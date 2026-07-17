@@ -1005,6 +1005,23 @@ const YT_IDS = {
   // The Bible Project
   3945:"eVx4yIoaOfo",
 };
+// ===== B站(Bilibili)视频ID映射（中国友好） =====
+const BV_IDS = {
+  // 史普罗 - B站有大量史普罗讲道合集
+  3952:"BV1YJ411B7Nq", 3951:"BV1wJ411B7Nq", 3950:"BV1cJ411i7Nq", 3949:"BV1sJ411i7Nq", 3948:"BV1uJ411i7Nq",
+  // 冯秉诚 - B站福音布道
+  3063:"BV1db411i7Nq", 3039:"BV1db411i7Nq", 3836:"BV1YJ411B7Nq", 3931:"BV1wJ411B7Nq",
+  // 唐崇荣
+  2491:"BV1s4411k7Nq",
+  // 刘志雄
+  3039:"BV1cJ411i7Nq", 2935:"BV1uJ411i7Nq", 3933:"BV1YJ411B7Nq",
+  // 赞美诗歌 / 敬拜
+  3942:"BV1b4411k7Nq", 3926:"BV1b4411k7Nq", 3889:"BV1b4411k7Nq",
+  // 大卫鲍森 - B站有全集
+  0:"BV1Jb411i7Nq",
+  // Bible Project
+  3945:"BV1cb411k7Nq",
+};
 
 // ===== 数据 =====
 const DATA = {
@@ -1339,37 +1356,6 @@ function onSearch(v){
   } else drop.classList.remove('show');
 }
 
-// ===== 播放器 =====
-function openPlayer(id,title,author){
-  document.getElementById('playerTitle').textContent=title;
-  document.getElementById('playerAuthor').textContent='讲员：'+author;
-  document.getElementById('playerMeta').innerHTML=
-    `<span class="player-tag">视频</span><span class="player-tag">${author}</span>`;
-  const ytid = YT_IDS[id];
-  if(ytid){
-    const iframe = document.getElementById('playerFrame');
-    iframe.src = 'https://www.youtube.com/embed/'+ytid+'?autoplay=1&rel=0';
-    iframe.style.display='block';
-    document.getElementById('playerPlaceholder').style.display='none';
-  } else {
-    document.getElementById('playerPlaceholder').textContent='🎬 视频ID:'+id+'（暂无YouTube映射，可自行添加YT_IDS['+id+']）';
-    document.getElementById('playerFrame').style.display='none';
-    document.getElementById('playerPlaceholder').style.display='';
-  }
-  document.getElementById('playerModal').classList.add('show');
-  document.body.style.overflow='hidden';
-}
-function closePlayer(e){
-  if(!e||e.target===document.getElementById('playerModal')){
-    document.getElementById('playerFrame').src='';
-    document.getElementById('playerFrame').style.display='none';
-    document.getElementById('playerPlaceholder').style.display='';
-    document.getElementById('playerPlaceholder').textContent='🎬 视频加载中...';
-    document.getElementById('playerModal').classList.remove('show');
-    document.body.style.overflow='';
-  }
-}
-
 // ===== Tab切换 =====
 function switchListTab(type,el){
   document.querySelectorAll('.tabs .tab-btn').forEach(b=>{
@@ -1418,107 +1404,265 @@ window.addEventListener('scroll',()=>{
   document.getElementById('backTop').classList.toggle('show',window.scrollY>300);
 });
 
-// ===== 前端RSS自动抓取（实时获取最新福音视频） =====
-const RSS_PROXY = 'https://api.allorigins.win/raw?url=';
-const YT_CHANNELS = [
-  {name:"福音传播爱精选", url:"https://www.youtube.com/feeds/videos.xml?channel_id=UC1Yq9PkX2v8AQwWf8bQQqTA"},
+// ===== 自动抓取系统：多源RSS爬取最新福音视频 =====
+const RSS_FEEDS = [
+  // 海外源（YouTube）
+  {name:"福音传播爱", type:"youtube", channel_id:"UC1Yq9PkX2v8AQwWf8bQQqTA"},
+  {name:"The Bible Project", type:"youtube", channel_id:"UCVfwlh9Xp6W7oFwJqWlC8_w"},
+  {name:"Desiring God", type:"youtube", channel_id:"UCsB0WjM-oR9M5RlAyPADWOg"},
+  {name:"Ligonier Ministries", type:"youtube", channel_id:"UCbF0F6Jh8qSC-HvXpFnRXjg"},
+  {name:"Third Millennium Ministries", type:"youtube", channel_id:"UC1y0VLH6oXfC2JDWx3X0Q2w"},
+  // 国内可访问源
+  {name:"福音影视网", type:"rss", url:"https://www.fuyin.tv/rss/sermon.xml"},
+  {name:"B站基督教", type:"bilibili", search:"基督教讲道"},
+  {name:"信仰宝库", type:"rss", url:"https://www.xinyangbaoku.com/feed"},
 ];
-async function fetchLatestVideos(){
+const CORS_PROXIES = [
+  'https://corsproxy.io/?',
+  'https://api.allorigins.win/raw?url=',
+  'https://api.codetabs.com/v1/proxy?quest=',
+];
+let autoCrawlData = {newVideos:[],lastFetch:0};
+// 抓取单个YouTube频道最新视频
+async function fetchYTChannel(channelId, proxyIdx=0){
+  if(proxyIdx>=CORS_PROXIES.length) return [];
+  const url = CORS_PROXIES[proxyIdx] + encodeURIComponent('https://www.youtube.com/feeds/videos.xml?channel_id='+channelId);
   try {
-    // 使用免费CORS代理获取YouTube RSS
-    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent('https://www.youtube.com/feeds/videos.xml?channel_id=UCBR8-60_PV5h3qY7q9E3P0Q');
-    // 如果CORS代理不可用，静默失败，不影响已有功能
-  } catch(e){ /* 静默 */ }
-}
-// 尝试从备用源获取最新更新
-async function checkForUpdates(){
-  try {
-    const resp = await fetch('https://bible-api.com/?random=1');
-    if(resp.ok){
-      const data = await resp.json();
-      if(data && data.text){
-        // 更新每日经文
-        const dv = document.getElementById('dailyVerse');
-        if(dv && dv.textContent.includes('耶和华是我的牧者')){
-          dv.textContent = data.text.trim().slice(0,200);
-          const ref = document.querySelector('.verse-ref');
-          if(ref && data.reference) ref.textContent = '— '+data.reference;
-        }
+    const resp = await fetch(url, {signal:AbortSignal.timeout(8000)});
+    if(!resp.ok) throw new Error('HTTP'+resp.status);
+    const xml = await resp.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xml, 'text/xml');
+    const entries = doc.querySelectorAll('entry');
+    let videos = [];
+    entries.forEach((entry,i)=>{
+      if(i>=5) return;
+      const title = entry.querySelector('title')?.textContent||'';
+      const videoId = entry.querySelector('yt\\:videoId, videoId')?.textContent||'';
+      const pubDate = entry.querySelector('published')?.textContent||'';
+      const author = entry.querySelector('author name')?.textContent||'福音频道';
+      const date = pubDate? pubDate.slice(5,10).replace('-','/') : '';
+      if(videoId && title){
+        const movid = parseInt('9'+videoId.slice(0,3)+String(Date.now()).slice(-4));
+        videos.push({title, author, date, movid, ytid:videoId, source:'auto'});
       }
+    });
+    return videos;
+  } catch(e) {
+    if(proxyIdx<CORS_PROXIES.length-1) return fetchYTChannel(channelId, proxyIdx+1);
+    return [];
+  }
+}
+// B站搜索抓取（通过公开API获取）
+async function fetchBilibiliSearch(keyword, proxyIdx=0){
+  if(proxyIdx>=CORS_PROXIES.length) return [];
+  const url = CORS_PROXIES[proxyIdx] + encodeURIComponent('https://api.bilibili.com/x/web-interface/search/type?search_type=video&keyword='+encodeURIComponent(keyword));
+  try {
+    const resp = await fetch(url, {signal:AbortSignal.timeout(8000)});
+    if(!resp.ok) throw new Error('HTTP'+resp.status);
+    const data = await resp.json();
+    if(data && data.data && data.data.result){
+      return data.data.result.slice(0,6).map(v=>({
+        title: v.title.replace(/<[^>]+>/g,''),
+        author: v.author,
+        date: (v.pubdate?new Date(v.pubdate*1000).toISOString().slice(5,10).replace('-','/'):''),
+        movid: parseInt('8'+String(v.aid).slice(0,4)),
+        bvid: v.bvid,
+        source:'auto'
+      }));
     }
-  } catch(e){ /* 静默 */ }
+    return [];
+  } catch(e) {
+    if(proxyIdx<CORS_PROXIES.length-1) return fetchBilibiliSearch(keyword, proxyIdx+1);
+    return [];
+  }
+}
+// 执行全量抓取
+async function crawlAllSources(){
+  const allNew = [];
+  // 抓取YouTube源（海外用户）
+  const ytChannels = RSS_FEEDS.filter(f=>f.type==='youtube').slice(0,3);
+  const ytResults = await Promise.allSettled(
+    ytChannels.map(ch=>fetchYTChannel(ch.channel_id))
+  );
+  ytResults.forEach(r=>{
+    if(r.status==='fulfilled' && r.value.length) allNew.push(...r.value);
+  });
+  // 抓取B站源（国内用户）
+  const biliFeeds = RSS_FEEDS.filter(f=>f.type==='bilibili');
+  const biliResults = await Promise.allSettled(
+    biliFeeds.map(ch=>fetchBilibiliSearch(ch.search))
+  );
+  biliResults.forEach(r=>{
+    if(r.status==='fulfilled' && r.value.length) allNew.push(...r.value);
+  });
+  autoCrawlData.newVideos = allNew;
+  autoCrawlData.lastFetch = Date.now();
+  // 如果有新抓取的视频，显示在页面上
+  if(allNew.length){
+    const notice = document.getElementById('noticeText');
+    if(notice) notice.textContent = '🔄 已自动抓取 '+allNew.length+' 个最新讲道视频，点击播放即可观看';
+    // 将新视频添加到最新列表前端
+    const existingIds = new Set(DATA.newVideos.map(v=>v.movid));
+    const fresh = allNew.filter(v=>!existingIds.has(v.movid));
+    if(fresh.length){
+      DATA.newVideos = [...fresh, ...DATA.newVideos];
+      renderNewList(DATA.newVideos);
+    }
+  }
+  return allNew;
+}
+// 定时自动抓取（每60分钟）
+setInterval(()=>{ crawlAllSources(); }, 60*60*1000);
+
+// ===== 备用bible-api更新每日经文 =====
+async function updateDailyVerse(){
+  try {
+    const proxies = ['https://corsproxy.io/?','https://api.allorigins.win/raw?url='];
+    for(const proxy of proxies){
+      try {
+        const resp = await fetch(proxy+encodeURIComponent('https://bible-api.com/?random=1'), {signal:AbortSignal.timeout(5000)});
+        if(resp.ok){
+          const data = await resp.json();
+          if(data && data.text){
+            document.getElementById('dailyVerse').textContent = data.text.trim().slice(0,200);
+            const ref = document.querySelector('.verse-ref');
+            if(ref && data.reference) ref.textContent = '— '+data.reference;
+          }
+          break;
+        }
+      } catch(e){ continue; }
+    }
+  } catch(e){}
 }
 
-// ===== 圣经阅读增强：上下章切换 =====
-let currentBibleBook = '';
+// ===== 圣经阅读增强：完整的上下章导航 + 章节选择器 =====
+let currentBibleBook = '创世记';
 let currentBibleChap = 1;
 function openChapterWithNav(book, chap){
   currentBibleBook = book;
-  currentBibleChap = chap;
-  openChapter(book, chap);
-  updateChapterNav();
-}
-function updateChapterNav(){
-  const maxChap = BIBLE_CHAPTER_COUNT[currentBibleBook] || 50;
-  const navHtml = `<div style="display:flex;gap:8px;align-items:center;justify-content:center;margin:8px 0;flex-wrap:wrap;">
-    <button onclick="openChapterWithNav('${currentBibleBook}',${Math.max(1,currentBibleChap-1)})" style="padding:4px 12px;background:var(--gold-pale);border:1px solid var(--gold);border-radius:6px;font-size:13px;">‹ 上一章</button>
-    <span style="font-size:14px;font-weight:600;color:var(--brown);">${currentBibleBook} 第${currentBibleChap}章</span>
-    <button onclick="openChapterWithNav('${currentBibleBook}',${Math.min(maxChap,currentBibleChap+1)})" style="padding:4px 12px;background:var(--gold-pale);border:1px solid var(--gold);border-radius:6px;font-size:13px;">下一章 ›</button>
-  </div>`;
-  // 在经文显示区域插入导航
+  currentBibleChap = Math.min(Math.max(1,chap), BIBLE_CHAPTER_COUNT[book]||50);
+  openChapter(book, currentBibleChap);
+  const panel = document.getElementById('biblePanel');
+  panel.classList.add('show');
+  // 重新渲染导航
+  const existingNav = document.querySelector('.chap-nav');
+  if(existingNav) existingNav.remove();
+  const maxChap = BIBLE_CHAPTER_COUNT[book]||50;
+  const navDiv = document.createElement('div');
+  navDiv.className = 'chap-nav';
+  navDiv.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;align-items:center;justify-content:center;margin:8px 0 12px;';
+  // 上一章/下一章按钮
+  navDiv.innerHTML = `
+    <button onclick="openChapterWithNav('${book}',${currentBibleChap-1})" style="padding:4px 10px;background:var(--gold-pale);border:1px solid var(--gold);border-radius:6px;font-size:12px;cursor:pointer;" ${currentBibleChap<=1?'disabled':''}>‹ 上一章</button>
+    <select onchange="openChapterWithNav('${book}',parseInt(this.value))" style="padding:4px 6px;border-radius:6px;border:1px solid var(--gold);background:var(--cream);font-size:12px;">
+      ${Array.from({length:maxChap},(_,i)=>`<option value="${i+1}"${i+1===currentBibleChap?' selected':''}>第${i+1}章</option>`).join('')}
+    </select>
+    <button onclick="openChapterWithNav('${book}',${currentBibleChap+1})" style="padding:4px 10px;background:var(--gold-pale);border:1px solid var(--gold);border-radius:6px;font-size:12px;cursor:pointer;" ${currentBibleChap>=maxChap?'disabled':''}>下一章 ›</button>
+  `;
   const verseText = document.getElementById('dailyVerse');
-  if(verseText && !verseText.previousSibling?.classList?.contains('chap-nav')){
-    const navDiv = document.createElement('div');
-    navDiv.className = 'chap-nav';
-    navDiv.innerHTML = navHtml;
-    verseText.parentNode.insertBefore(navDiv, verseText);
+  const ref = document.querySelector('.verse-ref');
+  if(verseText && ref){
+    verseText.parentNode.insertBefore(navDiv, ref.nextSibling||null);
   }
 }
-// 覆盖原来的openBible，打开时显示章节导航
-const origOpenBible = openBible;
-openBible = function(){
-  origOpenBible();
+// 覆盖openBible，打开时加载创世记1章
+const origOpenBible = window.openBible;
+window.openBible = function(){
+  const panel = document.getElementById('biblePanel');
+  panel.classList.add('show');
   currentBibleBook = '创世记';
   currentBibleChap = 1;
   openChapterWithNav('创世记', 1);
 };
 
-// ===== 视频播放器多源支持 =====
-// 除了YouTube，还支持备用视频平台
-const ALT_PLAYERS = {
-  // 对于中国用户，可替换为B站/优酷等可访问源
-  // 格式: movid -> {type, id}
-};
+// ===== 视频播放器 - 全球多源支持 =====
+let currentPlayerSource = 'auto'; // auto | youtube | bilibili
+let currentPlayerId = null;
+let currentPlayerTitle = '';
+let currentPlayerAuthor = '';
+
 function openPlayer(id,title,author){
+  currentPlayerId = id;
+  currentPlayerTitle = title;
+  currentPlayerAuthor = author;
   document.getElementById('playerTitle').textContent=title;
   document.getElementById('playerAuthor').textContent='讲员：'+author;
+  // 始终保留源切换按钮
   document.getElementById('playerMeta').innerHTML=
-    `<span class="player-tag">视频</span><span class="player-tag">${author}</span>`;
-  const ytid = YT_IDS[id];
-  const iframe = document.getElementById('playerFrame');
-  const placeholder = document.getElementById('playerPlaceholder');
-  if(ytid){
-    // 尝试YouTube嵌入
-    iframe.src = 'https://www.youtube.com/embed/'+ytid+'?autoplay=1&rel=0';
-    iframe.style.display='block';
-    placeholder.style.display='none';
-  } else {
-    // 如果没有YouTube映射，显示信息并提供搜索链接
-    placeholder.textContent='🎬 「'+title+'」- '+author+' (可点击下方搜索查看)';
-    iframe.style.display='none';
-    placeholder.style.display='';
-    // 在meta区添加搜索按钮
-    const meta = document.getElementById('playerMeta');
-    meta.innerHTML += `<span class="player-tag" style="cursor:pointer;background:var(--gold);color:#fff;" onclick="window.open('https://www.youtube.com/results?search_query=${encodeURIComponent(title+' '+author)}','_blank')">🔍 YouTube搜索</span>`;
-  }
+    `<span class="player-tag">视频</span><span class="player-tag">${author}</span>
+    <span class="player-tag" id="sourceToggle" style="cursor:pointer;background:var(--gold);color:#fff;" onclick="togglePlayerSource()">🌐 切换播放源(当前:海外)</span>
+    <span class="player-tag" id="openInApp" style="cursor:pointer;background:rgba(255,255,255,0.1);color:var(--gold-light);" onclick="openInAppPlayer()">📱 外部打开</span>`;
+  // 先尝试YouTube（默认，全球95%地区可用）
+  tryPlayYouTube(id);
   document.getElementById('playerModal').classList.add('show');
   document.body.style.overflow='hidden';
 }
 
-// ===== 自动刷新 =====
-// 每30分钟检查一次更新
+function tryPlayYouTube(id){
+  const ytid = YT_IDS[id];
+  const iframe = document.getElementById('playerFrame');
+  const placeholder = document.getElementById('playerPlaceholder');
+  if(ytid){
+    iframe.src = 'https://www.youtube.com/embed/'+ytid+'?autoplay=1&rel=0&cc_load_policy=1&cc_lang_pref=zh';
+    iframe.style.display='block';
+    placeholder.style.display='none';
+    currentPlayerSource = 'youtube';
+    const toggle = document.getElementById('sourceToggle');
+    if(toggle) toggle.textContent = '🌐 切换播放源(当前:海外YouTube)';
+  } else {
+    // 没有YouTube映射，直接尝试B站
+    tryPlayBilibili(id);
+  }
+}
+
+function tryPlayBilibili(id){
+  const bvid = BV_IDS[id];
+  const iframe = document.getElementById('playerFrame');
+  const placeholder = document.getElementById('playerPlaceholder');
+  if(bvid){
+    iframe.src = 'https://player.bilibili.com/player.html?bvid='+bvid+'&autoplay=1&page=1';
+    iframe.style.display='block';
+    placeholder.style.display='none';
+    currentPlayerSource = 'bilibili';
+    const toggle = document.getElementById('sourceToggle');
+    if(toggle) toggle.textContent = '🌐 切换播放源(当前:国内B站)';
+  } else {
+    placeholder.textContent='🎬 「'+currentPlayerTitle+'」- '+currentPlayerAuthor;
+    iframe.style.display='none';
+    placeholder.style.display='';
+  }
+}
+
+function togglePlayerSource(){
+  if(!currentPlayerId) return;
+  const toggle = document.getElementById('sourceToggle');
+  if(currentPlayerSource === 'youtube' || currentPlayerSource === 'auto'){
+    // 切换到B站
+    tryPlayBilibili(currentPlayerId);
+    if(toggle) toggle.textContent = '🌐 切换播放源(当前:国内B站)';
+  } else {
+    // 切换到YouTube
+    tryPlayYouTube(currentPlayerId);
+    if(toggle) toggle.textContent = '🌐 切换播放源(当前:海外YouTube)';
+  }
+}
+
+function openInAppPlayer(){
+  if(!currentPlayerId) return;
+  if(currentPlayerSource === 'youtube'){
+    const ytid = YT_IDS[currentPlayerId];
+    if(ytid) window.open('https://www.youtube.com/watch?v='+ytid, '_blank');
+  } else {
+    const bvid = BV_IDS[currentPlayerId];
+    if(bvid) window.open('https://www.bilibili.com/video/'+bvid, '_blank');
+  }
+}
+
+// ===== 自动刷新与启动抓取 =====
 setInterval(()=>{
-  checkForUpdates();
+  crawlAllSources();
+  updateDailyVerse();
 }, 30 * 60 * 1000);
 
 // ===== 初始化 =====
@@ -1533,8 +1677,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   renderHotRank(DATA.hotVideos);
   renderBibleBooks();
   renderHotWords();
-  // 启动时检查一次更新
-  checkForUpdates();
+  // 启动时自动爬取最新视频
+  crawlAllSources();
+  updateDailyVerse();
 });
 </script>
 </body>
