@@ -51,6 +51,9 @@ nbbuild/
 dist/
 nbdist/
 
+# Backup
+.backup/
+
 # Project specific
 *.tmp
 *.temp
