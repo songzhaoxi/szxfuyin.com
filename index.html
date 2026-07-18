@@ -718,6 +718,7 @@ ul{list-style:none;}
 }
 .player-meta{
   display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;
+}
 .player-tag{
   font-size:11px;padding:4px 14px;border-radius:14px;
   background:rgba(200,151,58,0.12);color:var(--gold-light);
@@ -854,9 +855,7 @@ ul{list-style:none;}
 @keyframes pulse{0%,100%{opacity:0.5;}50%{opacity:1;}}
 .player-loading span{font-size:12px;color:rgba(255,255,255,0.5);letter-spacing:1px;}
 
-/* ===== 暗色模式 =====
-  transition:all 0.3s ease!important;
-}
+/* ===== 暗色模式结束 ===== */
 .player-tag:hover{transform:translateY(-1px)!important;box-shadow:0 3px 10px rgba(200,151,58,0.2)!important;}
 .player-tag#sourceToggle{
   background:linear-gradient(135deg,#C8973A,#A07828)!important;
@@ -2634,14 +2633,6 @@ function toggleFullscreen(){
     if(document.exitFullscreen){
       document.exitFullscreen();
     } else if(document.webkitExitFullscreen){
-      document.webkitExitFullscreen();
-    } else {
-      modal.classList.remove('fullscreen-mode');
-    }
-    if(btn) btn.textContent = '⛶';
-    if(btn) btn.title = '全屏';
-  }
-}
       document.webkitExitFullscreen();
     } else {
       modal.classList.remove('fullscreen-mode');
