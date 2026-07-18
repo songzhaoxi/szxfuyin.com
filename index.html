@@ -557,14 +557,6 @@ ul{list-style:none;}
   max-width:600px;margin:8px auto 0;line-height:1.6;
 }
 
-/* ===== 屏蔽B站/YouTube外部按钮&水印（不移除，防止跳转） ===== */
-/* 隐藏B站跳转APP和推广按钮，但保留全屏按钮 */
-.bili-player-watermark{display:none!important;}
-.bpx-player-video-info{display:none!important;}
-.bpx-player-top-fixed{display:none!important;}
-/* 注意：不移除全屏按钮 .bpx-player-video-btn，保留用户全屏能力 */
-/* 只隐藏会导致跳转的推广区域 */
-.bpx-player-state-wrap{pointer-events:none!important;}
 /* 视频区域基础遮罩 */
 .player-video{
   position:relative;
@@ -898,42 +890,63 @@ ul{list-style:none;}
   transform:scale(1.08)!important;
   box-shadow:0 4px 20px rgba(200,151,58,0.5)!important;
 }
-/* ===== szxfuyin.com自定义水印 - 福音传播爱 ===== */
+/* ===== szxfuyin.com自定义水印 - 四周跳动 福音传播爱 ===== */
+/* 隐藏B站、YouTube全部外部水印和按钮 */
+.bili-player-watermark,.bpx-player-video-info,.bpx-player-top-fixed{display:none!important;}
+.bpx-player-state-wrap{pointer-events:none!important;}
+.ytp-watermark,.ytp-logo,.ytp-ce-element,.ytp-pause-overlay{display:none!important;}
+
+/* 水印容器 - 覆盖整个播放区域 */
 .player-watermark{
-  position:absolute;top:0;left:0;right:0;bottom:0;
-  z-index:10;pointer-events:none;
-  display:flex;align-items:flex-end;justify-content:flex-end;
-  padding:12px 16px;
+  position:absolute;inset:0;
+  z-index:15;pointer-events:none;
   opacity:0;
-  transition:opacity 0.5s ease;
+  transition:opacity 0.6s ease;
 }
 .player-modal.show .player-watermark{opacity:1;}
-.player-watermark .wm-brand{
-  display:flex;align-items:center;gap:8px;
-  background:linear-gradient(135deg,rgba(200,151,58,0.2),rgba(200,151,58,0.08));
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
-  padding:6px 14px 6px 10px;
-  border-radius:20px;
-  border:1px solid rgba(200,151,58,0.12);
-  box-shadow:0 2px 12px rgba(0,0,0,0.15);
+
+/* 每个角落的水印项 */
+.wm-item{
+  position:absolute;
+  display:flex;align-items:center;gap:5px;
+  animation:wmBounce 3s ease-in-out infinite;
+  white-space:nowrap;
 }
-.player-watermark .wm-cross{
-  width:20px;height:20px;position:relative;
-  display:flex;align-items:center;justify-content:center;
+.wm-item .wm-cross-symbol{
+  font-size:14px;color:var(--gold);
+  text-shadow:0 0 12px rgba(200,151,58,0.6);
+  animation:crossGlow 1.5s ease-in-out infinite;
 }
-.player-watermark .wm-cross::before{content:'';position:absolute;width:3px;height:18px;background:var(--gold);border-radius:2px;}
-.player-watermark .wm-cross::after{content:'';position:absolute;width:14px;height:3px;background:var(--gold);border-radius:2px;}
-.player-watermark .wm-text{
-  font-size:11px;font-weight:600;color:var(--gold-light);
+.wm-item .wm-label{
+  font-size:13px;font-weight:700;
+  color:#FFD700;
   font-family:'Noto Serif SC',serif;
-  letter-spacing:1px;
-  text-shadow:0 1px 4px rgba(0,0,0,0.3);
+  letter-spacing:1.5px;
+  text-shadow:0 0 10px rgba(200,151,58,0.5),0 2px 8px rgba(0,0,0,0.8);
 }
-.player-watermark .wm-sub{
-  font-size:8px;color:rgba(232,185,106,0.5);
-  letter-spacing:2px;
-  margin-left:2px;
+.wm-item .wm-domain{
+  font-size:9px;font-weight:600;
+  color:rgba(255,215,0,0.7);
+  letter-spacing:1px;
+  text-shadow:0 1px 6px rgba(0,0,0,0.8);
+}
+
+/* 四个角落定位 */
+.wm-tl{top:14px;left:14px;animation-delay:0s;}
+.wm-tr{top:14px;right:14px;animation-delay:0.75s;}
+.wm-br{bottom:14px;right:14px;animation-delay:1.5s;}
+.wm-bl{bottom:14px;left:14px;animation-delay:2.25s;}
+
+/* 弹跳动效 - 每个角落独立上下弹跳 */
+@keyframes wmBounce{
+  0%,100%{transform:translateY(0) scale(1);opacity:0.85;}
+  50%{transform:translateY(-8px) scale(1.06);opacity:1;}
+}
+
+/* 十字光效 */
+@keyframes crossGlow{
+  0%,100%{text-shadow:0 0 8px rgba(200,151,58,0.4);}
+  50%{text-shadow:0 0 20px rgba(200,151,58,0.9),0 0 40px rgba(200,151,58,0.3);}
 }
 /* ===== 暗色模式 ===== */
 .dark-mode{
@@ -1261,13 +1274,27 @@ ul{list-style:none;}
         <div class="spin-cross"></div>
         <span>✝️ 视频加载中 · 荣耀归主</span>
       </div>
-      <!-- 视频加载时的福音提示 - 无遮挡水印 -->
-      <!-- ===== szxfuyin.com自定义水印 - 点击不跳转 ===== -->
+      <!-- ===== szxfuyin.com专属水印 - 四周跳动 清晰可见 ===== -->
       <div class="player-watermark">
-        <div class="wm-brand">
-          <div class="wm-cross"></div>
-          <span class="wm-text">福音传播爱</span>
-          <span class="wm-sub">szxfuyin.com</span>
+        <div class="wm-item wm-tl">
+          <span class="wm-cross-symbol">✝</span>
+          <span class="wm-label">福音传播爱</span>
+          <span class="wm-domain">szxfuyin.com</span>
+        </div>
+        <div class="wm-item wm-tr">
+          <span class="wm-cross-symbol">✝</span>
+          <span class="wm-label">福音传播爱</span>
+          <span class="wm-domain">szxfuyin.com</span>
+        </div>
+        <div class="wm-item wm-br">
+          <span class="wm-cross-symbol">✝</span>
+          <span class="wm-label">福音传播爱</span>
+          <span class="wm-domain">szxfuyin.com</span>
+        </div>
+        <div class="wm-item wm-bl">
+          <span class="wm-cross-symbol">✝</span>
+          <span class="wm-label">福音传播爱</span>
+          <span class="wm-domain">szxfuyin.com</span>
         </div>
       </div>
     </div>
