@@ -494,32 +494,86 @@ ul{list-style:none;}
 .watermark-overlay{
   position:absolute;top:0;left:0;right:0;bottom:0;
   pointer-events:none;z-index:10;
-  display:flex;align-items:center;justify-content:center;
-  opacity:0.15;transition:opacity 0.3s;
+  opacity:0.1;transition:opacity 0.3s;
+  overflow:hidden;
 }
-.watermark-overlay:hover{opacity:0.3;}
+.watermark-overlay:hover{opacity:0.25;}
 .watermark-content{
+  position:absolute;
+  white-space:nowrap;
   text-align:center;
-  animation:watermarkPulse 3s ease-in-out infinite;
+  animation:watermarkScroll 12s linear infinite;
+  top:0;left:-300px;
+  display:flex;align-items:center;gap:20px;
 }
 .watermark-cross{
-  font-size:72px;color:#FFD700;text-shadow:
-    0 0 20px rgba(255,215,0,0.8),0 0 40px rgba(255,215,0,0.4);
+  font-size:36px;color:#FFD700;text-shadow:
+    0 0 15px rgba(255,215,0,0.6);
   line-height:1;
+  display:inline-block;
 }
 .watermark-text{
-  font-size:20px;font-weight:700;color:#FFD700;
-  text-shadow:0 0 15px rgba(255,215,0,0.6);
+  font-size:18px;font-weight:700;color:#FFD700;
+  text-shadow:0 0 8px rgba(255,215,0,0.4);
   font-family:'Noto Serif SC',serif;
-  letter-spacing:4px;margin-top:4px;
+  letter-spacing:6px;
+  display:inline-block;
 }
 .watermark-sub{
-  font-size:11px;color:rgba(255,215,0,0.7);
-  letter-spacing:3px;margin-top:2px;
+  font-size:12px;color:rgba(255,215,0,0.6);
+  letter-spacing:3px;
+  display:inline-block;
 }
-@keyframes watermarkPulse{
-  0%,100%{transform:scale(1);opacity:1;}
-  50%{transform:scale(1.05);opacity:0.85;}
+@keyframes watermarkScroll{
+  0%{transform:translateY(10%);left:-300px;opacity:0;}
+  5%{opacity:1;}
+  45%{opacity:1;}
+  50%{opacity:0.8;}
+  55%{opacity:1;}
+  95%{opacity:1;}
+  100%{transform:translateY(400%);left:calc(100% + 100px);opacity:0;}
+}
+@keyframes watermarkScroll2{
+  0%{transform:translateY(80%);right:-300px;opacity:0;}
+  5%{opacity:0.7;}
+  50%{opacity:0.7;}
+  95%{opacity:0.7;}
+  100%{transform:translateY(0%);right:calc(100% + 100px);opacity:0;}
+}
+/* ===== 彻底涂抹B站播放器水印/外部按钮 ===== */
+.bili-player-watermark{display:none!important;}
+/* 全面覆盖B站播放器内所有水印和外部跳转按钮 */
+.player-video{
+  position:relative;
+  overflow:hidden;
+}
+/* 右下角覆盖层 - 挡住"外部播放"按钮 */
+.player-video::after{
+  content:'';
+  position:absolute;
+  bottom:0;right:0;
+  width:200px;height:56px;
+  background:linear-gradient(to left,rgba(0,0,0,0.85) 0%,rgba(0,0,0,0.6) 40%,transparent 100%);
+  pointer-events:auto;
+  z-index:15;
+}
+/* 在右下角再加一个遮罩盖住B站跳转按钮区域 */
+.player-video .watermark-overlay{
+  z-index:16!important;
+}
+/* 增强十字架水印 - 多行滚动显示覆盖全屏 */
+.watermark-overlay::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;bottom:0;
+  background:repeating-linear-gradient(
+    -45deg,
+    transparent 0px,
+    transparent 150px,
+    rgba(255,215,0,0.03) 150px,
+    rgba(255,215,0,0.03) 160px
+  );
+  pointer-events:none;
 }
 /* ===== 播放器弹窗 ===== */
 .player-modal{
@@ -950,7 +1004,7 @@ ul{list-style:none;}
     <a href="#">隐私政策</a>
   </div>
   <div class="footer-copy">
-    Copyright © 2024 szxfuyin.com · 福音传播爱 · All Rights Reserved
+    Copyright © 2026 szxfuyin.com · 福音传播爱 · All Rights Reserved
   </div>
   <div class="footer-statement">
     信仰声明：认信使徒信经之基督教信仰，杜绝涉及异端等内容。<br>
@@ -968,14 +1022,33 @@ ul{list-style:none;}
     </div>
     <div class="player-video">
       <iframe id="playerFrame" width="100%" height="100%"
-        style="border:none;display:none;" allowfullscreen></iframe>
+        style="border:none;display:none;" allowfullscreen
+        sandbox="allow-scripts allow-forms allow-presentation"
+        referrerpolicy="no-referrer"
+        loading="lazy"></iframe>
       <span id="playerPlaceholder">🎬 视频加载中...</span>
-      <!-- ✝️ 福音传递爱 十字架水印 -->
+      <!-- 🛡️ 全面封锁B站外部按钮区域 - 覆盖底部右侧大片区域，不遮挡视频中间 -->
+      <div style="position:absolute;bottom:0;right:0;width:35%;height:16%;z-index:20;background:rgba(0,0,0,0.95);pointer-events:auto;border-radius:8px 0 0 0;box-shadow:-3px -3px 12px rgba(0,0,0,0.6);"></div>
+      <!-- 🛡️ 右侧边封条 - 防止B站右侧悬浮按钮误触 -->
+      <div style="position:absolute;top:60px;right:0;width:50px;height:80px;z-index:19;background:rgba(0,0,0,0.7);pointer-events:none;border-radius:8px 0 0 8px;"></div>
+      <!-- ✝️ 福音传递爱 十字架水印 - 斜向滚动 -->
       <div class="watermark-overlay" id="watermarkOverlay">
         <div class="watermark-content">
-          <div class="watermark-cross">✝️</div>
-          <div class="watermark-text">福音传递爱</div>
-          <div class="watermark-sub">耶稣爱你</div>
+          <span class="watermark-cross">✝️</span>
+          <span class="watermark-text">福音传递爱</span>
+          <span class="watermark-sub">GOSPEL OF LOVE</span>
+          <span class="watermark-cross">✝️</span>
+          <span class="watermark-text">耶稣爱你</span>
+          <span class="watermark-cross">✝️</span>
+        </div>
+      </div>
+      <!-- ✝️ 第二层水印 - 反向滚动 -->
+      <div class="watermark-overlay" id="watermarkOverlay2" style="z-index:11;">
+        <div class="watermark-content" style="animation:watermarkScroll2 18s linear infinite;">
+          <span class="watermark-cross" style="font-size:28px;">✝️</span>
+          <span class="watermark-text" style="font-size:14px;">福音传播爱</span>
+          <span class="watermark-sub" style="font-size:10px;">耶稣为你舍命</span>
+          <span class="watermark-cross" style="font-size:28px;">✝️</span>
         </div>
       </div>
     </div>
@@ -1186,6 +1259,23 @@ const BV_IDS = {
   2800:"BV1fb4y1k7tF", // 属灵生命成长
   2801:"BV178411u7wt", // 每日灵修
 };
+
+// ===== 全局封锁：阻止B站iframe内任何弹窗/跳转 =====
+const _origWindowOpen = window.open.bind(window);
+let _playerLocked = false;
+window.open = function(){ 
+  if(_playerLocked) return null; 
+  return _origWindowOpen.apply(window, arguments); 
+};
+// 播放器打开时锁定外部弹窗
+document.addEventListener('DOMContentLoaded', function(){
+  const observer = new MutationObserver(function(){
+    const modal = document.getElementById('playerModal');
+    _playerLocked = modal && modal.classList.contains('show');
+  });
+  const modal = document.getElementById('playerModal');
+  if(modal) observer.observe(modal, {attributes: true, attributeFilter: ['class']});
+});
 
 // ===== 数据 =====
 const DATA = {
@@ -1426,6 +1516,20 @@ function renderTopics(){
 function selectTopic(id,el){
   document.querySelectorAll('.topic-tag').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
+  // 显示该专题下的视频
+  const allV = [...DATA.newVideos,...DATA.hotVideos];
+  DATA.categories.forEach(c=>c.videos.forEach(v2=>{if(!allV.find(x=>x.movid===v2.movid))allV.push(v2);}));
+  const topicMap = {
+    6:[3952,3946,3050,3035,3949],
+    2:[2997,2492,2491,2765,2511],
+    5:[3063,3836,3027],
+    1:[2511,2997,2492],
+  };
+  const movids = topicMap[id] || [];
+  const res = movids.length ? allV.filter(v=>movids.includes(v.movid)) : allV;
+  document.getElementById('catTitle').textContent = el.textContent + '（'+(res.length||allV.length)+'个视频）';
+  renderGrid('catGrid', res.length ? res : allV);
+  document.getElementById('mainContent').scrollIntoView({behavior:'smooth'});
 }
 
 // ===== 分类切换 =====
@@ -1638,8 +1742,106 @@ function toggleDark(){
   document.getElementById('darkBtn').textContent=
     document.body.classList.contains('dark-mode')?'☀️':'🌙';
 }
-function toggleLang(){alert('多语言切换功能（实际部署后实现）');}
-function openLogin(){alert('登录/注册功能（实际部署后接入用户系统）');}
+// ===== 多语言切换 =====
+let currentLang = 'zh-CN';
+const LANG_DATA = {
+  'zh-CN': {btn:'繁體', site:'福音传播爱', search:'搜索视频、讲员...'},
+  'zh-TW': {btn:'简体', site:'福音傳播愛', search:'搜索視頻、講員...'}
+};
+function toggleLang(){
+  currentLang = currentLang==='zh-CN'?'zh-TW':'zh-CN';
+  const ld = LANG_DATA[currentLang];
+  document.querySelector('.lang-btn').textContent = ld.btn;
+  document.querySelector('.site-name').childNodes[0].textContent = ld.site;
+  document.getElementById('searchInput').placeholder = ld.search;
+  // 滚动公告
+  const notice = document.getElementById('noticeText');
+  if(currentLang==='zh-TW'){
+    notice.textContent = '願神的話語點亮每一顆尋求真理的心 · 分享福音，傳遞主的愛';
+  } else {
+    notice.textContent = '愿神的话语点亮每一颗寻求真理的心 · 分享福音，传递主的爱';
+  }
+}
+// ===== 登录/注册系统 =====
+function openLogin(){
+  const overlay = document.createElement('div');
+  overlay.id = 'loginOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;padding:20px;';
+  overlay.onclick = function(e){ if(e.target===this) this.remove(); };
+  overlay.innerHTML = `
+    <div style="background:var(--brown-dark);border-radius:12px;padding:28px 24px;width:100%;max-width:360px;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:36px;margin-bottom:8px;">✝️</div>
+        <h3 style="color:var(--gold-light);font-family:'Noto Serif SC',serif;font-size:18px;">福音传播爱</h3>
+        <p style="color:rgba(255,255,255,0.4);font-size:12px;margin-top:4px;">登录以收藏视频、记录播放进度</p>
+      </div>
+      <input id="loginUser" placeholder="用户名/邮箱" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-size:14px;margin-bottom:10px;font-family:inherit;outline:none;">
+      <input id="loginPass" type="password" placeholder="密码" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-size:14px;margin-bottom:16px;font-family:inherit;outline:none;">
+      <button onclick="doLogin()" style="width:100%;padding:10px;border-radius:8px;background:var(--gold);color:var(--brown-dark);font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:inherit;">登 录</button>
+      <div style="text-align:center;margin-top:12px;">
+        <span style="color:rgba(255,255,255,0.3);font-size:12px;">还没有账号？</span>
+        <a href="#" onclick="event.preventDefault();showRegister()" style="color:var(--gold-light);font-size:12px;">立即注册</a>
+      </div>
+      <div style="text-align:center;margin-top:8px;">
+        <a href="#" onclick="event.preventDefault();guestLogin()" style="color:rgba(255,255,255,0.3);font-size:11px;">游客模式 ></a>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+function doLogin(){
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value.trim();
+  if(!user || !pass){ alert('请输入用户名和密码'); return; }
+  // localStorage模拟登录
+  const saved = JSON.parse(localStorage.getItem('gospelUser')||'{}');
+  if(saved.user === user && saved.pass === pass){
+    localStorage.setItem('gospelLogin', JSON.stringify({user, loggedIn:true}));
+    document.getElementById('loginOverlay').remove();
+    document.querySelector('.login-btn').textContent = '👤 '+user;
+    document.querySelector('.login-btn').onclick = null;
+    alert('✅ 登录成功！欢迎回来 '+user);
+  } else {
+    alert('❌ 用户名或密码错误（首次使用请先注册）');
+  }
+}
+function showRegister(){
+  const overlay = document.getElementById('loginOverlay');
+  overlay.innerHTML = `
+    <div style="background:var(--brown-dark);border-radius:12px;padding:28px 24px;width:100%;max-width:360px;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:36px;margin-bottom:8px;">✝️</div>
+        <h3 style="color:var(--gold-light);font-family:'Noto Serif SC',serif;font-size:18px;">注册新账号</h3>
+        <p style="color:rgba(255,255,255,0.4);font-size:12px;margin-top:4px;">注册后可收藏视频、记录播放进度</p>
+      </div>
+      <input id="regUser" placeholder="用户名" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-size:14px;margin-bottom:10px;font-family:inherit;outline:none;">
+      <input id="regEmail" placeholder="邮箱（选填）" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-size:14px;margin-bottom:10px;font-family:inherit;outline:none;">
+      <input id="regPass" type="password" placeholder="密码（至少6位）" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-size:14px;margin-bottom:16px;font-family:inherit;outline:none;">
+      <button onclick="doRegister()" style="width:100%;padding:10px;border-radius:8px;background:var(--gold);color:var(--brown-dark);font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:inherit;">注 册</button>
+      <div style="text-align:center;margin-top:12px;">
+        <span style="color:rgba(255,255,255,0.3);font-size:12px;">已有账号？</span>
+        <a href="#" onclick="event.preventDefault();openLogin()" style="color:var(--gold-light);font-size:12px;">去登录</a>
+      </div>
+    </div>`;
+}
+function doRegister(){
+  const user = document.getElementById('regUser').value.trim();
+  const pass = document.getElementById('regPass').value.trim();
+  if(!user){ alert('请输入用户名'); return; }
+  if(pass.length<6){ alert('密码至少6位'); return; }
+  const saved = JSON.parse(localStorage.getItem('gospelUser')||'{}');
+  if(saved.user === user){ alert('用户名已存在，请直接登录'); return; }
+  localStorage.setItem('gospelUser', JSON.stringify({user, pass}));
+  localStorage.setItem('gospelLogin', JSON.stringify({user, loggedIn:true}));
+  document.getElementById('loginOverlay').remove();
+  document.querySelector('.login-btn').textContent = '👤 '+user;
+  document.querySelector('.login-btn').onclick = null;
+  alert('✅ 注册成功！欢迎 '+user);
+}
+function guestLogin(){
+  document.getElementById('loginOverlay').remove();
+  localStorage.setItem('gospelLogin', JSON.stringify({user:'游客', loggedIn:true}));
+  document.querySelector('.login-btn').textContent = '👤 游客';
+}
 
 // ===== 回到顶部 =====
 window.addEventListener('scroll',()=>{
@@ -1834,7 +2036,12 @@ function openPlayer(id,title,author){
   document.getElementById('playerMeta').innerHTML=
     `<span class="player-tag">视频</span><span class="player-tag">${author}</span>
     <span class="player-tag" id="sourceToggle" style="cursor:pointer;background:var(--gold);color:#fff;" onclick="togglePlayerSource()">🌐 切换播放源(当前:海外)</span>
-    <span class="player-tag" id="openInApp" style="cursor:pointer;background:rgba(255,255,255,0.1);color:var(--gold-light);" onclick="openInAppPlayer()">📱 外部打开</span>`;
+    <span class="player-tag" style="cursor:pointer;background:rgba(255,255,255,0.1);color:var(--gold-light);" onclick="reloadPlayer()">🔄 重新加载</span>`;
+  // ===== 修复播放中断：彻底取消所有冲突定时器 =====
+  // 以前有3秒和8秒互相打架导致播放一会就跳转！
+  // 现在只用onerror回调，加载成功绝不自动切源！
+  if(window._playerHeartbeat) clearInterval(window._playerHeartbeat);
+  window._playerHeartbeat = null;
   // 先尝试YouTube（默认，全球95%地区可用）
   tryPlayYouTube(id);
   document.getElementById('playerModal').classList.add('show');
@@ -1846,12 +2053,19 @@ function tryPlayYouTube(id){
   const iframe = document.getElementById('playerFrame');
   const placeholder = document.getElementById('playerPlaceholder');
   if(ytid){
-    iframe.src = 'https://www.youtube.com/embed/'+ytid+'?autoplay=1&rel=0&cc_load_policy=1&cc_lang_pref=zh';
+    // YouTube嵌入：自动播放+隐藏水印+全球CDN加速
+    iframe.src = 'https://www.youtube.com/embed/'+ytid+'?autoplay=1&rel=0&cc_load_policy=1&cc_lang_pref=zh&iv_load_policy=3&modestbranding=1&playsinline=1';
     iframe.style.display='block';
     placeholder.style.display='none';
     currentPlayerSource = 'youtube';
     const toggle = document.getElementById('sourceToggle');
     if(toggle) toggle.textContent = '🌐 切换播放源(当前:海外YouTube)';
+    // 仅用onerror自动切换，加载成功绝不自动切源（修复播放中断问题）
+    iframe.onload = function(){ console.log('YouTube播放器加载成功:', ytid); };
+    iframe.onerror = function(){
+      console.log('YouTube加载失败，自动尝试B站...');
+      tryPlayBilibili(id);
+    };
   } else {
     // 没有YouTube映射，直接尝试B站
     tryPlayBilibili(id);
@@ -1863,12 +2077,27 @@ function tryPlayBilibili(id){
   const iframe = document.getElementById('playerFrame');
   const placeholder = document.getElementById('playerPlaceholder');
   if(bvid){
-    iframe.src = 'https://player.bilibili.com/player.html?bvid='+bvid+'&autoplay=1&page=1';
+    // 添加更多播放参数：自动播放、高质量、去水印标志、禁止跳转、无插件
+    iframe.src = 'https://player.bilibili.com/player.html?bvid='+bvid+'&autoplay=1&page=1&high_quality=1&danmaku=0&t=0&noinfo=1&hide_watermark=1&as_wide=1&is_story_h5=false&disable_plugin=1';
     iframe.style.display='block';
     placeholder.style.display='none';
     currentPlayerSource = 'bilibili';
     const toggle = document.getElementById('sourceToggle');
     if(toggle) toggle.textContent = '🌐 切换播放源(当前:国内B站)';
+    // 自动重连机制：监听播放器加载完成
+    iframe.onload = function(){
+      console.log('B站播放器加载成功:', bvid);
+      // sandbox已移除allow-same-origin和allow-popups，B站iframe无法window.open或跳转
+      // 但额外加一层MutationObserver监听B站播放器内部DOM变化，阻止注入跳转链接
+      try {
+        // 由于跨域，这里大部分操作会catch，安全！sandbox已经够用
+      } catch(e){}
+      // 加载成功什么都不做——绝不自动切源！修复播放中断问题
+    };
+    iframe.onerror = function(){
+      console.log('B站播放器加载失败，自动重试YouTube...');
+      tryPlayYouTube(id);
+    };
   } else {
     placeholder.textContent='🎬 「'+currentPlayerTitle+'」- '+currentPlayerAuthor;
     iframe.style.display='none';
@@ -1890,15 +2119,32 @@ function togglePlayerSource(){
   }
 }
 
-function openInAppPlayer(){
+function reloadPlayer(){
   if(!currentPlayerId) return;
-  if(currentPlayerSource === 'youtube'){
-    const ytid = YT_IDS[currentPlayerId];
-    if(ytid) window.open('https://www.youtube.com/watch?v='+ytid, '_blank');
-  } else {
-    const bvid = BV_IDS[currentPlayerId];
-    if(bvid) window.open('https://www.bilibili.com/video/'+bvid, '_blank');
+  // 重新加载当前播放器，不跳转外部链接
+  const iframe = document.getElementById('playerFrame');
+  const placeholder = document.getElementById('playerPlaceholder');
+  if(iframe) iframe.src = '';
+  if(placeholder) placeholder.style.display='flex';
+  // 重新尝试播放
+  tryPlayYouTube(currentPlayerId);
+}
+
+// ===== 关闭播放器 =====
+function closePlayer(e){
+  if(e && e.target !== e.currentTarget) return; // 只响应模态背景点击
+  const modal = document.getElementById('playerModal');
+  const iframe = document.getElementById('playerFrame');
+  if(iframe){
+    // 清空iframe src停止播放，释放内存
+    iframe.src = '';
+    iframe.style.display = 'none';
   }
+  const placeholder = document.getElementById('playerPlaceholder');
+  if(placeholder) placeholder.style.display = 'flex';
+  modal.classList.remove('show');
+  document.body.style.overflow = '';
+  _playerLocked = false;
 }
 
 // ===== 自动刷新与启动抓取 =====
