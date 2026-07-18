@@ -614,14 +614,14 @@ ul{list-style:none;}
   position:relative;
   overflow:hidden;
 }
-/* 右下角覆盖层 - 挡住"外部播放"按钮 */
+/* 右下角覆盖层 - 挡住"外部播放"按钮 - 仅视觉不阻挡点击 */
 .player-video::after{
   content:'';
   position:absolute;
   bottom:0;right:0;
   width:200px;height:56px;
   background:linear-gradient(to left,rgba(0,0,0,0.85) 0%,rgba(0,0,0,0.6) 40%,transparent 100%);
-  pointer-events:auto;
+  pointer-events:none;
   z-index:15;
 }
 /* 在右下角再加一个遮罩盖住B站跳转按钮区域 */
@@ -1262,8 +1262,8 @@ ul{list-style:none;}
     <div class="player-video">
       <iframe id="playerFrame" width="100%" height="100%"
         style="border:none;display:none;" allowfullscreen
-        sandbox="allow-scripts allow-forms allow-presentation"
-        referrerpolicy="no-referrer"
+        sandbox="allow-scripts allow-forms allow-same-origin allow-presentation"
+        referrerpolicy="strict-origin-when-cross-origin"
         loading="lazy"></iframe>
       <div class="player-loading" id="playerPlaceholder">
         <div class="spin-cross"></div>
@@ -2503,18 +2503,32 @@ function tryPlayYouTube(id){
   const iframe = document.getElementById('playerFrame');
   const placeholder = document.getElementById('playerPlaceholder');
   if(ytid){
-    // YouTube嵌入：自动播放+隐藏水印+全球CDN加速
-    iframe.src = 'https://www.youtube.com/embed/'+ytid+'?autoplay=1&rel=0&cc_load_policy=1&cc_lang_pref=zh&iv_load_policy=3&modestbranding=1&playsinline=1';
+    // YouTube嵌入：使用nocookie域名+自动播放+隐藏水印
+    iframe.src = 'https://www.youtube-nocookie.com/embed/'+ytid+'?autoplay=1&rel=0&cc_load_policy=1&cc_lang_pref=zh&iv_load_policy=3&modestbranding=1&playsinline=1&origin=https://szxfuyin.com';
     iframe.style.display='block';
     placeholder.style.display='none';
     currentPlayerSource = 'youtube';
     const toggle = document.getElementById('sourceToggle');
     if(toggle) toggle.textContent = '🌐 切换播放源(当前:海外YouTube)';
-    // 仅用onerror自动切换，加载成功绝不自动切源（修复播放中断问题）
-    iframe.onload = function(){ console.log('YouTube播放器加载成功:', ytid); };
-    iframe.onerror = function(){
-      console.log('YouTube加载失败，自动尝试B站...');
-      tryPlayBilibili(id);
+    // ==== 修复：iframe.onerror不工作，使用超时检测 ====
+    // 设置5秒超时，如果YouTube未能加载则自动切换到B站
+    if(window._ytTimer) clearTimeout(window._ytTimer);
+    window._ytTimer = setTimeout(function(){
+      // 检查iframe是否真的加载了内容
+      try {
+        // 如果YouTube被墙，iframe会显示空白或错误页面
+        // 尝试通过B站备用方案播放
+        console.log('YouTube超时未加载，自动尝试B站...');
+        const bvid = BV_IDS[id];
+        if(bvid && !window._ytLoaded){
+          tryPlayBilibili(id);
+        }
+      } catch(e){}
+    }, 5000);
+    iframe.onload = function(){
+      console.log('YouTube播放器加载成功:', ytid);
+      window._ytLoaded = true;
+      if(window._ytTimer) clearTimeout(window._ytTimer);
     };
   } else {
     // 没有YouTube映射，直接尝试B站
@@ -2527,31 +2541,31 @@ function tryPlayBilibili(id){
   const iframe = document.getElementById('playerFrame');
   const placeholder = document.getElementById('playerPlaceholder');
   if(bvid){
-    // 添加更多播放参数：自动播放、高质量、去水印标志、禁止跳转、无插件
-    iframe.src = 'https://player.bilibili.com/player.html?bvid='+bvid+'&autoplay=1&page=1&high_quality=1&danmaku=0&t=0&noinfo=1&hide_watermark=1&as_wide=1&is_story_h5=false&disable_plugin=1';
+    // B站嵌入：自动播放+高质量+去水印
+    iframe.src = 'https://player.bilibili.com/player.html?bvid='+bvid+'&autoplay=1&page=1&high_quality=1&danmaku=0&t=0&noinfo=1&hide_watermark=1&as_wide=1&is_story_h5=false';
     iframe.style.display='block';
     placeholder.style.display='none';
     currentPlayerSource = 'bilibili';
     const toggle = document.getElementById('sourceToggle');
     if(toggle) toggle.textContent = '🌐 切换播放源(当前:国内B站)';
-    // 自动重连机制：监听播放器加载完成
+    // B站加载检测
+    if(window._biliTimer) clearTimeout(window._biliTimer);
+    window._biliTimer = setTimeout(function(){
+      if(!window._biliLoaded){
+        console.log('B站加载超时，显示提示...');
+        placeholder.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.6);font-size:13px;">⏳ 视频加载较慢，请点击"重新加载"或切换播放源</div>';
+      }
+    }, 8000);
     iframe.onload = function(){
       console.log('B站播放器加载成功:', bvid);
-      // sandbox已移除allow-same-origin和allow-popups，B站iframe无法window.open或跳转
-      // 但额外加一层MutationObserver监听B站播放器内部DOM变化，阻止注入跳转链接
-      try {
-        // 由于跨域，这里大部分操作会catch，安全！sandbox已经够用
-      } catch(e){}
-      // 加载成功什么都不做——绝不自动切源！修复播放中断问题
-    };
-    iframe.onerror = function(){
-      console.log('B站播放器加载失败，自动重试YouTube...');
-      tryPlayYouTube(id);
+      window._biliLoaded = true;
+      if(window._biliTimer) clearTimeout(window._biliTimer);
     };
   } else {
-    placeholder.textContent='🎬 「'+currentPlayerTitle+'」- '+currentPlayerAuthor;
+    // 两个源都没有该视频ID -> 显示友好提示
+    placeholder.innerHTML = '<div style="text-align:center;padding:30px 20px;"><div style="font-size:36px;margin-bottom:10px;">🙏</div><div style="font-size:14px;color:rgba(255,255,255,0.7);margin-bottom:6px;">视频源加载中</div><div style="font-size:12px;color:rgba(255,255,255,0.4);">「'+currentPlayerTitle+'」- '+currentPlayerAuthor+'</div><div style="margin-top:16px;"><button onclick="reloadPlayer()" style="padding:8px 24px;border-radius:20px;background:linear-gradient(135deg,#C8973A,#A07828);color:#3D1F05;border:none;font-size:13px;font-weight:600;cursor:pointer;">🔄 重新加载</button></div></div>';
     iframe.style.display='none';
-    placeholder.style.display='';
+    placeholder.style.display='flex';
   }
 }
 
@@ -2574,6 +2588,11 @@ function reloadPlayer(){
   // 重新加载当前播放器，不跳转外部链接
   const iframe = document.getElementById('playerFrame');
   const placeholder = document.getElementById('playerPlaceholder');
+  // 重置加载状态
+  window._ytLoaded = false;
+  window._biliLoaded = false;
+  if(window._ytTimer) clearTimeout(window._ytTimer);
+  if(window._biliTimer) clearTimeout(window._biliTimer);
   if(iframe) iframe.src = '';
   if(placeholder) placeholder.style.display='flex';
   // 重新尝试播放
@@ -2585,6 +2604,13 @@ function closePlayer(e){
   if(e && e.target !== e.currentTarget) return; // 只响应模态背景点击
   const modal = document.getElementById('playerModal');
   const iframe = document.getElementById('playerFrame');
+  // 清除所有定时器，防止关闭后仍然触发源切换
+  if(window._ytTimer) clearTimeout(window._ytTimer);
+  if(window._biliTimer) clearTimeout(window._biliTimer);
+  window._ytTimer = null;
+  window._biliTimer = null;
+  window._ytLoaded = false;
+  window._biliLoaded = false;
   if(iframe){
     // 清空iframe src停止播放，释放内存
     iframe.src = '';
