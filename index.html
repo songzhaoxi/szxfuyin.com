@@ -1215,9 +1215,9 @@ ul{list-style:none;}
     </div>
     <div class="player-video">
       <iframe id="playerFrame" width="100%" height="100%"
-        style="border:none;display:none;" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"
-        sandbox="allow-scripts allow-forms allow-same-origin allow-pointer-lock allow-orientation-lock allow-presentation"
-        loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        style="border:none;display:none;" allowfullscreen allow="autoplay; fullscreen; picture-in-picture; accelerometer; gyroscope"
+        sandbox="allow-scripts allow-forms allow-same-origin allow-pointer-lock allow-orientation-lock allow-presentation allow-popups allow-popups-to-escape-sandbox"
+        loading="lazy" referrerpolicy="no-referrer-when-downgrade">
       <div class="player-loading" id="playerPlaceholder">
         <div class="spin-cross"></div>
         <span>✝️ 视频加载中 · 荣耀归主</span>
@@ -2510,8 +2510,9 @@ function tryPlayBilibili(id){
   const iframe = document.getElementById('playerFrame');
   const placeholder = document.getElementById('playerPlaceholder');
   if(bvid){
-    // B站嵌入：自动播放+高质量+去水印+防跳转+禁止APP弹窗
-    iframe.src = 'https://player.bilibili.com/player.html?bvid='+bvid+'&autoplay=1&page=1&high_quality=1&danmaku=0&t=0&noinfo=1&hide_watermark=1&as_wide=1&is_story_h5=false&external=1&disable_highlight=1&enable_smart_app_banner=0&hide_related_videos=1&hide_bottom_share=1&hide_auto_replay=1&header_display=false';
+    // 移动端mbplayer兼容所有设备，自动播放+高质量+去水印+防跳转
+    // 使用 mute 帮助自动播放通过浏览器策略，用户可手动取消静音
+    iframe.src = 'https://www.bilibili.com/blackboard/webplayer/mbplayer.html?bvid='+bvid+'&autoplay=1&muted=1&page=1&high_quality=1&danmaku=0&t=0&noinfo=1&hide_watermark=1&as_wide=1&is_story_h5=false&external=1&disable_highlight=1&enable_smart_app_banner=0&hide_related_videos=1&hide_bottom_share=1&hide_auto_replay=1&header_display=false';
     iframe.style.display='block';
     placeholder.style.display='none';
     currentPlayerSource = 'bilibili';
@@ -2524,6 +2525,16 @@ function tryPlayBilibili(id){
         console.log('B站加载超时，显示提示...');
         placeholder.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.6);font-size:13px;">⏳ B站加载慢，正在尝试备用源...</div>';
         placeholder.style.display='flex';
+        // B站超时则自动尝试YouTube（如果有）
+        const ytid = YT_IDS[id];
+        if(ytid){
+          setTimeout(function(){
+            if(!window._biliLoaded){
+              console.log('B站超时自动切换到YouTube');
+              tryPlayYouTube(id);
+            }
+          }, 3000);
+        }
       }
     }, 8000);
     iframe.addEventListener('load', function biliLoaded(){
@@ -2541,7 +2552,6 @@ function tryPlayBilibili(id){
       }catch(e){/*跨域忽略*/}
     });
   }
-  // 没有bvid → 不做任何事（openPlayer会处理YouTube回退）
 }
 
 function togglePlayerSource(){
