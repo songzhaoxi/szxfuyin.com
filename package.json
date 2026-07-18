@@ -1,0 +1,15 @@
+{
+  "name": "szxfuyin-gospel-platform",
+  "version": "1.0.0",
+  "description": "福音传播爱 - 福音TV风格完整视频平台",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node server/server.js"
+  },
+  "dependencies": {
+    "axios": "^1.18.1",
+    "cors": "^2.8.6",
+    "express": "^4.22.2"
+  }
+}

@@ -60,3 +60,5 @@ nbdist/
 *.bak
 .env
 szxfuyin/
+node_modules/
+.backup/

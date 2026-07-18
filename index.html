@@ -1788,6 +1788,58 @@ const DATA = {
   notices:["愿神的话语点亮每一颗寻求真理的心 · 分享福音，传递主的爱","最近更新的内容已经展示在首页，欢迎分享给有需要的朋友","感谢每一位为福音事工祷告支持的弟兄姐妹"]
 };
 
+// ===== 后端API数据同步（自动从服务器拉取海量福音视频） =====
+(async function syncApiData(){
+  try{
+    const resp = await fetch('/api/data', {signal:AbortSignal.timeout(5000)});
+    if(!resp.ok) return;
+    const result = await resp.json();
+    if(!result || !result.success || !result.data) return;
+    const apiData = result.data;
+    // 合并视频ID到YT_IDS和BV_IDS
+    if(apiData.videos && Array.isArray(apiData.videos)){
+      apiData.videos.forEach(v => {
+        // 使用api id作为movid（偏移确保不冲突）
+        const mid = v.id + 10000;
+        if(v.ytid) YT_IDS[mid] = v.ytid;
+        if(v.bvid) BV_IDS[mid] = v.bvid;
+        // 如果还没有该分类，创建
+        if(apiData.categories){
+          const cat = apiData.categories.find(c => c.id === v.c);
+          if(cat){
+            let existingCat = DATA.categories.find(c => c.id === cat.id.charCodeAt(0) + 200);
+            if(!existingCat && cat.id){
+              // 映射分类名称
+              const catNameMap = {
+                'animation':'福音动漫','movie':'福音电影','testimony':'福音见证',
+                'music':'赞美诗歌','preach':'福音证道','family':'婚姻家庭',
+                'growth':'属灵成长','study':'神学课程','video':'福音视频','hymns':'圣乐崇拜'
+              };
+              DATA.categories.push({
+                id: cat.id.charCodeAt(0) + 200,
+                name: catNameMap[cat.id] || cat.name,
+                videos: []
+              });
+              existingCat = DATA.categories.find(c => c.id === cat.id.charCodeAt(0) + 200);
+            }
+            if(existingCat){
+              existingCat.videos.push({
+                title: v.t, author: cat.name || '福音资源',
+                movid: mid
+              });
+            }
+          }
+        }
+      });
+      console.log('✅ 已从后端同步 '+apiData.videos.length+' 个福音视频到前端');
+      // 重新渲染
+      if(typeof renderVideos === 'function') renderVideos();
+    }
+  }catch(e){
+    console.log('后端API未连接，使用静态数据模式');
+  }
+})();
+
 // ===== Banner =====
 let bannerIdx = 0, bannerTimer;
 function renderBanner(){

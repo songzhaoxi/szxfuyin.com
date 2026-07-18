@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>福音传播爱 - 管理后台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans SC',sans-serif;background:#f0ebe3;color:#2c1a08;display:flex;}
+.sidebar{width:200px;background:#3d1f05;color:#e8b96a;min-height:100vh;padding:20px 0;position:fixed;left:0;top:0;bottom:0;}
+.sidebar h2{text-align:center;padding:0 12px 16px;border-bottom:1px solid rgba(255,255,255,0.1);font-size:16px;}
+.sidebar h2 span{display:block;font-size:10px;color:rgba(255,255,255,0.4);}
+.sidebar nav{margin-top:12px;}
+.sidebar nav a{display:block;padding:10px 16px;color:#c8973a;text-decoration:none;font-size:13px;border-left:3px solid transparent;cursor:pointer;}
+.sidebar nav a:hover,.sidebar nav a.active{background:rgba(255,255,255,0.08);border-left-color:#e8b96a;color:#e8b96a;}
+.main{margin-left:200px;flex:1;padding:20px;}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.header h1{font-size:20px;color:#3d1f05;}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:16px;}
+.stat-card{background:#fff;border-radius:8px;padding:14px 16px;box-shadow:0 2px 8px rgba(90,50,10,0.08);}
+.stat-card .num{font-size:24px;font-weight:700;color:#3d1f05;}
+.stat-card .label{font-size:12px;color:#8a7a6a;margin-top:2px;}
+table{width:100%;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(90,50,10,0.08);font-size:12px;}
+th{background:#3d1f05;color:#e8b96a;padding:10px 12px;text-align:left;font-weight:500;}
+td{padding:8px 12px;border-bottom:1px solid #f0ebe3;}
+tr:hover{background:#fdf3e0;}
+.actions button{padding:3px 10px;border:none;border-radius:4px;cursor:pointer;font-size:11px;margin:0 2px;}
+.btn-e{background:#c8973a;color:#fff;}
+.btn-d{background:#a04040;color:#fff;}
+.btn-a{background:#3d1f05;color:#e8b96a;padding:6px 16px;border:none;border-radius:5px;cursor:pointer;font-size:13px;margin-bottom:10px;}
+.filters{margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.filters select,.filters input{padding:6px 10px;border:1px solid #d4c5b0;border-radius:5px;font-size:12px;background:#fff;}
+.filters button{background:#c8973a;color:#fff;padding:6px 12px;border:none;border-radius:5px;cursor:pointer;font-size:12px;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;}
+.modal-overlay.show{display:flex;align-items:center;justify-content:center;}
+.modal{background:#fff;border-radius:10px;padding:20px;width:90%;max-width:500px;max-height:80vh;overflow-y:auto;}
+.modal h3{margin-bottom:12px;color:#3d1f05;font-size:16px;}
+.modal .f{margin-bottom:10px;}
+.modal label{display:block;font-size:12px;color:#6b5a4a;margin-bottom:3px;}
+.modal input,.modal select,.modal textarea{width:100%;padding:6px 10px;border:1px solid #d4c5b0;border-radius:5px;font-size:12px;}
+.modal textarea{height:50px;}
+.modal-btns{display:flex;gap:10px;margin-top:12px;justify-content:flex-end;}
+.modal-btns button{padding:6px 16px;border:none;border-radius:5px;cursor:pointer;}
+.btn-s{background:#3d1f05;color:#e8b96a;}
+.btn-c{background:#d4c5b0;color:#3d1f05;}
+.pagination{display:flex;gap:6px;justify-content:center;margin-top:12px;align-items:center;font-size:12px;}
+.pagination button{padding:4px 10px;border:1px solid #d4c5b0;border-radius:4px;background:#fff;cursor:pointer;font-size:11px;}
+.pagination button.active{background:#3d1f05;color:#e8b96a;border-color:#3d1f05;}
+.pagination button:disabled{opacity:0.4;cursor:default;}
+.toast{position:fixed;top:16px;right:16px;background:#3d1f05;color:#e8b96a;padding:10px 20px;border-radius:6px;font-size:13px;z-index:1000;display:none;}
+.tc{display:none;}
+.tc.active{display:block;}
+#importBox{background:#fff;border-radius:8px;padding:16px;box-shadow:0 2px 8px rgba(90,50,10,0.08);}
+#importBox textarea{width:100%;padding:10px;border:1px solid #d4c5b0;border-radius:6px;font-family:monospace;font-size:11px;min-height:200px;}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <h2>福音传播爱<span>管理后台</span></h2>
+  <nav>
+    <a href="#" class="active" onclick="st(0)">📊 总览</a>
+    <a href="#" onclick="st(1)">🎬 视频管理</a>
+    <a href="#" onclick="st(2)">📂 分类</a>
+    <a href="#" onclick="st(3)">🎤 讲员</a>
+    <a href="#" onclick="st(4)">🖼️ Banner</a>
+    <a href="#" onclick="st(5)">📥 导入</a>
+  </nav>
+</div>
+<div class="main">
+  <div class="header"><h1 id="pt">📊 总览</h1></div>
+
+  <div id="t0" class="tc active">
+    <div class="stats" id="sc"></div>
+    <div style="background:#fff;border-radius:8px;padding:16px;box-shadow:0 2px 8px rgba(90,50,10,0.08);">
+      <h3 style="margin-bottom:10px;color:#3d1f05;font-size:14px;">📈 分类分布</h3>
+      <div id="cc"></div>
+    </div>
+  </div>
+
+  <div id="t1" class="tc">
+    <div class="filters">
+      <select id="cf" onchange="lv(1)"><option value="all">全部分类</option></select>
+      <input type="text" id="si" placeholder="搜索标题..." onkeyup="if(event.key==='Enter')lv(1)">
+      <button onclick="lv(1)">🔍 搜索</button>
+      <button class="btn-a" onclick="oa()">＋ 添加视频</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table><thead><tr><th>ID</th><th>标题</th><th>分类</th><th>时长</th><th>播放</th><th>操作</th></tr></thead>
+        <tbody id="vt"></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="vp"></div>
+  </div>
+
+  <div id="t2" class="tc">
+    <button class="btn-a" onclick="oac()">＋ 添加分类</button>
+    <table><thead><tr><th>ID</th><th>名称</th><th>图标</th><th>描述</th><th>视频数</th><th>操作</th></tr></thead>
+      <tbody id="ct"></tbody>
+    </table>
+  </div>
+
+  <div id="t3" class="tc">
+    <button class="btn-a" onclick="oas()">＋ 添加讲员</button>
+    <table><thead><tr><th>姓名</th><th>职称</th><th>描述</th><th>操作</th></tr></thead>
+      <tbody id="st"></tbody>
+    </table>
+  </div>
+
+  <div id="t4" class="tc">
+    <button class="btn-a" onclick="oab()">＋ 添加Banner</button>
+    <table><thead><tr><th>标题</th><th>副标题</th><th>YT ID</th><th>操作</th></tr></thead>
+      <tbody id="bt"></tbody>
+    </table>
+  </div>
+
+  <div id="t5" class="tc">
+    <div id="importBox">
+      <h3 style="margin-bottom:10px;color:#3d1f05;font-size:14px;">📥 批量导入（JSON格式）</h3>
+      <p style="font-size:12px;color:#6b5a4a;margin-bottom:8px;">粘贴视频数组，每项包含：t(标题), c(分类id), ytid(YouTube ID), bvid(BV号), desc, v(播放量), dur(时长), tags</p>
+      <textarea id="ij" placeholder='[{"t":"耶稣传4K国语","c":"movie","ytid":"_T3GcH3bPzE","bvid":"BV1MyqnBeEVo","desc":"最真实的耶稣生平","v":"1280万","dur":"2:01:23","tags":["耶稣传","4K"]}]'></textarea>
+      <div style="margin-top:10px;display:flex;gap:8px;">
+        <button onclick="bi()" style="background:#3d1f05;color:#e8b96a;padding:8px 20px;border:none;border-radius:5px;cursor:pointer;">🚀 导入</button>
+        <button onclick="document.getElementById('ij').value=''" style="background:#d4c5b0;color:#3d1f05;padding:8px 20px;border:none;border-radius:5px;cursor:pointer;">清空</button>
+      </div>
+      <div id="ir" style="margin-top:8px;font-size:12px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modals -->
+<div class="modal-overlay" id="m0"><div class="modal">
+  <h3 id="mt">添加视频</h3>
+  <div class="f"><label>标题 *</label><input id="f0"></div>
+  <div class="f"><label>分类 *</label><select id="f1"></select></div>
+  <div class="f"><label>YouTube ID</label><input id="f2" placeholder="_T3GcH3bPzE"></div>
+  <div class="f"><label>B站BV号</label><input id="f3" placeholder="BV1MyqnBeEVo"></div>
+  <div class="f"><label>描述</label><textarea id="f4"></textarea></div>
+  <div class="f"><label>播放量 / 时长</label><input id="f5" placeholder="1280万"><input id="f6" placeholder="2:01:23" style="margin-top:4px;"></div>
+  <div class="f"><label>标签（逗号分隔）</label><input id="f7" placeholder="耶稣传,4K,国语"></div>
+  <input type="hidden" id="fe">
+  <div class="modal-btns">
+    <button class="btn-c" onclick="cm('m0')">取消</button>
+    <button class="btn-s" onclick="sv()">保存</button>
+  </div>
+</div></div>
+
+<div class="modal-overlay" id="m1"><div class="modal">
+  <h3>添加分类</h3>
+  <div class="f"><label>ID</label><input id="c0" placeholder="movie"></div>
+  <div class="f"><label>名称</label><input id="c1" placeholder="福音电影"></div>
+  <div class="f"><label>图标</label><input id="c2" placeholder="🎬"></div>
+  <div class="f"><label>描述</label><textarea id="c3" placeholder="完整福音电影正片"></textarea></div>
+  <div class="modal-btns">
+    <button class="btn-c" onclick="cm('m1')">取消</button>
+    <button class="btn-s" onclick="sc()">保存</button>
+  </div>
+</div></div>
+
+<div class="modal-overlay" id="m2"><div class="modal">
+  <h3>添加讲员</h3>
+  <div class="f"><label>姓名</label><input id="s0"></div>
+  <div class="f"><label>职称</label><input id="s1"></div>
+  <div class="f"><label>描述</label><textarea id="s2"></textarea></div>
+  <div class="modal-btns">
+    <button class="btn-c" onclick="cm('m2')">取消</button>
+    <button class="btn-s" onclick="ss()">保存</button>
+  </div>
+</div></div>
+
+<div class="modal-overlay" id="m3"><div class="modal">
+  <h3>添加Banner</h3>
+  <div class="f"><label>标题</label><input id="b0"></div>
+  <div class="f"><label>副标题</label><input id="b1"></div>
+  <div class="f"><label>YouTube ID</label><input id="b2"></div>
+  <div class="modal-btns">
+    <button class="btn-c" onclick="cm('m3')">取消</button>
+    <button class="btn-s" onclick="sb()">保存</button>
+  </div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+<script src="js/app.js"></script>
+</body>
+</html>
