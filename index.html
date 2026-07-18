@@ -557,122 +557,50 @@ ul{list-style:none;}
   max-width:600px;margin:8px auto 0;line-height:1.6;
 }
 
-/* ===== 十字架✝️水印 - 清晰华美版 ===== */
-.watermark-overlay{
-  position:absolute;top:0;left:0;right:0;bottom:0;
-  pointer-events:none;z-index:10;
-  overflow:hidden;
-}
-/* 居中主水印 - 大十字架 */
-.watermark-content-static{
-  position:absolute;
-  top:50%;left:50%;
-  transform:translate(-50%,-50%) rotate(-15deg);
-  display:flex;flex-direction:column;align-items:center;gap:6px;
-  opacity:0.25;
-  text-shadow:0 0 20px rgba(255,215,0,0.3);
-}
-.watermark-cross-static{
-  font-size:64px;color:#FFD700;
-  font-weight:700;line-height:1;
-  filter:drop-shadow(0 0 10px rgba(255,215,0,0.5));
-}
-.watermark-text-static{
-  font-size:22px;font-weight:800;color:#FFD700;
-  font-family:'Noto Serif SC',serif;
-  letter-spacing:8px;
-  filter:drop-shadow(0 0 8px rgba(255,215,0,0.4));
-}
-.watermark-sub-static{
-  font-size:12px;color:rgba(255,215,0,0.4);
-  letter-spacing:4px;
-  font-weight:300;
-}
-/* 角落水印 */
-.watermark-corner{
-  position:absolute;
-  top:12px;left:14px;
-  font-size:12px;font-weight:700;color:rgba(255,215,0,0.2);
-  font-family:'Noto Serif SC',serif;
-  letter-spacing:1px;
-  text-shadow:0 0 8px rgba(255,215,0,0.15);
-}
-.watermark-corner.br{
-  top:auto;bottom:12px;right:14px;left:auto;
-  font-size:10px;font-weight:400;color:rgba(255,215,0,0.15);
-}
-/* 全屏时水印放大 */
-.player-inner.fullscreen .watermark-cross-static{font-size:80px;}
-.player-inner.fullscreen .watermark-text-static{font-size:28px;}
-.player-inner.fullscreen .watermark-corner{font-size:14px;top:16px;left:18px;}
-.player-inner.fullscreen .watermark-corner.br{font-size:12px;bottom:16px;right:18px;}
-/* ===== 彻底屏蔽B站/YouTube外部按钮&水印 ===== */
+/* ===== 屏蔽B站/YouTube外部按钮&水印（不移除，防止跳转） ===== */
+/* 隐藏B站跳转APP和推广按钮，但保留全屏按钮 */
 .bili-player-watermark{display:none!important;}
 .bpx-player-video-info{display:none!important;}
 .bpx-player-top-fixed{display:none!important;}
-.bpx-player-video-btn{display:none!important;}
-/* 全面覆盖外部跳转按钮区域 */
+/* 注意：不移除全屏按钮 .bpx-player-video-btn，保留用户全屏能力 */
+/* 只隐藏会导致跳转的推广区域 */
+.bpx-player-state-wrap{pointer-events:none!important;}
+/* 视频区域基础遮罩 */
 .player-video{
   position:relative;
   overflow:hidden;
 }
-/* 右下角大面积遮罩 - 挡住B站"去观看"和YouTube水印区域 */
-.player-video::after{
-  content:'';
-  position:absolute;
-  bottom:0;right:0;
-  width:280px;height:64px;
-  z-index:15;
-  pointer-events:none;
-  background:linear-gradient(to left,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.7) 30%,rgba(0,0,0,0.0) 100%);
-  border-radius:0;
-}
-/* 右上角遮罩 - 挡住YouTube品牌水印 - 使用watermark-overlay::after避免冲突 */
-.watermark-overlay::after{
-  content:'';
-  position:absolute;top:0;right:0;
-  width:200px;height:50px;
-  z-index:2;
-  pointer-events:none;
-  background:linear-gradient(to left,rgba(0,0,0,0.85) 0%,rgba(0,0,0,0.4) 40%,transparent 100%);
-}
-/* 提高水印层级 */
-.player-video .watermark-overlay{
-  z-index:16!important;
-}
-/* 金色斜纹装饰底纹 */
-.watermark-overlay::before{
-  content:'';
-  position:absolute;
-  top:0;left:0;right:0;bottom:0;
-  background:repeating-linear-gradient(
-    -45deg,
-    transparent 0px,
-    transparent 150px,
-    rgba(255,215,0,0.03) 150px,
-    rgba(255,215,0,0.03) 160px
-  );
-  pointer-events:none;
-}
-/* ===== 播放器控制栏 ===== */
+/* ===== 播放器控制栏 - 华美影院级 ===== */
 .player-controls{
   display:flex;align-items:center;gap:8px;
   margin-top:10px;padding-top:10px;
   border-top:1px solid rgba(200,151,58,0.08);
+  flex-wrap:wrap;
 }
 .player-ctrl-btn{
-  padding:6px 14px;border-radius:8px;
-  font-size:11px;font-weight:500;
-  background:rgba(200,151,58,0.12);
+  padding:7px 18px;border-radius:20px;
+  font-size:11px;font-weight:600;
+  background:linear-gradient(135deg,rgba(200,151,58,0.18),rgba(200,151,58,0.08));
   color:var(--gold-light);
-  border:1px solid rgba(200,151,58,0.1);
+  border:1px solid rgba(200,151,58,0.12);
   cursor:pointer;transition:all 0.3s ease;
-  display:flex;align-items:center;gap:3px;
+  display:flex;align-items:center;gap:5px;
+  letter-spacing:0.3px;
 }
 .player-ctrl-btn:hover{
-  background:rgba(200,151,58,0.25);
-  transform:translateY(-1px);
-  box-shadow:0 2px 10px rgba(200,151,58,0.2);
+  background:linear-gradient(135deg,rgba(200,151,58,0.35),rgba(200,151,58,0.2));
+  transform:translateY(-2px);
+  box-shadow:0 4px 16px rgba(200,151,58,0.25);
+  border-color:var(--gold);
+}
+.player-ctrl-btn.primary{
+  background:linear-gradient(135deg,#C8973A,#A07828);
+  color:#3D1F05;border:none;
+  box-shadow:0 2px 12px rgba(200,151,58,0.35);
+}
+.player-ctrl-btn.primary:hover{
+  transform:translateY(-2px) scale(1.03);
+  box-shadow:0 6px 24px rgba(200,151,58,0.5);
 }
 .player-ctrl-hint{
   font-size:10px;color:rgba(255,255,255,0.2);
@@ -790,7 +718,6 @@ ul{list-style:none;}
 }
 .player-meta{
   display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;
-}
 .player-tag{
   font-size:11px;padding:4px 14px;border-radius:14px;
   background:rgba(200,151,58,0.12);color:var(--gold-light);
@@ -799,17 +726,6 @@ ul{list-style:none;}
   transition:var(--trans);
 }
 .player-tag:hover{background:rgba(200,151,58,0.2);transform:translateY(-1px);}
-/* 源切换按钮高亮 - 金色质感 */
-.player-tag#sourceToggle{
-  background:linear-gradient(135deg,#C8973A,#A07828);
-  color:#3D1F05;font-weight:700;border:none;
-  box-shadow:0 2px 12px rgba(200,151,58,0.35);
-  padding:4px 16px;
-  letter-spacing:0.8px;
-}
-.player-tag#sourceToggle:hover{
-  transform:scale(1.06);
-  box-shadow:0 4px 20px rgba(200,151,58,0.45);
 }
 /* 播放器底部进度条装饰 */
 .player-video::before{
@@ -953,9 +869,43 @@ ul{list-style:none;}
   transform:scale(1.08)!important;
   box-shadow:0 4px 20px rgba(200,151,58,0.5)!important;
 }
-/* 播放器水印特效增强 */
-.watermark-overlay{opacity:0.15!important;}
-.watermark-content{letter-spacing:4px!important;}
+/* ===== szxfuyin.com自定义水印 - 福音传播爱 ===== */
+.player-watermark{
+  position:absolute;top:0;left:0;right:0;bottom:0;
+  z-index:10;pointer-events:none;
+  display:flex;align-items:flex-end;justify-content:flex-end;
+  padding:12px 16px;
+  opacity:0;
+  transition:opacity 0.5s ease;
+}
+.player-modal.show .player-watermark{opacity:1;}
+.player-watermark .wm-brand{
+  display:flex;align-items:center;gap:8px;
+  background:linear-gradient(135deg,rgba(200,151,58,0.2),rgba(200,151,58,0.08));
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  padding:6px 14px 6px 10px;
+  border-radius:20px;
+  border:1px solid rgba(200,151,58,0.12);
+  box-shadow:0 2px 12px rgba(0,0,0,0.15);
+}
+.player-watermark .wm-cross{
+  width:20px;height:20px;position:relative;
+  display:flex;align-items:center;justify-content:center;
+}
+.player-watermark .wm-cross::before{content:'';position:absolute;width:3px;height:18px;background:var(--gold);border-radius:2px;}
+.player-watermark .wm-cross::after{content:'';position:absolute;width:14px;height:3px;background:var(--gold);border-radius:2px;}
+.player-watermark .wm-text{
+  font-size:11px;font-weight:600;color:var(--gold-light);
+  font-family:'Noto Serif SC',serif;
+  letter-spacing:1px;
+  text-shadow:0 1px 4px rgba(0,0,0,0.3);
+}
+.player-watermark .wm-sub{
+  font-size:8px;color:rgba(232,185,106,0.5);
+  letter-spacing:2px;
+  margin-left:2px;
+}
 /* ===== 暗色模式 ===== */
 .dark-mode{
   --cream:#1A1208;
@@ -1274,24 +1224,24 @@ ul{list-style:none;}
         <div class="spin-cross"></div>
         <span>✝️ 视频加载中 · 荣耀归主</span>
       </div>
-      <!-- ✝️ 十字架水印 - 清晰华美静态展示 -->
-      <div class="watermark-overlay" id="watermarkOverlay">
-        <div class="watermark-content-static">
-          <span class="watermark-cross-static">✝</span>
-          <span class="watermark-text-static">福音传递爱</span>
-          <span class="watermark-sub-static">szxfuyin.com</span>
+      <!-- 视频加载时的福音提示 - 无遮挡水印 -->
+      <!-- ===== szxfuyin.com自定义水印 - 点击不跳转 ===== -->
+      <div class="player-watermark">
+        <div class="wm-brand">
+          <div class="wm-cross"></div>
+          <span class="wm-text">福音传播爱</span>
+          <span class="wm-sub">szxfuyin.com</span>
         </div>
-        <div class="watermark-corner">✝ 福音传递爱 ✝</div>
-        <div class="watermark-corner br">szxfuyin.com · 耶稣爱你</div>
       </div>
     </div>
     <div class="player-info">
       <div id="playerAuthor" style="font-size:13px;color:var(--text-muted);"></div>
       <div class="player-meta" id="playerMeta"></div>
       <div class="player-controls">
-        <button class="player-ctrl-btn" onclick="toggleFullscreen()">⛶ 全屏</button>
+        <button class="player-ctrl-btn primary" onclick="toggleFullscreen()">⛶ 全屏观看</button>
         <button class="player-ctrl-btn" onclick="reloadPlayer()">🔄 重新加载</button>
-        <span class="player-ctrl-hint">如果视频无法播放，请点击「切换播放源」</span>
+        <button class="player-ctrl-btn" onclick="togglePlayerSource()">🌐 切换播放源</button>
+        <span class="player-ctrl-hint">若无法播放请点击「切换播放源」或「重新加载」</span>
       </div>
     </div>
   </div>
@@ -1838,7 +1788,6 @@ function renderGrid(elId, videos){
         <div class="card-title">${v.title}</div>
         <div class="card-author">${v.author}</div>
       </div>
-      <div class="duration-badge">✝ 福音传播爱</div>
     </div>`).join('');
 }
 
@@ -2481,8 +2430,7 @@ function openPlayer(id,title,author){
   document.getElementById('playerMeta').innerHTML=
     `<span class="player-tag">🎬 视频</span>
      <span class="player-tag">👤 ${author}</span>
-     <span class="player-tag" id="sourceToggle" style="cursor:pointer;background:linear-gradient(135deg,#C8973A,#A07828);color:#3D1F05;font-weight:700;" onclick="togglePlayerSource()">🌐 切换播放源</span>
-     <span class="player-tag" style="cursor:pointer;background:rgba(255,255,255,0.08);color:var(--gold-light);" onclick="reloadPlayer()">🔄 重新加载</span>`;
+     <span class="player-tag" id="sourceLabel" style="background:rgba(200,151,58,0.12);color:var(--gold-light);">🌐 源: 自动</span>`;
   // ===== 修复：智能选择播放源，B站没有时自动切YouTube =====
   // 清除所有旧的定时器和加载状态
   if(window._ytTimer) clearTimeout(window._ytTimer);
@@ -2534,8 +2482,8 @@ function tryPlayYouTube(id){
     iframe.style.display='block';
     placeholder.style.display='none';
     currentPlayerSource = 'youtube';
-    const toggle = document.getElementById('sourceToggle');
-    if(toggle) toggle.textContent = '🌐 切换播放源(当前:海外YouTube)';
+    const label = document.getElementById('sourceLabel');
+    if(label) label.textContent = '🎬 源: YouTube';
     // 设置8秒超时检测
     if(window._ytTimer) clearTimeout(window._ytTimer);
     window._ytTimer = setTimeout(function(){
@@ -2547,12 +2495,12 @@ function tryPlayYouTube(id){
         }
       }
     }, 8000);
-    iframe.onload = function(){
+    iframe.addEventListener('load', function ytLoaded(){
       console.log('YouTube播放器加载成功:', ytid);
       window._ytLoaded = true;
       if(window._ytTimer) clearTimeout(window._ytTimer);
       if(window._biliFailTimer) clearTimeout(window._biliFailTimer);
-    };
+    });
   } else {
     // 没有YouTube映射，尝试B站
     tryPlayBilibili(id);
@@ -2564,13 +2512,13 @@ function tryPlayBilibili(id){
   const iframe = document.getElementById('playerFrame');
   const placeholder = document.getElementById('playerPlaceholder');
   if(bvid){
-    // B站嵌入：自动播放+高质量+去水印+防跳转
-    iframe.src = 'https://player.bilibili.com/player.html?bvid='+bvid+'&autoplay=1&page=1&high_quality=1&danmaku=0&t=0&noinfo=1&hide_watermark=1&as_wide=1&is_story_h5=false&external=1&disable_highlight=1';
+    // B站嵌入：自动播放+高质量+去水印+防跳转+禁止APP弹窗
+    iframe.src = 'https://player.bilibili.com/player.html?bvid='+bvid+'&autoplay=1&page=1&high_quality=1&danmaku=0&t=0&noinfo=1&hide_watermark=1&as_wide=1&is_story_h5=false&external=1&disable_highlight=1&enable_smart_app_banner=0&hide_related_videos=1&hide_bottom_share=1&hide_auto_replay=1&header_display=false';
     iframe.style.display='block';
     placeholder.style.display='none';
     currentPlayerSource = 'bilibili';
-    const toggle = document.getElementById('sourceToggle');
-    if(toggle) toggle.textContent = '🌐 切换播放源(当前:国内B站)';
+    const label = document.getElementById('sourceLabel');
+    if(label) label.textContent = '🎬 源: B站';
     // B站加载检测
     if(window._biliTimer) clearTimeout(window._biliTimer);
     window._biliTimer = setTimeout(function(){
@@ -2580,7 +2528,7 @@ function tryPlayBilibili(id){
         placeholder.style.display='flex';
       }
     }, 8000);
-    iframe.onload = function(){
+    iframe.addEventListener('load', function biliLoaded(){
       console.log('B站播放器加载成功:', bvid);
       window._biliLoaded = true;
       if(window._biliTimer) clearTimeout(window._biliTimer);
@@ -2593,33 +2541,33 @@ function tryPlayBilibili(id){
           iframe.contentDocument.head.appendChild(style);
         }
       }catch(e){/*跨域忽略*/}
-    };
+    });
   }
   // 没有bvid → 不做任何事（openPlayer会处理YouTube回退）
 }
 
 function togglePlayerSource(){
   if(!currentPlayerId) return;
-  const toggle = document.getElementById('sourceToggle');
+  const label = document.getElementById('sourceLabel');
   const hasBili = !!BV_IDS[currentPlayerId];
   const hasYT = !!YT_IDS[currentPlayerId];
   if(currentPlayerSource === 'youtube' || currentPlayerSource === 'auto'){
     // 切换到B站
     if(hasBili){
       tryPlayBilibili(currentPlayerId);
-      if(toggle) toggle.textContent = '🌐 切换播放源(当前:国内B站)';
+      if(label) label.textContent = '🎬 源: B站(切换)';
     } else if(hasYT){
       // B站没有但YouTube有，提示用户
-      if(toggle) toggle.textContent = '🌐 该视频暂无B站源(仅YouTube)';
+      if(label) label.textContent = '🎬 仅YouTube源';
     }
   } else {
     // 切换到YouTube
     if(hasYT){
       tryPlayYouTube(currentPlayerId);
-      if(toggle) toggle.textContent = '🌐 切换播放源(当前:海外YouTube)';
+      if(label) label.textContent = '🎬 源: YouTube(切换)';
     } else if(hasBili){
       // YouTube没有但B站有，提示用户
-      if(toggle) toggle.textContent = '🌐 该视频暂无YouTube源(仅B站)';
+      if(label) label.textContent = '🎬 仅B站源';
     }
   }
 }
@@ -2661,22 +2609,25 @@ function reloadPlayer(){
   }
 }
 
-// ===== 全屏切换 =====
+// ===== 全屏切换 - 优化版 =====
 function toggleFullscreen(){
-  const inner = document.getElementById('playerInner');
   const modal = document.getElementById('playerModal');
   const btn = document.getElementById('fullscreenBtn');
+  const video = document.getElementById('playerVideo') || document.querySelector('.player-video');
+  const iframe = document.getElementById('playerFrame');
+  // 优先尝试iframe全屏（可触发播放器原生全屏）
+  const target = iframe && iframe.style.display!=='none' ? iframe : video;
   if(!document.fullscreenElement && !document.webkitFullscreenElement){
     // 进入全屏
-    if(inner.requestFullscreen){
-      inner.requestFullscreen();
-    } else if(inner.webkitRequestFullscreen){
-      inner.webkitRequestFullscreen();
+    if(target.requestFullscreen){
+      target.requestFullscreen();
+    } else if(target.webkitRequestFullscreen){
+      target.webkitRequestFullscreen();
     } else {
       // 降级方案：CSS全屏
       modal.classList.add('fullscreen-mode');
     }
-    if(btn) btn.textContent = '⛶';
+    if(btn) btn.textContent = '✕';
     if(btn) btn.title = '退出全屏';
   } else {
     // 退出全屏
@@ -2691,13 +2642,21 @@ function toggleFullscreen(){
     if(btn) btn.title = '全屏';
   }
 }
+      document.webkitExitFullscreen();
+    } else {
+      modal.classList.remove('fullscreen-mode');
+    }
+    if(btn) btn.textContent = '⛶';
+    if(btn) btn.title = '全屏';
+  }
+}
 // 监听全屏变化事件
 document.addEventListener('fullscreenchange', function(){
   const modal = document.getElementById('playerModal');
   const btn = document.getElementById('fullscreenBtn');
   if(document.fullscreenElement){
     modal.classList.add('fullscreen-mode');
-    if(btn){btn.textContent='✕';btn.title='退出全屏';}
+    if(btn){btn.textContent='⛶';btn.title='退出全屏(ESC)';}
   } else {
     modal.classList.remove('fullscreen-mode');
     if(btn){btn.textContent='⛶';btn.title='全屏';}
@@ -2708,7 +2667,7 @@ document.addEventListener('webkitfullscreenchange', function(){
   const btn = document.getElementById('fullscreenBtn');
   if(document.webkitFullscreenElement){
     modal.classList.add('fullscreen-mode');
-    if(btn){btn.textContent='✕';btn.title='退出全屏';}
+    if(btn){btn.textContent='⛶';btn.title='退出全屏(ESC)';}
   } else {
     modal.classList.remove('fullscreen-mode');
     if(btn){btn.textContent='⛶';btn.title='全屏';}
