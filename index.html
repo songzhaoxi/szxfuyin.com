@@ -1262,9 +1262,9 @@ ul{list-style:none;}
     <div class="player-video">
       <iframe id="playerFrame" width="100%" height="100%"
         style="border:none;display:none;" allowfullscreen
-        sandbox="allow-scripts allow-forms allow-same-origin allow-presentation"
-        referrerpolicy="strict-origin-when-cross-origin"
-        loading="lazy"></iframe>
+        sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-pointer-lock allow-orientation-lock"
+        referrerpolicy="no-referrer"
+        loading="lazy" allow="autoplay; fullscreen; picture-in-picture"></iframe>
       <div class="player-loading" id="playerPlaceholder">
         <div class="spin-cross"></div>
         <span>✝️ 视频加载中 · 荣耀归主</span>
@@ -2481,19 +2481,49 @@ function openPlayer(id,title,author){
   document.getElementById('playerAuthor').textContent='✝ '+author;
   // 显示视频海报
   showPlayerPoster(id);
-  // 始终保留源切换按钮 - 更美观的布局
+  // 始终保留源切换按钮 + 重新加载按钮
   document.getElementById('playerMeta').innerHTML=
     `<span class="player-tag">🎬 视频</span>
      <span class="player-tag">👤 ${author}</span>
      <span class="player-tag" id="sourceToggle" style="cursor:pointer;background:linear-gradient(135deg,#C8973A,#A07828);color:#3D1F05;font-weight:700;" onclick="togglePlayerSource()">🌐 切换播放源</span>
      <span class="player-tag" style="cursor:pointer;background:rgba(255,255,255,0.08);color:var(--gold-light);" onclick="reloadPlayer()">🔄 重新加载</span>`;
-  // ===== 修复播放中断：彻底取消所有冲突定时器 =====
-  // 以前有3秒和8秒互相打架导致播放一会就跳转！
-  // 现在只用onerror回调，加载成功绝不自动切源！
-  if(window._playerHeartbeat) clearInterval(window._playerHeartbeat);
-  window._playerHeartbeat = null;
-  // 先尝试YouTube（默认，全球95%地区可用）
-  tryPlayYouTube(id);
+  // ===== 修复：智能选择播放源，B站没有时自动切YouTube =====
+  // 清除所有旧的定时器和加载状态
+  if(window._ytTimer) clearTimeout(window._ytTimer);
+  if(window._biliTimer) clearTimeout(window._biliTimer);
+  if(window._biliFailTimer) clearTimeout(window._biliFailTimer);
+  window._ytTimer = null;
+  window._biliTimer = null;
+  window._biliFailTimer = null;
+  window._ytLoaded = false;
+  window._biliLoaded = false;
+  const hasBili = !!BV_IDS[id];
+  const hasYT = !!YT_IDS[id];
+  if(hasBili){
+    // 有B站源 → 优先B站（国内友好）
+    tryPlayBilibili(id);
+    // 设置5秒超时：如果B站未加载成功，自动切YouTube做备用
+    if(hasYT){
+      window._biliFailTimer = setTimeout(function(){
+        if(!window._biliLoaded){
+          console.log('⚠ B站未加载，自动切换到YouTube...');
+          tryPlayYouTube(id);
+        }
+      }, 5000);
+    }
+  } else if(hasYT){
+    // 只有YouTube源 → 直接播放YouTube
+    tryPlayYouTube(id);
+  } else {
+    // 两个源都没有 → 显示友好提示
+    const placeholder = document.getElementById('playerPlaceholder');
+    const iframe = document.getElementById('playerFrame');
+    if(placeholder){
+      placeholder.innerHTML = '<div style="text-align:center;padding:40px 20px;"><div style="font-size:48px;margin-bottom:12px;">🙏</div><div style="font-size:16px;color:rgba(255,255,255,0.8);margin-bottom:8px;">视频源准备中</div><div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px;">「'+title+'」</div><button onclick="reloadPlayer()" style="padding:10px 28px;border-radius:24px;background:linear-gradient(135deg,#C8973A,#A07828);color:#3D1F05;border:none;font-size:14px;font-weight:600;cursor:pointer;">🔄 重新加载</button></div>';
+      placeholder.style.display='flex';
+    }
+    if(iframe) iframe.style.display='none';
+  }
   document.getElementById('playerModal').classList.add('show');
   document.body.style.overflow='hidden';
 }
@@ -2510,28 +2540,25 @@ function tryPlayYouTube(id){
     currentPlayerSource = 'youtube';
     const toggle = document.getElementById('sourceToggle');
     if(toggle) toggle.textContent = '🌐 切换播放源(当前:海外YouTube)';
-    // ==== 修复：iframe.onerror不工作，使用超时检测 ====
-    // 设置5秒超时，如果YouTube未能加载则自动切换到B站
+    // 设置8秒超时检测
     if(window._ytTimer) clearTimeout(window._ytTimer);
     window._ytTimer = setTimeout(function(){
-      // 检查iframe是否真的加载了内容
-      try {
-        // 如果YouTube被墙，iframe会显示空白或错误页面
-        // 尝试通过B站备用方案播放
-        console.log('YouTube超时未加载，自动尝试B站...');
+      if(!window._ytLoaded){
+        console.log('YouTube超时未加载，尝试B站备用...');
         const bvid = BV_IDS[id];
-        if(bvid && !window._ytLoaded){
+        if(bvid && !window._biliLoaded){
           tryPlayBilibili(id);
         }
-      } catch(e){}
-    }, 5000);
+      }
+    }, 8000);
     iframe.onload = function(){
       console.log('YouTube播放器加载成功:', ytid);
       window._ytLoaded = true;
       if(window._ytTimer) clearTimeout(window._ytTimer);
+      if(window._biliFailTimer) clearTimeout(window._biliFailTimer);
     };
   } else {
-    // 没有YouTube映射，直接尝试B站
+    // 没有YouTube映射，尝试B站
     tryPlayBilibili(id);
   }
 }
@@ -2553,39 +2580,49 @@ function tryPlayBilibili(id){
     window._biliTimer = setTimeout(function(){
       if(!window._biliLoaded){
         console.log('B站加载超时，显示提示...');
-        placeholder.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.6);font-size:13px;">⏳ 视频加载较慢，请点击"重新加载"或切换播放源</div>';
+        placeholder.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.6);font-size:13px;">⏳ B站加载慢，正在尝试备用源...</div>';
+        placeholder.style.display='flex';
       }
     }, 8000);
     iframe.onload = function(){
       console.log('B站播放器加载成功:', bvid);
       window._biliLoaded = true;
       if(window._biliTimer) clearTimeout(window._biliTimer);
+      if(window._biliFailTimer) clearTimeout(window._biliFailTimer);
     };
-  } else {
-    // 两个源都没有该视频ID -> 显示友好提示
-    placeholder.innerHTML = '<div style="text-align:center;padding:30px 20px;"><div style="font-size:36px;margin-bottom:10px;">🙏</div><div style="font-size:14px;color:rgba(255,255,255,0.7);margin-bottom:6px;">视频源加载中</div><div style="font-size:12px;color:rgba(255,255,255,0.4);">「'+currentPlayerTitle+'」- '+currentPlayerAuthor+'</div><div style="margin-top:16px;"><button onclick="reloadPlayer()" style="padding:8px 24px;border-radius:20px;background:linear-gradient(135deg,#C8973A,#A07828);color:#3D1F05;border:none;font-size:13px;font-weight:600;cursor:pointer;">🔄 重新加载</button></div></div>';
-    iframe.style.display='none';
-    placeholder.style.display='flex';
   }
+  // 没有bvid → 不做任何事（openPlayer会处理YouTube回退）
 }
 
 function togglePlayerSource(){
   if(!currentPlayerId) return;
   const toggle = document.getElementById('sourceToggle');
+  const hasBili = !!BV_IDS[currentPlayerId];
+  const hasYT = !!YT_IDS[currentPlayerId];
   if(currentPlayerSource === 'youtube' || currentPlayerSource === 'auto'){
     // 切换到B站
-    tryPlayBilibili(currentPlayerId);
-    if(toggle) toggle.textContent = '🌐 切换播放源(当前:国内B站)';
+    if(hasBili){
+      tryPlayBilibili(currentPlayerId);
+      if(toggle) toggle.textContent = '🌐 切换播放源(当前:国内B站)';
+    } else if(hasYT){
+      // B站没有但YouTube有，提示用户
+      if(toggle) toggle.textContent = '🌐 该视频暂无B站源(仅YouTube)';
+    }
   } else {
     // 切换到YouTube
-    tryPlayYouTube(currentPlayerId);
-    if(toggle) toggle.textContent = '🌐 切换播放源(当前:海外YouTube)';
+    if(hasYT){
+      tryPlayYouTube(currentPlayerId);
+      if(toggle) toggle.textContent = '🌐 切换播放源(当前:海外YouTube)';
+    } else if(hasBili){
+      // YouTube没有但B站有，提示用户
+      if(toggle) toggle.textContent = '🌐 该视频暂无YouTube源(仅B站)';
+    }
   }
 }
 
 function reloadPlayer(){
   if(!currentPlayerId) return;
-  // 重新加载当前播放器，不跳转外部链接
+  // 重新加载当前播放器
   const iframe = document.getElementById('playerFrame');
   const placeholder = document.getElementById('playerPlaceholder');
   // 重置加载状态
@@ -2593,10 +2630,31 @@ function reloadPlayer(){
   window._biliLoaded = false;
   if(window._ytTimer) clearTimeout(window._ytTimer);
   if(window._biliTimer) clearTimeout(window._biliTimer);
+  if(window._biliFailTimer) clearTimeout(window._biliFailTimer);
   if(iframe) iframe.src = '';
   if(placeholder) placeholder.style.display='flex';
-  // 重新尝试播放
-  tryPlayYouTube(currentPlayerId);
+  // 智能选择源：B站优先（国内友好），YouTube做备用
+  const hasBili = !!BV_IDS[currentPlayerId];
+  const hasYT = !!YT_IDS[currentPlayerId];
+  if(hasBili){
+    tryPlayBilibili(currentPlayerId);
+    // 如果B站5秒没加载成功，自动尝试YouTube
+    if(hasYT){
+      window._biliFailTimer = setTimeout(function(){
+        if(!window._biliLoaded){
+          console.log('reload: B站未加载，切换到YouTube');
+          tryPlayYouTube(currentPlayerId);
+        }
+      }, 5000);
+    }
+  } else if(hasYT){
+    tryPlayYouTube(currentPlayerId);
+  } else {
+    if(placeholder){
+      placeholder.innerHTML = '<div style="text-align:center;padding:40px 20px;"><div style="font-size:48px;margin-bottom:12px;">🙏</div><div style="font-size:16px;color:rgba(255,255,255,0.7);">视频源暂时不可用</div></div>';
+      placeholder.style.display='flex';
+    }
+  }
 }
 
 // ===== 关闭播放器 =====
@@ -2607,8 +2665,10 @@ function closePlayer(e){
   // 清除所有定时器，防止关闭后仍然触发源切换
   if(window._ytTimer) clearTimeout(window._ytTimer);
   if(window._biliTimer) clearTimeout(window._biliTimer);
+  if(window._biliFailTimer) clearTimeout(window._biliFailTimer);
   window._ytTimer = null;
   window._biliTimer = null;
+  window._biliFailTimer = null;
   window._ytLoaded = false;
   window._biliLoaded = false;
   if(iframe){
