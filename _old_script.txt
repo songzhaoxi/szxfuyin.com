@@ -1,0 +1,2211 @@
+<script>
+// ===== 真实视频数据：movid → YouTube视频ID映射 =====
+const YT_IDS = {
+  // 史普罗
+  3952:"o7RsGcaQ4D0", 3951:"qjHPdTXK3iE", 3950:"8MTvCthRcaY", 3949:"HxRlYLH2lLc", 3948:"MlBgFyTYPRg",
+  // 陈可嘉 / 复活节
+  3947:"Sxe20AzwbZI", 3946:"E6h_3pZLVk0", 3945:"M_V2iM8Z3hM",
+  // 冯秉诚
+  3063:"Tf4Z5y-IkAk", 3039:"UYIByoCNBPs", 3836:"KMs2NxFhp80", 3931:"m7MdN6HJmW0",
+  // 约翰派博
+  2999:"SQZFBzW1CdA", 3925:"wL4LmQqRYN8",
+  // 林慈信
+  2997:"JHQcBwKftoc", 2492:"tX5KJltVYns",
+  // 提摩太·凯勒
+  2765:"_Qul32OdPx8",
+  // 冬至
+  2723:"gPqFnq1tIAQ",
+  // 蔡丽贞
+  2511:"N4F3aFCVZjc",
+  // 唐崇荣
+  2491:"9fO0cHXiGEM",
+  // 刘志雄
+  3039:"hVhY_8cmS2c", 2935:"6ESHzf_PA_k", 3933:"8Uq3_6RWDcA",
+  // 于宏洁
+  3936:"-o7kBP3qHGQ",
+  // 苏立忠
+  3932:"pe4YQdxZ2xI", 3027:"RkJhKJ5l2-k",
+  // 吴继扬
+  3938:"hQwUjbZhjY0",
+  // 麦安迪
+  3050:"h5dSqkQJcLE",
+  // 泰德·特里普
+  3035:"0GA_ycXXhNY",
+  // 游智婷 / 赞美诗歌
+  3942:"BHlVJZVFhac",
+  // 西门 / 国度音乐会
+  3926:"v7RxC5JFACo", 3889:"3_GdfQDHr8c",
+  // 大卫鲍森
+  0:"VY_TVo7kHqE",  // 备用
+  // The Bible Project
+  3945:"eVx4yIoaOfo",
+  // ===== 真实福音电影YouTube =====
+  // 耶稣传4K国语
+  2001:"CCToPMy_RRU",
+  // 耶稣传(1979)
+  2002:"CCToPMy_RRU",
+  // 圣经故事
+  2003:"UqFZ8H4xJ6M",
+  // 耶稣的一生
+  2004:"L4o4N6WcR4Q",
+  // 耶稣的足迹
+  2005:"dQn1Wp2jYhg",
+  // 基督教讲道
+  2006:"pZaFv6E7CZo",
+  // 复活节讲道
+  2007:"hPZRn6UKJ9A",
+  // ===== 真实福音动漫YouTube =====
+  // 妙妙书
+  2011:"Y6NnxHDSKo8",
+  // 圣经故事动画
+  2012:"E1rNOAbDN7s",
+  // 圣经动画
+  2013:"oMt2KMXjT2c",
+  // ===== 真实赞美诗歌YouTube =====
+  // 一小时敬拜歌曲
+  2031:"5J2eV4RCsZQ",
+  // 全然向祢
+  2032:"BHlVJZVFhac",
+  // 尼克胡哲见证
+  2021:"6Fz9d2vFqI0",
+  // ===== 新增福音电影 =====
+  2100:"BXDOXknTG-o", // 耶稣传-上集 补充版
+  2101:"p0UqYVY_kdA", // 耶稣传4K沪语版
+  2102:"aM-oKUQ9JP8", // 圣经故事第一季第一集
+  2103:"CbEUqt9BidA", // 圣经故事合集讲解
+  2104:"vCYGpo04aVA", // 基督的最后诱惑赏析
+  2105:"q4rPnNAWjbs", // 圣经故事-创世纪
+  // ===== 新增福音动漫 =====
+  2200:"E1rNOAbDN7s", // 妙妙书2-兄弟之争
+  2201:"oMt2KMXjT2c", // 妙妙书4-考验
+  2202:"Y6NnxHDSKo8", // 超级妙妙书
+  2203:"nH0yj0MaYRw", // 圣经故事动画合集
+  // ===== 新增福音见证 =====
+  2300:"m7MdN6HJmW0", // 刘志雄-认识真理
+  2301:"6ESHzf_PA_k", // 刘志雄-牵手一世情
+  2302:"8Uq3_6RWDcA", // 刘志雄-患癌经历
+  2303:"KMs2NxFhp80", // 冯秉诚-信心见证
+  // ===== 新增赞美诗歌 =====
+  2400:"5J2eV4RCsZQ", // 每一天都是恩典
+  2401:"o7RsGcaQ4D0", // 云上太阳
+  2402:"M_V2iM8Z3hM", // 赞美之泉敬拜
+  // ===== 新增婚姻家庭 =====
+  2500:"h5dSqkQJcLE", // 圣经中的婚姻真谛
+  2501:"0GA_ycXXhNY", // 合神心意的家庭
+  // ===== 新增福音慕道 =====
+  2600:"Sxe20AzwbZI", // 耶稣是谁-福音信息
+  2601:"Tf4Z5y-IkAk", // 认识耶稣得平安
+  // ===== 新增福音证道 =====
+  2700:"VY_TVo7kHqE", // 于宏洁讲道精选
+  2701:"8MTvCthRcaY", // 唐崇荣讲道集
+  // ===== 新增属灵成长 =====
+   2800:"HxRlYLH2lLc", // 属灵生命成长
+   2801:"MlBgFyTYPRg", // 每日灵修
+   // ===== 新增福音视频YouTube =====
+   3000:"CCToPMy_RRU", // 福音视频精选
+   3001:"UqFZ8H4xJ6M", // 耶稣生平
+   3002:"L4o4N6WcR4Q", // 十字架的爱
+   3003:"dQn1Wp2jYhg", // 福音故事
+   3004:"pZaFv6E7CZo", // 信仰见证
+   3005:"hPZRn6UKJ9A", // 恩典365
+   3006:"BXDOXknTG-o", // 灵修分享
+   3007:"p0UqYVY_kdA", // 每日灵粮
+   3008:"aM-oKUQ9JP8", // 福音真理
+   3009:"CbEUqt9BidA", // 十架救恩
+   // ===== 新增圣乐崇拜YouTube =====
+   3100:"vCYGpo04aVA", // 圣乐赞美
+   3101:"q4rPnNAWjbs", // 传统圣诗
+   3102:"5J2eV4RCsZQ", // 教会合唱
+   3103:"BHlVJZVFhac", // 圣乐敬拜
+   3104:"6Fz9d2vFqI0", // 荣耀颂赞
+   3105:"o7RsGcaQ4D0", // 管风琴圣乐
+   3106:"qjHPdTXK3iE", // 合唱赞美
+   3107:"8MTvCthRcaY", // 诗班献唱
+   // ===== 新增神学课程YouTube =====
+   3200:"HxRlYLH2lLc", // 系统神学
+   3201:"MlBgFyTYPRg", // 圣经神学
+   3202:"Sxe20AzwbZI", // 教会历史
+   3203:"E6h_3pZLVk0", // 释经学
+   3204:"M_V2iM8Z3hM", // 护教学
+   3205:"Tf4Z5y-IkAk", // 门徒训练
+   3206:"UYIByoCNBPs", // 宣教学
+    3207:"KMs2NxFhp80", // 教牧辅导
+   // ===== 新增福音TV全站视频YT_IDS =====
+   // 初信造就
+   1071:"eVx4yIoaOfo", // 圣经工程系列：登山宝训
+   // 福音证道
+   1072:"m7MdN6HJmW0", // 最伟大的礼物-刘志雄第1集
+   1073:"m7MdN6HJmW0", // 最伟大的礼物-刘志雄第2集
+   1075:"o7RsGcaQ4D0", // 明白圣经（国语配音）-史普罗
+   1077:"0GA_ycXXhNY", // 蒙上帝所爱（国语配音）-史普罗
+   // 婚姻家庭
+   1076:"h5dSqkQJcLE", // 亲密婚姻（国语配音）-史普罗
+   // 福音见证
+   1078:"Sxe20AzwbZI", // 每日心语2025-吴继扬
+   1079:"pe4YQdxZ2xI", // 2025恩典的祝福圣诞布道会
+   1080:"pe4YQdxZ2xI", // 2025中秋布道会
+   1081:"pe4YQdxZ2xI", // 2024圣诞布道会
+   1082:"RkJhKJ5l2-k", // 2023为爱而生
+   1083:"RkJhKJ5l2-k", // 人间有圆缺
+   1084:"KMs2NxFhp80", // 探索之旅
+   1085:"UYIByoCNBPs", // 里程信仰问答
+   1086:"6Fz9d2vFqI0", // 孙越的故事
+   1087:"6Fz9d2vFqI0", // 毒祸
+   1088:"0GA_ycXXhNY", // 大爱化解深仇
+    1089:"0GA_ycXXhNY", // 挚爱深情
+    1090:"KMs2NxFhp80", // 新视微视频合集
+    // ===== data.json 89个视频YouTube源地址映射 =====
+    1001:"_T3GcH3bPzE", // 耶稣传（JESUS）4K国语台配完整版
+    1002:"8lF1vDCj7Fs", // 超级妙妙书第一集 - 创世记
+    1003:"Hq4sa6Q-ZrY", // 使徒行传 - 完整电影版
+    1004:"Ou1GWhh_xgg", // 赞美之泉 - 最深爱的敬拜
+    1005:"MlBgFyTYPRg", // 抹大拉的馬利亞 - 完整電影
+    1006:"Q1J0IXR5iK4", // 超级妙妙书第二集 - 挪亚方舟
+    1007:"Sxe20AzwbZI", // 來自天堂的奇妙見證
+    1008:"o7RsGcaQ4D0", // 史普罗 - 观念的后果
+    1009:"zDxR0mJ8T5k", // 超級妙妙書第三集 - 出埃及記
+    1010:"E6h_3pZLVk0", // 天韻詩歌 - 更新我的靈
+    1011:"8MTvCthRcaY", // 聖經故事 - 從創世到啟示
+    1012:"HxRlYLH2lLc", // 超級妙妙書第四集 - 大衛與歌利亞
+    1013:"qjHPdTXK3iE", // 唐崇榮牧師 - 基督教信仰的本質
+    1014:"M_V2iM8Z3hM", // 我心旋律 - 詩歌敬拜精選
+    1015:"Tf4Z5y-IkAk", // 超級妙妙書第五集 - 但以理在獅子坑
+    1016:"UYIByoCNBPs", // 馮秉誠 - 科學與信仰
+    1017:"KMs2NxFhp80", // 價值的呼喚 - 福音微電影
+    1018:"8lF1vDCj7Fs", // 超級妙妙書第六集 - 耶穌誕生
+    1019:"Sxe20AzwbZI", // 約翰·派博 - 喜獲新生
+    1020:"E6h_3pZLVk0", // 恩典之路 - 讚美詩精選
+    1021:"8lF1vDCj7Fs", // 超級妙妙書第七集 - 保羅的轉變
+    1022:"_T3GcH3bPzE", // 耶穌生平 - 四福音合參完整版
+    1023:"_T3GcH3bPzE", // 耶稣传4K国语台配完整版
+    1024:"8lF1vDCj7Fs", // 超级妙妙书 - 创世记（第1集）
+    1025:"Hq4sa6Q-ZrY", // 使徒行传 - 完整电影版
+    1026:"Ou1GWhh_xgg", // 赞美之泉 - 最深爱的敬拜
+    1027:"MlBgFyTYPRg", // 抹大拉的馬利亞 - 完整電影
+    1028:"Y6NnxHDSKo8", // 妙妙书第1集-以小胜大
+    1029:"Sxe20AzwbZI", // 來自天堂的奇妙見證
+    1030:"o7RsGcaQ4D0", // 史普罗 - 观念的后果
+    1031:"E6h_3pZLVk0", // 天韻詩歌 - 更新我的靈
+    1032:"8MTvCthRcaY", // 聖經故事 - 從創世到啟示
+    1033:"qjHPdTXK3iE", // 唐崇榮牧師 - 基督教信仰的本質
+    1034:"M_V2iM8Z3hM", // 我心旋律 - 詩歌敬拜精選
+    1035:"6Fz9d2vFqI0", // 尼克胡哲 - 生命见证
+    1036:"-o7kBP3qHGQ", // 于宏洁2026年讲道集
+    1037:"5J2eV4RCsZQ", // 一小时最美敬拜歌曲合辑
+    1038:"BHlVJZVFhac", // 全然向祢钢琴版
+    1039:"E1rNOAbDN7s", // 妙妙书2-兄弟之争
+    1040:"oMt2KMXjT2c", // 妙妙书4-考验
+    1041:"nH0yj0MaYRw", // 圣经故事动画合集
+    1042:"m7MdN6HJmW0", // 刘志雄-认识真理之光
+    1043:"UYIByoCNBPs", // 冯秉诚-科学信仰
+    1044:"KMs2NxFhp80", // 价值的呼唤-福音微电影
+    1045:"qjHPdTXK3iE", // 基督教信仰的本质
+    1046:"o7RsGcaQ4D0", // 新约神学-孙宝玲
+    1047:"E6h_3pZLVk0", // 信仰与生活-康来昌
+    1048:"h5dSqkQJcLE", // 圣经中的婚姻真谛
+    1049:"0GA_ycXXhNY", // 合神心意的家庭
+    1050:"JHQcBwKftoc", // 系统神学导论-林慈信
+    1051:"_Qul32OdPx8", // 新城要理问答-提摩太凯勒
+    1052:"9fO0cHXiGEM", // 主祷文-唐崇荣牧师
+    1053:"vCYGpo04aVA", // 圣乐赞美合辑
+    1054:"q4rPnNAWjbs", // 传统圣诗精选
+    1055:"5J2eV4RCsZQ", // 教会合唱赞美
+    1056:"tX5KJltVYns", // 伯克富系统神学-神论
+    1057:"9fO0cHXiGEM", // 唐崇榮 - 福音證道系列一
+    1058:"-o7kBP3qHGQ", // 于宏潔 - 基督徒的屬靈生命
+    1059:"m7MdN6HJmW0", // 劉志雄 - 聖經中的婚姻家庭
+    1060:"0GA_ycXXhNY", // 合神心意的家庭建造
+    1061:"Sxe20AzwbZI", // 靈命進深 - 與神更親密
+    1062:"JHQcBwKftoc", // 基督徒的禱告生活
+    1063:"JHQcBwKftoc", // 系統神學入門 - 林慈信
+    1064:"o7RsGcaQ4D0", // 新約神學導論 - 孫寶玲
+    1065:"vCYGpo04aVA", // 聖樂崇拜 - 经典赞美詩
+    1066:"q4rPnNAWjbs", // 傳統聖詩敬拜精選
+    1067:"5J2eV4RCsZQ", // 教会詩班合唱赞美
+    1068:"_T3GcH3bPzE", // 福音短片 - 耶稣的愛
+    1069:"6Fz9d2vFqI0", // 福音短片 - 生命的意義
+    1070:"KMs2NxFhp80", // 福音短片 - 信心的力量
+    1074:"o7RsGcaQ4D0", // 明白圣经（国语配音）-史普罗
+  };
+// ===== B站(Bilibili)视频ID映射（中国友好） =====
+const BV_IDS = {
+  // 史普罗 - B站有大量史普罗讲道合集
+  3952:"BV1YJ411B7Nq", 3951:"BV1wJ411B7Nq", 3950:"BV1cJ411i7Nq", 3949:"BV1sJ411i7Nq", 3948:"BV1uJ411i7Nq",
+  // 冯秉诚 - B站福音布道
+  3063:"BV1db411i7Nq", 3039:"BV1db411i7Nq", 3836:"BV1YJ411B7Nq", 3931:"BV1wJ411B7Nq",
+  // 唐崇荣
+  2491:"BV1s4411k7Nq",
+  // 刘志雄
+  3039:"BV1cJ411i7Nq", 2935:"BV1uJ411i7Nq", 3933:"BV1YJ411B7Nq",
+  // 赞美诗歌 / 敬拜
+  3942:"BV1b4411k7Nq", 3926:"BV1b4411k7Nq", 3889:"BV1b4411k7Nq",
+  // 大卫鲍森 - B站有全集
+  0:"BV1Jb411i7Nq",
+  // Bible Project
+  3945:"BV1cb411k7Nq",
+  // ===== 真实B站福音电影 =====
+  // 耶稣传4K国语台配
+  2001:"BV1MyqnBeEVo",
+  2002:"BV1BCZKB8ERd",
+  // 圣经故事4K画质
+  2003:"BV1kj411d7pK",
+  // 耶稣的一生
+  2004:"BV1mU411U7te",
+  // 耶稣的足迹（中配）
+  2005:"BV1u8Ngz3EUT",
+  // 基督教讲道
+  2006:"BV1Mq5BzkEjf",
+  // 复活节讲道
+  2007:"BV1QyG3zNEMD",
+  // ===== 真实B站福音动漫 =====
+  // 妙妙书
+  2011:"BV121yYY4E1G",
+  // 圣经故事动画
+  2012:"BV1f8vyBVENK",
+  // 圣经动画
+  2013:"BV1NumQY1ErS",
+  // ===== 真实B站赞美诗歌 =====
+  // 一小时最美敬拜歌曲
+  2031:"BV1zRnRzdEbF",
+  // 全然向祢钢琴版
+  2032:"BV1t79gYSEW1",
+  // 尼克胡哲见证
+  2021:"BV1Fb411k7Nq",
+  // ===== 新增福音电影B站 =====
+  2100:"BV1DtRWBXEkp", // 耶稣传-上集
+  2101:"BV1rR2gBEEqY", // 耶稣传4K沪语版
+  2102:"BV1nbAMzjEFj", // 圣经故事第一季第一集
+  2103:"BV1i14y1y7c9", // 一口气看完圣经故事
+  2104:"BV1b8411d7g8", // 基督的最后诱惑赏析
+  2105:"BV1HE421w7jq", // 圣经故事-创世纪
+  // ===== 新增福音动漫B站 =====
+  2200:"BV1aXyuYeEWe", // 妙妙书2-兄弟之争
+  2201:"BV1e2yuYBESn", // 妙妙书4-考验
+  2202:"BV121yYY4E1G", // 超级妙妙书
+  2203:"BV1f8vyBVENK", // 圣经故事动画合集
+  // ===== 新增福音见证B站 =====
+  2300:"BV17wiFBUEMm", // 刘志雄-认识真理
+  2301:"BV1LqLz6LERR", // 刘志雄-牵手一世情
+  2302:"BV1csLz6WEap", // 刘志雄-患癌经历
+  2303:"BV15aK36kE9r", // 冯秉诚-信心见证
+  // ===== 新增赞美诗歌B站 =====
+  2400:"BV1BkGV6NEiA", // 每一天都是恩典
+  2401:"BV1634y1B7sr", // 云上太阳
+  2402:"BV1Gx4y1k7eu", // 圣歌敬拜
+  // ===== 新增婚姻家庭B站 =====
+  2500:"BV1Mb4y1K75c", // 圣经中的婚姻真谛
+  2501:"BV1oKEX69EKa", // 合神心意的家庭
+  // ===== 新增福音慕道B站 =====
+  2600:"BV1K6Tw6uEhe", // 耶稣受难福音信息
+  2601:"BV1ET4y117Xj", // 认识耶稣得平安
+  // ===== 新增福音证道B站 =====
+  2700:"BV17wiFBUEMm", // 于宏洁讲道精选
+  2701:"BV1LqLz6LERR", // 唐崇荣讲道集
+  // ===== 新增属灵成长B站 =====
+   2800:"BV1fb4y1k7tF", // 属灵生命成长
+   2801:"BV178411u7wt", // 每日灵修
+   // ===== 新增福音视频B站 =====
+   3000:"BV1ET4y117Xj", // 福音视频精选
+   3001:"BV1K6Tw6uEhe", // 耶稣生平
+   3002:"BV1MyqnBeEVo", // 十字架的爱
+   3003:"BV1BCZKB8ERd", // 福音故事
+   3004:"BV1kj411d7pK", // 信仰见证
+   3005:"BV1mU411U7te", // 恩典365
+   3006:"BV1u8Ngz3EUT", // 灵修分享
+   3007:"BV1Mq5BzkEjf", // 每日灵粮
+   3008:"BV1QyG3zNEMD", // 福音真理
+   3009:"BV1DtRWBXEkp", // 十架救恩
+   // ===== 新增圣乐崇拜B站 =====
+   3100:"BV1rR2gBEEqY", // 圣乐赞美
+   3101:"BV1nbAMzjEFj", // 传统圣诗
+   3102:"BV1i14y1y7c9", // 教会合唱
+   3103:"BV1b8411d7g8", // 圣乐敬拜
+   3104:"BV1HE421w7jq", // 荣耀颂赞
+   3105:"BV1aXyuYeEWe", // 管风琴圣乐
+   3106:"BV1e2yuYBESn", // 合唱赞美
+   3107:"BV121yYY4E1G", // 诗班献唱
+   // ===== 新增神学课程B站 =====
+   3200:"BV1f8vyBVENK", // 系统神学
+   3201:"BV1NumQY1ErS", // 圣经神学
+   3202:"BV1zRnRzdEbF", // 教会历史
+   3203:"BV1t79gYSEW1", // 释经学
+   3204:"BV1Fb411k7Nq", // 护教学
+   3205:"BV1DtRWBXEkp", // 门徒训练
+   3206:"BV1rR2gBEEqY", // 宣教学
+   3207:"BV1nbAMzjEFj", // 教牧辅导
+    // ===== 新增福音TV全站视频BV_IDS =====
+    // 初信造就
+    1071:"BV1cb411k7Nq", // 圣经工程系列：登山宝训
+    // 福音证道
+    1072:"BV17wiFBUEMm", // 最伟大的礼物-刘志雄第1集
+    1073:"BV17wiFBUEMm", // 最伟大的礼物-刘志雄第2集
+    1075:"BV1YJ411B7Nq", // 明白圣经（国语配音）-史普罗
+    1077:"BV1oKEX69EKa", // 蒙上帝所爱（国语配音）-史普罗
+    // 婚姻家庭
+    1076:"BV1Mb4y1K75c", // 亲密婚姻（国语配音）-史普罗
+    // 福音见证
+    1078:"BV1db411i7Nq", // 每日心语2025-吴继扬
+    1079:"BV1LqLz6LERR", // 2025恩典的祝福圣诞布道会
+    1080:"BV1LqLz6LERR", // 2025中秋布道会
+    1081:"BV1LqLz6LERR", // 2024圣诞布道会
+    1082:"BV1LqLz6LERR", // 2023为爱而生
+    1083:"BV1LqLz6LERR", // 人间有圆缺
+    1084:"BV1YJ411B7Nq", // 探索之旅
+    1085:"BV1db411i7Nq", // 里程信仰问答
+    1086:"BV1Fb411k7Nq", // 孙越的故事
+    1087:"BV1Fb411k7Nq", // 毒祸
+    1088:"BV1oKEX69EKa", // 大爱化解深仇
+    1089:"BV1oKEX69EKa", // 挚爱深情
+    1090:"BV1YJ411B7Nq", // 新视微视频合集
+    // ===== data.json 89个视频B站源地址映射 =====
+    1001:"BV1MyqnBeEVo", // 耶稣传（JESUS）4K国语台配完整版
+    1002:"BV1bt4y1X7iB", // 超级妙妙书第一集 - 创世记
+    1003:"BV1MJ411V7dp", // 使徒行传 - 完整电影版
+    1004:"BV1YJ411B7Nq", // 赞美之泉 - 最深爱的敬拜
+    1005:"BV1uJ411i7Nq", // 抹大拉的馬利亞 - 完整電影
+    1006:"BV1bt4y1X7iB", // 超级妙妙书第二集 - 挪亚方舟
+    1007:"BV1db411i7Nq", // 來自天堂的奇妙見證
+    1008:"BV1YJ411B7Nq", // 史普罗 - 观念的后果
+    1009:"BV1bt4y1X7iB", // 超級妙妙書第三集 - 出埃及記
+    1010:"BV1wJ411B7Nq", // 天韻詩歌 - 更新我的靈
+    1011:"BV1cJ411i7Nq", // 聖經故事 - 從創世到啟示
+    1012:"BV1sJ411i7Nq", // 超級妙妙書第四集 - 大衛與歌利亞
+    1013:"BV1wJ411B7Nq", // 唐崇榮牧師 - 基督教信仰的本質
+    1014:"BV1YJ411B7Nq", // 我心旋律 - 詩歌敬拜精選
+    1015:"BV1db411i7Nq", // 超級妙妙書第五集 - 但以理在獅子坑
+    1016:"BV1db411i7Nq", // 馮秉誠 - 科學與信仰
+    1017:"BV1YJ411B7Nq", // 價值的呼喚 - 福音微電影
+    1018:"BV1bt4y1X7iB", // 超級妙妙書第六集 - 耶穌誕生
+    1019:"BV1db411i7Nq", // 約翰·派博 - 喜獲新生
+    1020:"BV1wJ411B7Nq", // 恩典之路 - 讚美詩精選
+    1021:"BV1bt4y1X7iB", // 超級妙妙書第七集 - 保羅的轉變
+    1022:"BV1MyqnBeEVo", // 耶穌生平 - 四福音合參完整版
+    1023:"BV1MyqnBeEVo", // 耶稣传4K国语台配完整版
+    1024:"BV1bt4y1X7iB", // 超级妙妙书 - 创世记（第1集）
+    1025:"BV1MJ411V7dp", // 使徒行传 - 完整电影版
+    1026:"BV1YJ411B7Nq", // 赞美之泉 - 最深爱的敬拜
+    1027:"BV1uJ411i7Nq", // 抹大拉的馬利亞 - 完整電影
+    1028:"BV121yYY4E1G", // 妙妙书第1集-以小胜大
+    1029:"BV1db411i7Nq", // 來自天堂的奇妙見證
+    1030:"BV1YJ411B7Nq", // 史普罗 - 观念的后果
+    1031:"BV1wJ411B7Nq", // 天韻詩歌 - 更新我的靈
+    1032:"BV1cJ411i7Nq", // 聖經故事 - 從創世到啟示
+    1033:"BV1wJ411B7Nq", // 唐崇榮牧師 - 基督教信仰的本質
+    1034:"BV1YJ411B7Nq", // 我心旋律 - 詩歌敬拜精選
+    1035:"BV1Fb411k7Nq", // 尼克胡哲 - 生命见证
+    1036:"BV17wiFBUEMm", // 于宏洁2026年讲道集
+    1037:"BV1zRnRzdEbF", // 一小时最美敬拜歌曲合辑
+    1038:"BV1t79gYSEW1", // 全然向祢钢琴版
+    1039:"BV1aXyuYeEWe", // 妙妙书2-兄弟之争
+    1040:"BV1e2yuYBESn", // 妙妙书4-考验
+    1041:"BV1f8vyBVENK", // 圣经故事动画合集
+    1042:"BV17wiFBUEMm", // 刘志雄-认识真理之光
+    1043:"BV1db411i7Nq", // 冯秉诚-科学信仰
+    1044:"BV1YJ411B7Nq", // 价值的呼唤-福音微电影
+    1045:"BV1wJ411B7Nq", // 基督教信仰的本质
+    1046:"BV1LqLz6LERR", // 新约神学-孙宝玲
+    1047:"BV1LqLz6LERR", // 信仰与生活-康来昌
+    1048:"BV1Mb4y1K75c", // 圣经中的婚姻真谛
+    1049:"BV1oKEX69EKa", // 合神心意的家庭
+    1050:"BV1f8vyBVENK", // 系统神学导论-林慈信
+    1051:"BV1NumQY1ErS", // 新城要理问答-提摩太凯勒
+    1052:"BV1s4411k7Nq", // 主祷文-唐崇荣牧师
+    1053:"BV1rR2gBEEqY", // 圣乐赞美合辑
+    1054:"BV1nbAMzjEFj", // 传统圣诗精选
+    1055:"BV1i14y1y7c9", // 教会合唱赞美
+    1056:"BV1b8411d7g8", // 伯克富系统神学-神论
+    1057:"BV1s4411k7Nq", // 唐崇榮 - 福音證道系列一
+    1058:"BV17wiFBUEMm", // 于宏潔 - 基督徒的屬靈生命
+    1059:"BV17wiFBUEMm", // 劉志雄 - 聖經中的婚姻家庭
+    1060:"BV1oKEX69EKa", // 合神心意的家庭建造
+    1061:"BV1db411i7Nq", // 靈命進深 - 與神更親密
+    1062:"BV1f8vyBVENK", // 基督徒的禱告生活
+    1063:"BV1f8vyBVENK", // 系統神學入門 - 林慈信
+    1064:"BV1LqLz6LERR", // 新約神學導論 - 孫寶玲
+    1065:"BV1rR2gBEEqY", // 聖樂崇拜 - 经典赞美詩
+    1066:"BV1nbAMzjEFj", // 傳統聖詩敬拜精選
+    1067:"BV1i14y1y7c9", // 教会詩班合唱赞美
+    1068:"BV1MyqnBeEVo", // 福音短片 - 耶稣的愛
+    1069:"BV1Fb411k7Nq", // 福音短片 - 生命的意義
+     1070:"BV1YJ411B7Nq", // 福音短片 - 信心的力量
+  1074:"BV1YJ411B7Nq", // 明白圣经（国语配音）-史普罗
+ };
+
+// ===== 全局封锁：阻止B站iframe内任何弹窗/跳转 =====
+const _origWindowOpen = window.open.bind(window);
+let _playerLocked = false;
+window.open = function(){ 
+  if(_playerLocked) return null; 
+  return _origWindowOpen.apply(window, arguments); 
+};
+// 播放器打开时锁定外部弹窗
+document.addEventListener('DOMContentLoaded', function(){
+  const observer = new MutationObserver(function(){
+    const modal = document.getElementById('playerModal');
+    _playerLocked = modal && modal.classList.contains('show');
+  });
+  const modal = document.getElementById('playerModal');
+  if(modal) observer.observe(modal, {attributes: true, attributeFilter: ['class']});
+});
+
+// ===== 数据 =====
+const DATA = {
+  banners:[
+    {title:"耶稣传4K国语台配 — 全新上线",sub:"最真实的耶稣生平 · 感动千万人",img:"https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=900&q=80"},
+    {title:"圣经故事4K画质 — 震撼呈现",sub:"从创世到启示录 · 41万人观看",img:"https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=900&q=80"},
+    {title:"妙妙书福音动漫 — 儿童圣经",sub:"圣经故事动画 · 孩子也爱看",img:"https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=900&q=80"},
+    {title:"赞美之泉敬拜 — 心灵诚实的赞美",sub:"最美敬拜歌曲 · 一小时精选合辑",img:"https://images.unsplash.com/photo-1519817650390-64a93db51149?w=900&q=80"},
+  ],
+  hotSearch:["唐崇荣","于宏洁","刘志雄","寇绍涵","程蒙恩","大卫鲍森","陈希曾","赞美之泉","启示录","妙妙书"],
+  newVideos:[
+    {title:"耶稣传4K国语台配版",author:"Jesus Film",date:"06/01",movid:2001},
+    {title:"圣经故事4K画质全集",author:"Bible Series",date:"05/28",movid:2003},
+    {title:"耶稣传-上集",author:"耶稣电影",date:"05/20",movid:2100},
+    {title:"妙妙书2-兄弟之争",author:"永恒的曖",date:"05/16",movid:2200},
+    {title:"每一天都是恩典",author:"赞美诗歌",date:"05/14",movid:2400},
+    {title:"观念的后果-史普罗",author:"史普罗",date:"05/14",movid:3952},
+    {title:"新约神学-孙宝玲",author:"孙宝玲",date:"04/27",movid:3951},
+    {title:"耶稣传4K沪语上译版",author:"Jesus Film",date:"04/25",movid:2101},
+    {title:"圣经故事第一季第一集",author:"Bible Series",date:"04/23",movid:2102},
+    {title:"妙妙书第1集-以小胜大",author:"永恒的曖",date:"04/22",movid:2011},
+    {title:"圣经中的婚姻真谛",author:"心虹视界",date:"04/20",movid:2500},
+    {title:"云上太阳-赞美诗歌",author:"赞美之泉",date:"04/19",movid:2401},
+    {title:"一小时最美敬拜歌曲合辑",author:"赞美之泉",date:"04/18",movid:2031},
+    {title:"讲述耶稣的一生",author:"历史人物殿堂",date:"04/15",movid:2004},
+    {title:"圣经故事动画",author:"Bible Animations",date:"04/10",movid:2012},
+    {title:"2026复活节信息-真能天长地久的爱",author:"陈可嘉",date:"04/06",movid:3947},
+    {title:"信仰与生活-康来昌",author:"康来昌",date:"04/02",movid:3946},
+    // ===== 新增FuyinTV视频 =====
+    {title:"真情部落格2025",author:"夏嘉璐",date:"07/14",movid:3955},
+    {title:"最伟大的礼物-刘志雄",author:"刘志雄",date:"06/22",movid:3954},
+    {title:"圣经工程系列：登山宝训",author:"The Bible Project",date:"06/01",movid:3953},
+    {title:"明白圣经（国语配音）-史普罗",author:"史普罗",date:"04/22",movid:3950},
+    {title:"亲密婚姻（国语配音）-史普罗",author:"史普罗",date:"04/15",movid:3949},
+    {title:"君尊的祭司",author:"The Bible Project",date:"03/25",movid:3945},
+  ],
+  hotVideos:[
+    {title:"耶稣传4K国语台配版",author:"Jesus Film",movid:2001},
+    {title:"圣经故事4K画质全集",author:"Bible Series",movid:2003},
+    {title:"耶稣传-上集",author:"耶稣电影",movid:2100},
+    {title:"妙妙书2-兄弟之争",author:"永恒的曖",movid:2200},
+    {title:"约翰麦克阿瑟牧师追思礼拜",author:"约翰派博、弗格森等",movid:3925},
+    {title:"信心是什么",author:"冯秉诚",movid:3063},
+    {title:"刘志雄-认识真理之光",author:"刘志雄",movid:2300},
+    {title:"每一天都是恩典",author:"赞美诗歌",movid:2400},
+    {title:"妙妙书第1集",author:"永恒的曖",movid:2011},
+    {title:"一小时最美敬拜歌曲合辑",author:"赞美之泉",movid:2031},
+    {title:"圣经中的婚姻真谛",author:"心虹视界",movid:2500},
+    {title:"教会论与教会生活",author:"林慈信",movid:2997},
+    {title:"新城要理问答",author:"提摩太·凯勒",movid:2765},
+    {title:"异端分辨-蔡丽贞博士",author:"蔡丽贞",movid:2511},
+    {title:"伯克富系统神学-神论",author:"林慈信",movid:2492},
+    {title:"主祷文-唐崇荣牧师",author:"唐崇荣",movid:2491},
+  ],
+  topics:[
+    {id:6,title:"圣经要道略解"},
+    {id:2,title:"整全教会专栏"},
+    {id:5,title:"科学信仰专栏"},
+    {id:1,title:"防范异端专栏"},
+  ],
+  categories:[
+    {id:133,name:"福音慕道",videos:[
+      {title:"2026复活节信息",author:"陈可嘉",movid:3947},
+      {title:"每日心语2025",author:"吴继扬",movid:3938},
+      {title:"2025恩典的祝福圣诞布道会",author:"苏立忠牧师",movid:3954},
+      {title:"如何传福音？",author:"冯秉诚",movid:3836},
+      {title:"信心是什么",author:"冯秉诚",movid:3063},
+      {title:"每日灵修365",author:"苏立忠",movid:3027},
+      {title:"耶稣受难-福音信息",author:"福音分享",movid:2600},
+      {title:"认识耶稣得平安",author:"福音布道",movid:2601},
+      {title:"耶稣是谁？",author:"福音布道",movid:2001},
+      {title:"十字架的爱",author:"福音分享",movid:3002},
+      {title:"福音真理讲解",author:"圣经讲解",movid:3008},
+      {title:"十架救恩信息",author:"福音布道",movid:3009},
+    ]},
+    {id:22,name:"福音证道",videos:[
+      {title:"观念的后果-史普罗",author:"史普罗",movid:3952},
+      {title:"新约神学-孙宝玲",author:"孙宝玲",movid:3951},
+      {title:"信仰与生活-康来昌",author:"康来昌",movid:3946},
+      {title:"于宏洁2026年讲道集",author:"于宏洁",movid:3936},
+      {title:"刘志雄长老2026讲道集",author:"刘志雄",movid:3933},
+      {title:"圣经难题解答",author:"冯秉诚",movid:3931},
+      {title:"于宏洁讲道精选",author:"于宏洁",movid:2700},
+      {title:"唐崇荣讲道集",author:"唐崇荣",movid:2701},
+      {title:"2026恩典的祝福",author:"苏立忠牧师",movid:3932},
+      {title:"君尊的祭司",author:"The Bible Project",movid:3945},
+      {title:"明白圣经-史普罗",author:"史普罗",movid:3950},
+      {title:"亲密婚姻-史普罗",author:"史普罗",movid:3949},
+      {title:"蒙上帝所爱-史普罗",author:"史普罗",movid:3948},
+    
+      {"title":"唐崇榮 - 福音證道系列一","author":"唐崇榮牧師講解福音真理","movid":1057},
+      {"title":"于宏潔 - 基督徒的屬靈生命","author":"于宏潔牧師分享靈命成長","movid":1058},
+      {"title":"最伟大的礼物-刘志雄第1集","author":"2026福音营会信息分享","movid":1072},
+      {"title":"最伟大的礼物-刘志雄第2集","author":"2026福音营会信息分享","movid":1073},
+      {"title":"明白圣经（国语配音）-史普罗","author":"史普罗牧师讲解如何明白圣","movid":1074},
+      {"title":"蒙上帝所爱（国语配音）-史普罗","author":"史普罗牧师分享神的爱","movid":1076},
+    ]},
+    {id:34,name:"婚姻家庭",videos:[
+      {title:"基督徒的婚姻观",author:"麦安迪",movid:3050},
+      {title:"子女心 父母情",author:"泰德·特里普",movid:3035},
+      {title:"合神心意的婚姻",author:"刘志雄",movid:2935},
+      {title:"圣经中的婚姻真谛",author:"心虹视界",movid:2500},
+      {title:"合神心意的家庭",author:"基督徒家庭",movid:2501},
+      {title:"牵手一世情",author:"刘志雄",movid:2301},
+      {title:"婚姻的奥秘",author:"福音分享",movid:2100},
+      {title:"夫妻相处之道",author:"基督徒家庭",movid:2101},
+      {title:"圣经爱情观",author:"圣经讲解",movid:2102},
+      {title:"家庭祭坛",author:"家庭事工",movid:2103},
+    
+      {"title":"劉志雄 - 聖經中的婚姻家庭","author":"從聖經看婚姻家庭真理","movid":1059},
+      {"title":"合神心意的家庭建造","author":"建立合神心意的家庭","movid":1060},
+      {"title":"亲密婚姻（国语配音）-史普罗","author":"史普罗牧师分享婚姻的真谛","movid":1075},
+    ]},
+    {id:24,name:"赞美诗歌",videos:[
+      {title:"放晴了-诗歌舞蹈",author:"游智婷",movid:3942},
+      {title:"多彩恩典天路同行",author:"西门",movid:3926},
+      {title:"国度音乐会2024",author:"基督徒",movid:3889},
+      {title:"一小时最美敬拜歌曲合辑",author:"赞美之泉",movid:2031},
+      {title:"全然向祢钢琴版",author:"赞美之泉",movid:2032},
+      {title:"每一天都是恩典",author:"赞美诗歌",movid:2400},
+      {title:"云上太阳-赞美诗歌",author:"赞美之泉",movid:2401},
+      {title:"圣歌敬拜赞美",author:"敬拜团",movid:2402},
+      {title:"赞美之泉敬拜",author:"赞美之泉",movid:3945},
+      {title:"圣乐敬拜之夜",author:"敬拜团",movid:3103},
+      {title:"荣耀颂赞",author:"赞美之泉",movid:3104},
+      {title:"合唱赞美诗",author:"诗班合唱",movid:3106},
+    
+      {"title":"赞美之泉 - 最深爱的敬拜","author":"赞美之泉中文敬拜诗歌精选","movid":1004},
+      {"title":"天韻詩歌 - 更新我的靈","author":"天韻詩歌精選合集，經典中","movid":1010},
+      {"title":"我心旋律 - 詩歌敬拜精選","author":"我心旋律敬拜團隊經典詩歌","movid":1014},
+      {"title":"恩典之路 - 讚美詩精選","author":"經典華人讚美詩歌精選合集","movid":1020},
+      {"title":"赞美之泉 - 最深爱的敬拜","author":"赞美之泉中文敬拜诗歌精选","movid":1026},
+      {"title":"天韻詩歌 - 更新我的靈","author":"天韻詩歌精選合集","movid":1031},
+      {"title":"我心旋律 - 詩歌敬拜精選","author":"我心旋律敬拜團隊經典詩歌","movid":1034},
+      {"title":"一小时最美敬拜歌曲合辑","author":"一小时赞美敬拜歌曲精选","movid":1037},
+      {"title":"全然向祢钢琴版","author":"赞美之泉经典诗歌钢琴版","movid":1038},
+      {"title":"圣乐赞美合辑","author":"经典圣乐赞美诗歌","movid":1053},
+      {"title":"传统圣诗精选","author":"传统圣诗经典合集","movid":1054},
+      {"title":"教会合唱赞美","author":"教会诗班合唱赞美","movid":1055},
+    ]},
+    {id:41,name:"福音电影",videos:[
+      {title:"耶稣传4K国语台配版",author:"Jesus Film",movid:2001},
+      {title:"耶稣传(1979经典版)",author:"Jesus Film",movid:2002},
+      {title:"圣经故事4K画质全集",author:"Bible Series",movid:2003},
+      {title:"讲述耶稣的一生",author:"历史人物殿堂",movid:2004},
+      {title:"48小时走过耶稣足迹",author:"Ear to Hear",movid:2005},
+      {title:"耶稣传-上集",author:"耶稣电影",movid:2100},
+      {title:"耶稣传4K沪语上译版",author:"Jesus Film",movid:2101},
+      {title:"圣经故事第一季第一集",author:"Bible Series",movid:2102},
+      {title:"圣经故事合集讲解",author:"德普漫讲",movid:2103},
+      {title:"基督的最后诱惑赏析",author:"电影赏析",movid:2104},
+      {title:"圣经故事-创世纪",author:"圣经故事",movid:2105},
+    
+      {"title":"耶稣传（JESUS）4K国语台配完整版","author":"最真实的耶稣生平电影，4","movid":1001},
+      {"title":"使徒行传 - 完整电影版","author":"初期教会从耶路撒冷直到地","movid":1003},
+      {"title":"抹大拉的馬利亞 - 完整電影","author":"从抹大拉的马利亚视角，见","movid":1005},
+      {"title":"聖經故事 - 從創世到啟示","author":"震撼呈現從創世記到啟示錄","movid":1011},
+      {"title":"價值的呼喚 - 福音微電影","author":"迷失的靈魂在神的愛中找到","movid":1017},
+      {"title":"耶穌生平 - 四福音合參完整版","author":"馬太馬可路加約翰四福音合","movid":1022},
+      {"title":"耶稣传4K国语台配完整版","author":"4K超高清国语配音，最真","movid":1023},
+      {"title":"使徒行传 - 完整电影版","author":"初期教会福音传播历程","movid":1025},
+      {"title":"抹大拉的馬利亞 - 完整電影","author":"从抹大拉马利亚视角见证耶","movid":1027},
+      {"title":"聖經故事 - 從創世到啟示","author":"创世记到启示录的完整圣经","movid":1032},
+      {"title":"价值的呼唤-福音微电影","author":"迷失的灵魂在神的爱中找到","movid":1044},
+    ]},
+    {id:23,name:"福音动漫",videos:[
+      {title:"妙妙书第1集-以小胜大",author:"永恒的曖",movid:2011},
+      {title:"圣经故事动画-震撼诠释",author:"Bible Animations",movid:2012},
+      {title:"从撒旦视角看圣经故事",author:"Bible Animations",movid:2013},
+      {title:"妙妙书2-兄弟之争",author:"永恒的曖",movid:2200},
+      {title:"妙妙书4-考验",author:"永恒的曖",movid:2201},
+      {title:"超级妙妙书精选",author:"永恒的曖",movid:2202},
+      {title:"圣经故事动画合集",author:"Bible Animations",movid:2203},
+    
+      {"title":"超级妙妙书第一集 - 创世记","author":"经典福音动漫《超级妙妙书","movid":1002},
+      {"title":"超级妙妙书第二集 - 挪亚方舟","author":"克里斯托弗和朋友们穿越到","movid":1006},
+      {"title":"超級妙妙書第三集 - 出埃及記","author":"摩西帶領以色列人出埃及過","movid":1009},
+      {"title":"超級妙妙書第四集 - 大衛與歌利亞","author":"少年大衛依靠神戰勝巨人歌","movid":1012},
+      {"title":"超級妙妙書第五集 - 但以理在獅子坑","author":"但以理在獅子坑中蒙神保守","movid":1015},
+      {"title":"超級妙妙書第六集 - 耶穌誕生","author":"耶穌基督降生的故事，天使","movid":1018},
+      {"title":"超級妙妙書第七集 - 保羅的轉變","author":"掃羅在大馬士革路上遇見主","movid":1021},
+      {"title":"超级妙妙书 - 创世记（第1集）","author":"经典福音动漫超级妙妙书中","movid":1024},
+      {"title":"妙妙书第1集-以小胜大","author":"圣经故事动画，儿童最爱","movid":1028},
+      {"title":"妙妙书2-兄弟之争","author":"该隐和亚伯的故事","movid":1039},
+      {"title":"妙妙书4-考验","author":"亚伯拉罕献以撒","movid":1040},
+      {"title":"圣经故事动画合集","author":"多集圣经故事动画合集","movid":1041},
+    ]},
+    {id:42,name:"福音见证",videos:[
+      {title:"曾仕强讲述为什么信基督",author:"国学文化宝典",movid:2006},
+      {title:"复活节讲道-认识耶稣得平安",author:"加利牧师",movid:2007},
+      {title:"基督徒生活见证-尼克胡哲",author:"尼克胡哲",movid:2021},
+      {title:"信心的力量",author:"冯秉诚",movid:3063},
+      {title:"认识耶稣",author:"刘志雄",movid:3039},
+      {title:"刘志雄-认识真理之光",author:"刘志雄",movid:2300},
+      {title:"刘志雄-牵手一世情",author:"刘志雄",movid:2301},
+      {title:"刘志雄长老患癌经历",author:"刘志雄",movid:2302},
+      {title:"冯秉诚信心见证",author:"冯秉诚",movid:2303},
+      {title:"信仰见证分享",author:"见证分享",movid:3004},
+      {title:"尼克胡哲-生命见证",author:"尼克胡哲",movid:2021},
+      {title:"恩典365每日灵修",author:"寇绍恩",movid:3005},
+    
+      {"title":"來自天堂的奇妙見證","author":"一個經歷天堂的真實見證，","movid":1007},
+      {"title":"史普罗 - 观念的后果","author":"著名神学家史普罗牧师讲解","movid":1008},
+      {"title":"唐崇榮牧師 - 基督教信仰的本質","author":"唐崇榮牧師講解基督教信仰","movid":1013},
+      {"title":"馮秉誠 - 科學與信仰","author":"從科學角度探討信仰，論證","movid":1016},
+      {"title":"約翰·派博 - 喜獲新生","author":"如何在基督裡獲得真正的新","movid":1019},
+      {"title":"來自天堂的奇妙見證","author":"经历天堂的真实见证","movid":1029},
+      {"title":"史普罗 - 观念的后果","author":"史普罗牧师讲解基督教世界","movid":1030},
+      {"title":"唐崇榮牧師 - 基督教信仰的本質","author":"基督教信仰核心本质","movid":1033},
+      {"title":"尼克胡哲 - 生命见证","author":"没有四肢的生命斗士尼克胡","movid":1035},
+      {"title":"于宏洁2026年讲道集","author":"于宏洁牧师精选讲道","movid":1036},
+      {"title":"刘志雄-认识真理之光","author":"刘志雄长老讲道精选","movid":1042},
+      {"title":"冯秉诚-科学信仰","author":"从科学角度探讨信仰","movid":1043},
+      {"title":"基督教信仰的本质","author":"唐崇榮牧師讲解信仰本质","movid":1045},
+      {"title":"新约神学-孙宝玲","author":"孙宝玲博士新约神学课程","movid":1046},
+      {"title":"信仰与生活-康来昌","author":"康来昌牧师分享信仰与生活","movid":1047},
+      {"title":"圣经中的婚姻真谛","author":"圣经视角看婚姻","movid":1048},
+      {"title":"合神心意的家庭","author":"建立合神心意的家庭","movid":1049},
+      {"title":"系统神学导论-林慈信","author":"林慈信牧师系统神学课程","movid":1050},
+      {"title":"新城要理问答-提摩太凯勒","author":"提摩太凯勒新城要理问答","movid":1051},
+      {"title":"主祷文-唐崇荣牧师","author":"唐崇荣牧师讲解主祷文","movid":1052},
+      {"title":"伯克富系统神学-神论","author":"伯克富系统神学神论部分","movid":1056},
+      {"title":"每日心语2025-吴继扬","author":"吴继扬牧师每日灵修心语分","movid":1077},
+      {"title":"2025恩典的祝福圣诞布道会-苏立忠","author":"苏立忠牧师圣诞布道会","movid":1078},
+      {"title":"2025中秋布道会-走向爱的圆满-苏立忠","author":"苏立忠牧师中秋布道会","movid":1079},
+      {"title":"2024年圣诞节福音布道会-苏牧师","author":"苏牧师圣诞节福音布道会","movid":1080},
+      {"title":"2023年圣诞布道会-为爱而生-苏立忠","author":"苏立忠牧师圣诞布道会","movid":1081},
+      {"title":"人间有圆缺有主无所惧-苏立忠","author":"苏立忠牧师分享人生中的依","movid":1082},
+      {"title":"探索之旅-基督徒","author":"基督徒的信仰探索之旅","movid":1083},
+      {"title":"里程信仰问答-冯秉诚","author":"冯秉诚博士解答信仰问题","movid":1084},
+      {"title":"孙越的故事","author":"孙越先生的生命见证故事","movid":1085},
+      {"title":"毒祸-见证","author":"从毒品中得释放的真实见证","movid":1086},
+      {"title":"大爱化解深仇-宣教士","author":"宣教士用爱化解仇恨的故事","movid":1087},
+      {"title":"挚爱深情-宣教士","author":"宣教士的感人爱情故事","movid":1088},
+    ]},
+    {id:144,name:"属灵成长",videos:[
+      {title:"观念的后果-史普罗",author:"史普罗",movid:3952},
+      {title:"新约神学-孙宝玲",author:"孙宝玲",movid:3951},
+      {title:"明白圣经-史普罗",author:"史普罗",movid:3950},
+      {title:"亲密婚姻-史普罗",author:"史普罗",movid:3949},
+      {title:"每日心语2025",author:"吴继扬",movid:3938},
+      {title:"圣经真理-属灵生命成长",author:"圣经讲解",movid:2800},
+      {title:"每日灵修成长",author:"灵修365",movid:2801},
+      {title:"信心是什么",author:"冯秉诚",movid:3063},
+      {title:"新城要理问答",author:"提摩太·凯勒",movid:2765},
+      {title:"伯克富系统神学-神论",author:"林慈信",movid:2492},
+    
+      {"title":"靈命進深 - 與神更親密","author":"與神建立更親密的關係","movid":1061},
+      {"title":"基督徒的禱告生活","author":"建立穩定的禱告生活","movid":1062},
+    ]},
+    {id:21,name:"福音视频",videos:[
+      {title:"福音视频精选",author:"福音传播",movid:3000},
+      {title:"耶稣生平4K",author:"福音传播",movid:3001},
+      {title:"十字架的爱",author:"福音分享",movid:3002},
+      {title:"福音故事集",author:"福音传播",movid:3003},
+      {title:"信仰见证分享",author:"见证分享",movid:3004},
+      {title:"恩典365每日灵修",author:"寇绍恩",movid:3005},
+      {title:"灵修分享时光",author:"灵修365",movid:3006},
+      {title:"每日灵粮",author:"灵修365",movid:3007},
+      {title:"福音真理讲解",author:"圣经讲解",movid:3008},
+      {title:"十架救恩信息",author:"福音布道",movid:3009},
+    
+      {"title":"福音短片 - 耶稣的愛","author":"耶穌基督的愛感動人心","movid":1068},
+      {"title":"福音短片 - 生命的意義","author":"在基督裡找到生命的真正意","movid":1069},
+      {"title":"福音短片 - 信心的力量","author":"信心是所望之事的實底","movid":1070},
+      {"title":"新视微视频合集","author":"福音微视频精选合集","movid":1089},
+    ]},
+    {id:26,name:"圣乐崇拜",videos:[
+      {title:"圣乐赞美合辑",author:"圣乐团",movid:3100},
+      {title:"传统圣诗精选",author:"诗班",movid:3101},
+      {title:"教会合唱赞美",author:"合唱团",movid:3102},
+      {title:"圣乐敬拜之夜",author:"敬拜团",movid:3103},
+      {title:"荣耀颂赞",author:"赞美之泉",movid:3104},
+      {title:"管风琴圣乐演奏",author:"管风琴师",movid:3105},
+      {title:"合唱赞美诗",author:"诗班合唱",movid:3106},
+      {title:"诗班献唱精选",author:"教会诗班",movid:3107},
+    
+      {"title":"聖樂崇拜 - 经典赞美詩","author":"經典聖樂讚美詩歌","movid":1065},
+      {"title":"傳統聖詩敬拜精選","author":"傳統聖詩經典敬拜合集","movid":1066},
+      {"title":"教会詩班合唱赞美","author":"教會詩班合唱讚美","movid":1067},
+    ]},
+    {id:290,name:"神学课程",videos:[
+      {title:"系统神学导论",author:"林慈信",movid:3200},
+      {title:"圣经神学概论",author:"圣经学者",movid:3201},
+      {title:"教会历史纵览",author:"历史神学",movid:3202},
+      {title:"释经学基础",author:"释经学者",movid:3203},
+      {title:"基督教护教学",author:"护教学者",movid:3204},
+      {title:"门徒训练课程",author:"门训导师",movid:3205},
+      {title:"宣教学导论",author:"宣教学者",movid:3206},
+      {title:"教牧辅导技巧",author:"教牧辅导",movid:3207},
+    
+      {"title":"系統神學入門 - 林慈信","author":"系統神學入門課程","movid":1063},
+      {"title":"新約神學導論 - 孫寶玲","author":"新約神學導論","movid":1064},
+    ]},
+    {id:25,name:"初信造就",videos:[
+      {title:"圣经工程系列：登山宝训",author:"The Bible Project",movid:1071},
+    
+      {"title":"圣经工程系列：登山宝训","author":"The Bible Pr","movid":1071},
+    ]},
+  ],
+  speakers:[
+    {id:95,name:"唐崇荣"},{id:66,name:"刘志雄"},{id:27,name:"冯秉诚"},
+    {id:164,name:"史普罗"},{id:42,name:"康来昌"},{id:163,name:"苏立忠"},
+    {id:55,name:"林慈信"},{id:60,name:"麦克阿瑟"},{id:38,name:"江守道"},
+    {id:44,name:"寇世远"},{id:59,name:"楼建华"},{id:137,name:"于力工"},
+    {id:21,name:"程蒙恩"},{id:13,name:"陈鸿基"},{id:99,name:"汪川生"},
+  ],
+  bibleOld:["创世记","出埃及记","利未记","民数记","申命记","约书亚记","士师记","路得记","撒母耳记上","撒母耳记下","列王纪上","列王纪下","诗篇","箴言","传道书","以赛亚书","耶利米书","以西结书","但以理书"],
+  bibleNew:["马太福音","马可福音","路加福音","约翰福音","使徒行传","罗马书","哥林多前书","哥林多后书","加拉太书","以弗所书","腓立比书","歌罗西书","帖撒罗尼迦前书","提摩太前书","希伯来书","彼得前书","彼得后书","约翰一书","启示录"],
+  notices:["愿神的话语点亮每一颗寻求真理的心 · 分享福音，传递主的爱","最近更新的内容已经展示在首页，欢迎分享给有需要的朋友","感谢每一位为福音事工祷告支持的弟兄姐妹"]
+};
+
+// ===== 后端API数据同步（自动从本地服务器拉取海量福音视频） =====
+const API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? '' : 'http://localhost:3000';
+(async function syncApiData(){
+  try{
+    const resp = await fetch(API_BASE + '/api/data', {signal:AbortSignal.timeout(5000)});
+    if(!resp.ok) return;
+    const result = await resp.json();
+    if(!result || !result.success || !result.data) return;
+    const apiData = result.data;
+    // 合并视频ID到YT_IDS和BV_IDS
+    if(apiData.videos && Array.isArray(apiData.videos)){
+      apiData.videos.forEach(v => {
+        // 使用api id作为movid（偏移确保不冲突）
+        const mid = v.id + 10000;
+        if(v.ytid) YT_IDS[mid] = v.ytid;
+        if(v.bvid) BV_IDS[mid] = v.bvid;
+        // 如果还没有该分类，创建
+        if(apiData.categories){
+          const cat = apiData.categories.find(c => c.id === v.c);
+          if(cat){
+            let existingCat = DATA.categories.find(c => c.id === cat.id.charCodeAt(0) + 200);
+            if(!existingCat && cat.id){
+              // 映射分类名称
+              const catNameMap = {
+                'animation':'福音动漫','movie':'福音电影','testimony':'福音见证',
+                'music':'赞美诗歌','preach':'福音证道','family':'婚姻家庭',
+                'growth':'属灵成长','study':'神学课程','video':'福音视频','hymns':'圣乐崇拜',
+                'beginner':'初信造就'
+              };
+              DATA.categories.push({
+                id: cat.id.charCodeAt(0) + 200,
+                name: catNameMap[cat.id] || cat.name,
+                videos: []
+              });
+              existingCat = DATA.categories.find(c => c.id === cat.id.charCodeAt(0) + 200);
+            }
+            if(existingCat){
+              existingCat.videos.push({
+                title: v.t, author: cat.name || '福音资源',
+                movid: mid
+              });
+            }
+          }
+        }
+      });
+      console.log('✅ 已从后端同步 '+apiData.videos.length+' 个福音视频到前端');
+      // 重新渲染
+      if(typeof renderVideos === 'function') renderVideos();
+    }
+  }catch(e){
+    console.log('后端API未连接，使用静态数据模式');
+  }
+})();
+
+// ===== Banner =====
+let bannerIdx = 0, bannerTimer;
+function renderBanner(){
+  const b = DATA.banners[bannerIdx];
+  document.getElementById('bannerImg').src = b.img;
+  document.getElementById('bannerTitle').textContent = b.title;
+  document.getElementById('bannerSub').textContent = b.sub;
+  document.querySelectorAll('.banner-dots span').forEach((s,i)=>{
+    s.classList.toggle('active',i===bannerIdx);
+  });
+}
+function initBanner(){
+  const dots = document.getElementById('bannerDots');
+  DATA.banners.forEach((_,i)=>{
+    const s = document.createElement('span');
+    if(i===0)s.classList.add('active');
+    s.onclick=()=>{bannerIdx=i;renderBanner();resetTimer();};
+    dots.appendChild(s);
+  });
+  resetTimer();
+}
+function prevBanner(){bannerIdx=(bannerIdx-1+DATA.banners.length)%DATA.banners.length;renderBanner();resetTimer();}
+function nextBanner(){bannerIdx=(bannerIdx+1)%DATA.banners.length;renderBanner();resetTimer();}
+function resetTimer(){clearInterval(bannerTimer);bannerTimer=setInterval(nextBanner,4500);}
+
+// ===== 公告轮播 =====
+let noticeIdx=0;
+setInterval(()=>{
+  noticeIdx=(noticeIdx+1)%DATA.notices.length;
+  document.getElementById('noticeText').textContent=DATA.notices[noticeIdx];
+},4000);
+
+// ===== 最新列表 =====
+function renderNewList(videos){
+  const el=document.getElementById('newList');
+  el.innerHTML=videos.map(v=>`
+    <div class="list-item fade-in" onclick="openPlayer(${v.movid},'${v.title.replace(/'/g,"\\'")}','${v.author.replace(/'/g,"\\'")}')">
+      <div class="date-badge">
+        <div class="month">${(v.date||'').split('/')[0]||''}月</div>
+        <div class="day">${(v.date||'').split('/')[1]||''}</div>
+      </div>
+      <div class="list-thumb">
+        <img src="${getVideoThumb(v.movid)}" alt="${v.title}" loading="lazy" onerror="this.src='https://picsum.photos/seed/${v.movid}/180/112'">
+      </div>
+      <div class="list-info">
+        <div class="list-title">${v.title}</div>
+        <div class="list-author">${v.author}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ===== 视频卡片网格 =====
+function renderGrid(elId, videos){
+  const el=document.getElementById(elId);
+  el.innerHTML=videos.map(v=>`
+    <div class="album-card fade-in" onclick="openPlayer(${v.movid},'${v.title.replace(/'/g,"\\'")}','${v.author.replace(/'/g,"\\'")}')">
+      <div class="thumb">
+        <img src="${getVideoThumb(v.movid,'large')}" alt="${v.title}" loading="lazy" onerror="this.src='https://picsum.photos/seed/${v.movid}/300/186'">
+        <div class="play-btn"><div class="play-btn-circle">▶</div></div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${v.title}</div>
+        <div class="card-author">${v.author}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ===== 热播排行 =====
+function renderHotRank(videos){
+  const el=document.getElementById('hotRankList');
+  el.innerHTML=videos.slice(0,8).map((v,i)=>`
+    <div class="hot-item fade-in" onclick="openPlayer(${v.movid},'${v.title.replace(/'/g,"\\'")}','${v.author.replace(/'/g,"\\'")}')">
+      <div class="hot-rank">${i+1}</div>
+      <div class="hot-thumb">
+        <img src="${getVideoThumb(v.movid)}" alt="${v.title}" loading="lazy" onerror="this.src='https://picsum.photos/seed/${v.movid+10}/140/88'">
+      </div>
+      <div class="hot-info">
+        <div class="hot-title">${v.title}</div>
+        <div class="hot-author">${v.author}</div>
+      </div>
+      <div class="hot-views">${Math.floor(Math.random()*9+1)}w次</div>
+    </div>`).join('');
+}
+
+// ===== 专题标签 =====
+function renderTopics(){
+  const el=document.getElementById('topicsRow');
+  el.innerHTML=DATA.topics.map((t,i)=>`
+    <div class="topic-tag${i===0?' active':''}" onclick="selectTopic(${t.id},this)">${t.title}</div>`).join('');
+}
+function selectTopic(id,el){
+  document.querySelectorAll('.topic-tag').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  // 显示该专题下的视频
+  const allV = [...DATA.newVideos,...DATA.hotVideos];
+  DATA.categories.forEach(c=>c.videos.forEach(v2=>{if(!allV.find(x=>x.movid===v2.movid))allV.push(v2);}));
+  const topicMap = {
+    6:[3952,3946,3050,3035,3949],
+    2:[2997,2492,2491,2765,2511],
+    5:[3063,3836,3027],
+    1:[2511,2997,2492],
+  };
+  const movids = topicMap[id] || [];
+  const res = movids.length ? allV.filter(v=>movids.includes(v.movid)) : allV;
+  document.getElementById('catTitle').textContent = el.textContent + '（'+(res.length||allV.length)+'个视频）';
+  renderGrid('catGrid', res.length ? res : allV);
+  document.getElementById('mainContent').scrollIntoView({behavior:'smooth'});
+}
+
+// ===== 全部视频 / 更多按钮 =====
+function showAllVideos(type){
+  const allV = [...DATA.newVideos, ...DATA.hotVideos];
+  DATA.categories.forEach(c=>c.videos.forEach(v2=>{if(!allV.find(x=>x.movid===v2.movid))allV.push(v2);}));
+  const main=document.getElementById('mainContent');
+  main.scrollIntoView({behavior:'smooth'});
+  if(type==='new'){
+    document.getElementById('catTitle').textContent='📋 全部最新视频（共'+allV.length+'个）';
+    renderGrid('catGrid', allV);
+  } else if(type==='hot'||type==='rank'){
+    document.getElementById('catTitle').textContent='🔥 全部热门视频（共'+allV.length+'个）';
+    renderGrid('catGrid', allV);
+  } else if(type==='category'){
+    // 显示当前分类全部视频
+    const activeTab = document.querySelector('#catTabs .tab-btn.active');
+    if(activeTab){
+      const idx = Array.from(document.querySelectorAll('#catTabs .tab-btn')).indexOf(activeTab);
+      const cat = DATA.categories[idx];
+      if(cat) document.getElementById('catTitle').textContent=cat.name+'（全部'+cat.videos.length+'个视频）';
+    }
+  } else if(type==='speakers'){
+    document.getElementById('catTitle').textContent='👨‍🏫 全部讲员（点击讲员头像查看视频）';
+    renderGrid('catGrid', allV.slice(0,20));
+  }
+}
+// ===== 分类切换 =====
+function renderCatTabs(){
+  const tabs=document.getElementById('catTabs');
+  tabs.innerHTML=DATA.categories.map((c,i)=>`
+    <button class="tab-btn${i===0?' active':''}" onclick="switchCat(${i},this)">${c.name}</button>`).join('');
+}
+function switchCat(idx,el){
+  document.querySelectorAll('#catTabs .tab-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  const cat=DATA.categories[idx];
+  document.getElementById('catTitle').textContent=cat.name;
+  renderGrid('catGrid',cat.videos);
+}
+
+// ===== 讲员 =====
+function renderSpeakers(){
+  const el=document.getElementById('speakersRow');
+  el.innerHTML=DATA.speakers.map(s=>`
+    <div class="speaker-card" onclick="searchSpeaker('${s.name}')">
+      <div class="speaker-avatar">${s.name[0]}</div>
+      <div class="speaker-name">${s.name}</div>
+    </div>`).join('');
+}
+function searchSpeaker(name){
+  const allV = [...DATA.newVideos,...DATA.hotVideos];
+  DATA.categories.forEach(c=>c.videos.forEach(v2=>{if(!allV.find(x=>x.movid===v2.movid))allV.push(v2);}));
+  const res = allV.filter(v=>v.author.includes(name));
+  document.getElementById('catTitle').textContent='讲员：'+name+'（'+res.length+'个视频）';
+  renderGrid('catGrid',res.length?res:allV);
+  document.getElementById('mainContent').scrollIntoView({behavior:'smooth'});
+}
+
+// ===== 圣经侧栏 =====
+function renderBibleBooks(){
+  document.getElementById('oldBooks').innerHTML=
+    DATA.bibleOld.map(b=>`<div class="bible-book-btn" onclick="openChapter('${b}',1)">${b.replace(/[记书]/g,'').slice(0,3)}</div>`).join('');
+  document.getElementById('newBooks').innerHTML=
+    DATA.bibleNew.map(b=>`<div class="bible-book-btn" onclick="openChapter('${b}',1)">${b.replace(/[福音书]/g,'').slice(0,3)||b.slice(0,3)}</div>`).join('');
+}
+// ===== 圣经 - 在线API实时获取完整经文 =====
+const BIBLE_BOOKS_MAP = {
+  "创世记":"Gen","出埃及记":"Exod","利未记":"Lev","民数记":"Num","申命记":"Deut",
+  "约书亚记":"Josh","士师记":"Judg","路得记":"Ruth","撒母耳记上":"1Sam","撒母耳记下":"2Sam",
+  "列王纪上":"1Kgs","列王纪下":"2Kgs","历代志上":"1Chr","历代志下":"2Chr",
+  "以斯拉记":"Ezra","尼希米记":"Neh","以斯帖记":"Esth","约伯记":"Job",
+  "诗篇":"Ps","箴言":"Prov","传道书":"Eccl","雅歌":"Song",
+  "以赛亚书":"Isa","耶利米书":"Jer","耶利米哀歌":"Lam","以西结书":"Ezek","但以理书":"Dan",
+  "何西阿书":"Hos","约珥书":"Joel","阿摩司书":"Amos","俄巴底亚书":"Obad","约拿书":"Jonah",
+  "弥迦书":"Mic","那鸿书":"Nah","哈巴谷书":"Hab","西番雅书":"Zeph","哈该书":"Hag",
+  "撒迦利亚书":"Zech","玛拉基书":"Mal",
+  "马太福音":"Matt","马可福音":"Mark","路加福音":"Luke","约翰福音":"John",
+  "使徒行传":"Acts","罗马书":"Rom","哥林多前书":"1Cor","哥林多后书":"2Cor",
+  "加拉太书":"Gal","以弗所书":"Eph","腓立比书":"Phil","歌罗西书":"Col",
+  "帖撒罗尼迦前书":"1Thess","帖撒罗尼迦后书":"2Thess","提摩太前书":"1Tim","提摩太后书":"2Tim",
+  "提多书":"Titus","腓利门书":"Phlm","希伯来书":"Heb","雅各书":"Jas",
+  "彼得前书":"1Pet","彼得后书":"2Pet","约翰一书":"1John","约翰二书":"2John","约翰三书":"3John",
+  "犹大书":"Jude","启示录":"Rev"
+};
+// 经文章节数映射（和合本）
+const BIBLE_CHAPTER_COUNT = {
+  "创世记":50,"出埃及记":40,"利未记":27,"民数记":36,"申命记":34,
+  "约书亚记":24,"士师记":21,"路得记":4,"撒母耳记上":31,"撒母耳记下":24,
+  "列王纪上":22,"列王纪下":25,"历代志上":29,"历代志下":36,
+  "以斯拉记":10,"尼希米记":13,"以斯帖记":10,"约伯记":42,
+  "诗篇":150,"箴言":31,"传道书":12,"雅歌":8,
+  "以赛亚书":66,"耶利米书":52,"耶利米哀歌":5,"以西结书":48,"但以理书":12,
+  "何西阿书":14,"约珥书":3,"阿摩司书":9,"俄巴底亚书":1,"约拿书":4,
+  "弥迦书":7,"那鸿书":3,"哈巴谷书":3,"西番雅书":3,"哈该书":2,
+  "撒迦利亚书":14,"玛拉基书":4,
+  "马太福音":28,"马可福音":16,"路加福音":24,"约翰福音":21,
+  "使徒行传":28,"罗马书":16,"哥林多前书":16,"哥林多后书":13,
+  "加拉太书":6,"以弗所书":6,"腓立比书":4,"歌罗西书":4,
+  "帖撒罗尼迦前书":5,"帖撒罗尼迦后书":3,"提摩太前书":6,"提摩太后书":4,
+  "提多书":3,"腓利门书":1,"希伯来书":13,"雅各书":5,
+  "彼得前书":5,"彼得后书":3,"约翰一书":5,"约翰二书":1,"约翰三书":1,
+  "犹大书":1,"启示录":22
+};
+let bibleCache = {};
+async function openChapter(book, chap){
+  const panel = document.getElementById('biblePanel');
+  panel.classList.add('show');
+  const el = document.getElementById('dailyVerse');
+  const ref = document.querySelector('.verse-ref');
+  el.textContent = '📖 正在加载「'+book+'」第'+chap+'章...';
+  ref.textContent = '— '+book+' 第'+chap+'章';
+  const cacheKey = book+'_'+chap;
+  if(bibleCache[cacheKey]){
+    el.textContent = bibleCache[cacheKey];
+    return;
+  }
+  const engBook = BIBLE_BOOKS_MAP[book];
+  if(!engBook){ el.textContent = '「'+book+'」第'+chap+'章：愿神的话语成为你脚前的灯，路上的光。'; return; }
+  try {
+    const resp = await fetch('https://bible-api.com/'+engBook+'+'+chap+'?translation=cuv');
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const data = await resp.json();
+    if(data && data.verses && data.verses.length>0){
+      let text = '';
+      data.verses.forEach((v,i)=>{
+        text += (i>0?' ':'')+'【'+v.verse+'】'+v.text;
+      });
+      bibleCache[cacheKey] = text;
+      el.textContent = text;
+    } else {
+      throw new Error('empty');
+    }
+  } catch(e){
+    // 备用：缓存本地精选经文
+    const backup = {"创世记":["起初，神创造天地。地是空虚混沌，渊面黑暗；神的灵运行在水面上。神说：要有光，就有了光。","天地万物都造齐了。到第七日，神造物的工已经完毕，就在第七日歇了他一切的工，安息了。","耶和华神用地上的尘土造人，将生气吹在他鼻孔里，他就成了有灵的活人，名叫亚当。"],
+    "诗篇":["不从恶人的计谋，不站罪人的道路，不坐亵慢人的座位，惟喜爱耶和华的律法，昼夜思想，这人便为有福！","耶和华是我的牧者，我必不致缺乏。他使我躺卧在青草地上，领我在可安歇的水边。他使我的灵魂苏醒，为自己的名引导我走义路。","耶和华是我的亮光，是我的拯救，我还怕谁呢？耶和华是我性命的保障，我还惧谁呢？"],
+    "约翰福音":["太初有道，道与神同在，道就是神。这道太初与神同在。万物是藉着他造的；凡被造的，没有一样不是藉着他造的。","神爱世人，甚至将他的独生子赐给他们，叫一切信他的，不至灭亡，反得永生。"]};
+    const bk = backup[book];
+    if(bk && bk[chap-1]) el.textContent = '「'+book+'」第'+chap+'章（离线版）：'+bk[chap-1];
+    else el.textContent = '「'+book+'」第'+chap+'章：愿神的话语成为你脚前的灯，路上的光。（网络不可用时，完整圣经经文可通过圣经APP阅读）';
+  }
+}
+function openBible(){document.getElementById('biblePanel').classList.add('show');}
+function closeBible(){document.getElementById('biblePanel').classList.remove('show');}
+// ===== 热搜词 =====
+function renderHotWords(){
+  document.getElementById('hotWords').innerHTML=
+    DATA.hotSearch.map(w=>`<div class="hot-word" onmousedown="fillSearch('${w}')">${w}</div>`).join('');
+}
+function fillSearch(w){
+  document.getElementById('searchInput').value=w;
+  hideSearchDrop();
+}
+function showSearchDrop(){document.getElementById('searchDrop').classList.add('show');}
+function hideSearchDrop(){setTimeout(()=>document.getElementById('searchDrop').classList.remove('show'),200);}
+function doSearch(){
+  const v=document.getElementById('searchInput').value.trim();
+  if(v){
+    hideSearchDrop();
+    const allVideos = [...DATA.newVideos,...DATA.hotVideos];
+    DATA.categories.forEach(c=>c.videos.forEach(v2=>{if(!allVideos.find(x=>x.movid===v2.movid))allVideos.push(v2);}));
+    const q = v.toLowerCase();
+    const res = allVideos.filter(v2=>v2.title.toLowerCase().includes(q)||v2.author.toLowerCase().includes(q));
+    if(res.length>0){
+      const main=document.getElementById('mainContent');
+      main.scrollIntoView({behavior:'smooth'});
+      document.getElementById('catTitle').textContent='搜索：「'+v+'」共'+res.length+'个结果';
+      renderGrid('catGrid',res);
+    } else {
+      alert('未找到与「'+v+'」相关的视频，试试其他关键词');
+    }
+  }
+}
+function onSearch(v){
+  const drop=document.getElementById('searchDrop');
+  if(!v||v.length<1){drop.classList.remove('show');return;}
+  const allV = [...DATA.newVideos,...DATA.hotVideos];
+  DATA.categories.forEach(c=>c.videos.forEach(v2=>{if(!allV.find(x=>x.movid===v2.movid))allV.push(v2);}));
+  const q=v.toLowerCase();
+  const match=allV.filter(x=>x.title.toLowerCase().includes(q)||x.author.toLowerCase().includes(q)).slice(0,5);
+  if(match.length){
+    const hw=document.getElementById('hotWords');
+    hw.innerHTML=match.map(m=>`<div class="hot-word" onmousedown="fillSearch('${m.title}')">${m.title}</div>`).join('');
+    drop.classList.add('show');
+  } else drop.classList.remove('show');
+}
+
+// ===== Tab切换 =====
+function switchListTab(type,el){
+  document.querySelectorAll('.tabs .tab-btn').forEach(b=>{
+    if(b.parentNode===el.parentNode)b.classList.remove('active');
+  });
+  el.classList.add('active');
+  renderNewList(DATA.newVideos);
+}
+function switchHotTab(type,el){
+  document.querySelectorAll('#hotGrid').forEach(()=>{});
+  el.parentNode.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderGrid('hotGrid',DATA.hotVideos.slice(0,type==='hot'?8:10));
+}
+function switchTab(tab,el){
+  document.querySelectorAll('.topbar-nav a').forEach(a=>a.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ===== 侧栏 =====
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
+function navTo(page,el){
+  document.querySelectorAll('.sidebar a').forEach(a=>a.classList.remove('active'));
+  el.classList.add('active');
+  closeSidebar();
+  const main=document.getElementById('mainContent');
+  // 特殊页面导航
+  if(page==='home'){
+    window.scrollTo({top:0,behavior:'smooth'});
+    return;
+  }
+  if(page==='all'){
+    showAllVideos('new');
+    return;
+  }
+  if(page==='hot'){
+    document.getElementById('catTitle').textContent='🔥 热播排行';
+    renderGrid('catGrid', DATA.hotVideos);
+    main.scrollIntoView({behavior:'smooth'});
+    return;
+  }
+  if(page==='new'){
+    document.getElementById('catTitle').textContent='✨ 最新发布';
+    renderGrid('catGrid', DATA.newVideos);
+    main.scrollIntoView({behavior:'smooth'});
+    return;
+  }
+  if(page==='update'){
+    document.getElementById('catTitle').textContent='🔄 最近更新';
+    renderGrid('catGrid', DATA.newVideos.slice(0,10));
+    main.scrollIntoView({behavior:'smooth'});
+    return;
+  }
+  if(page==='sunday'){
+    document.getElementById('catTitle').textContent='⛪ 主日讲道精选';
+    renderGrid('catGrid', DATA.categories[1].videos);
+    main.scrollIntoView({behavior:'smooth'});
+    return;
+  }
+  if(page==='authors'){
+    document.getElementById('catTitle').textContent='👨‍🏫 讲员列表（点击查看视频）';
+    renderSpeakers();
+    main.scrollIntoView({behavior:'smooth'});
+    return;
+  }
+  if(page==='about'){
+    document.getElementById('catTitle').textContent='ℹ️ 关于我们 - 福音传播爱';
+    document.getElementById('catGrid').innerHTML='<div style="grid-column:1/-1;padding:30px;text-align:center;background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(90,50,10,0.10);"><h4 style="font-size:18px;color:var(--gold);margin-bottom:12px;font-family:Noto Serif SC,serif;">✝️ 福音传播爱</h4><p style="color:var(--text-muted);line-height:1.8;margin-bottom:8px;">szxfuyin.com 是一个基于圣经真理的基督教福音视频网站。</p><p style="color:var(--text-muted);line-height:1.8;margin-bottom:8px;">我们致力于分享纯正的福音信息、讲道视频、赞美诗歌和圣经学习资源。</p><p style="color:var(--text-muted);line-height:1.8;">信仰声明：认信使徒信经之基督教信仰，杜绝涉及异端等内容。</p></div>';
+    main.scrollIntoView({behavior:'smooth'});
+    return;
+  }
+  // 导航到对应分类
+  const catId = parseInt(page.replace('cat_',''));
+  const idx = DATA.categories.findIndex(c=>c.id===catId);
+  if(idx>=0){
+    const tabs = document.querySelectorAll('#catTabs .tab-btn');
+    if(tabs[idx]) switchCat(idx, tabs[idx]);
+    main.scrollIntoView({behavior:'smooth'});
+  }
+}
+
+// ===== 暗色模式 =====
+function toggleDark(){
+  document.body.classList.toggle('dark-mode');
+  document.getElementById('darkBtn').textContent=
+    document.body.classList.contains('dark-mode')?'☀️':'🌙';
+}
+// ===== 多语言切换 =====
+let currentLang = 'zh-CN';
+const LANG_DATA = {
+  'zh-CN': {btn:'繁體', site:'福音传播爱', search:'搜索视频、讲员...'},
+  'zh-TW': {btn:'简体', site:'福音傳播愛', search:'搜索視頻、講員...'}
+};
+function toggleLang(){
+  currentLang = currentLang==='zh-CN'?'zh-TW':'zh-CN';
+  const ld = LANG_DATA[currentLang];
+  document.querySelector('.lang-btn').textContent = ld.btn;
+  document.querySelector('.site-name').childNodes[0].textContent = ld.site;
+  document.getElementById('searchInput').placeholder = ld.search;
+  // 滚动公告
+  const notice = document.getElementById('noticeText');
+  if(currentLang==='zh-TW'){
+    notice.textContent = '願神的話語點亮每一顆尋求真理的心 · 分享福音，傳遞主的愛';
+  } else {
+    notice.textContent = '愿神的话语点亮每一颗寻求真理的心 · 分享福音，传递主的爱';
+  }
+}
+// ===== 登录/注册系统 =====
+function openLogin(){
+  const overlay = document.createElement('div');
+  overlay.id = 'loginOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;padding:20px;';
+  overlay.onclick = function(e){ if(e.target===this) this.remove(); };
+  overlay.innerHTML = `
+    <div style="background:var(--brown-dark);border-radius:12px;padding:28px 24px;width:100%;max-width:360px;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:36px;margin-bottom:8px;">✝️</div>
+        <h3 style="color:var(--gold-light);font-family:'Noto Serif SC',serif;font-size:18px;">福音传播爱</h3>
+        <p style="color:rgba(255,255,255,0.4);font-size:12px;margin-top:4px;">登录以收藏视频、记录播放进度</p>
+      </div>
+      <input id="loginUser" placeholder="用户名/邮箱" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-size:14px;margin-bottom:10px;font-family:inherit;outline:none;">
+      <input id="loginPass" type="password" placeholder="密码" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-size:14px;margin-bottom:16px;font-family:inherit;outline:none;">
+      <button onclick="doLogin()" style="width:100%;padding:10px;border-radius:8px;background:var(--gold);color:var(--brown-dark);font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:inherit;">登 录</button>
+      <div style="text-align:center;margin-top:12px;">
+        <span style="color:rgba(255,255,255,0.3);font-size:12px;">还没有账号？</span>
+        <a href="#" onclick="event.preventDefault();showRegister()" style="color:var(--gold-light);font-size:12px;">立即注册</a>
+      </div>
+      <div style="text-align:center;margin-top:8px;">
+        <a href="#" onclick="event.preventDefault();guestLogin()" style="color:rgba(255,255,255,0.3);font-size:11px;">游客模式 ></a>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+function doLogin(){
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value.trim();
+  if(!user || !pass){ alert('请输入用户名和密码'); return; }
+  // localStorage模拟登录
+  const saved = JSON.parse(localStorage.getItem('gospelUser')||'{}');
+  if(saved.user === user && saved.pass === pass){
+    localStorage.setItem('gospelLogin', JSON.stringify({user, loggedIn:true}));
+    document.getElementById('loginOverlay').remove();
+    document.querySelector('.login-btn').textContent = '👤 '+user;
+    document.querySelector('.login-btn').onclick = null;
+    alert('✅ 登录成功！欢迎回来 '+user);
+  } else {
+    alert('❌ 用户名或密码错误（首次使用请先注册）');
+  }
+}
+function showRegister(){
+  const overlay = document.getElementById('loginOverlay');
+  overlay.innerHTML = `
+    <div style="background:var(--brown-dark);border-radius:12px;padding:28px 24px;width:100%;max-width:360px;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:36px;margin-bottom:8px;">✝️</div>
+        <h3 style="color:var(--gold-light);font-family:'Noto Serif SC',serif;font-size:18px;">注册新账号</h3>
+        <p style="color:rgba(255,255,255,0.4);font-size:12px;margin-top:4px;">注册后可收藏视频、记录播放进度</p>
+      </div>
+      <input id="regUser" placeholder="用户名" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-size:14px;margin-bottom:10px;font-family:inherit;outline:none;">
+      <input id="regEmail" placeholder="邮箱（选填）" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-size:14px;margin-bottom:10px;font-family:inherit;outline:none;">
+      <input id="regPass" type="password" placeholder="密码（至少6位）" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-size:14px;margin-bottom:16px;font-family:inherit;outline:none;">
+      <button onclick="doRegister()" style="width:100%;padding:10px;border-radius:8px;background:var(--gold);color:var(--brown-dark);font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:inherit;">注 册</button>
+      <div style="text-align:center;margin-top:12px;">
+        <span style="color:rgba(255,255,255,0.3);font-size:12px;">已有账号？</span>
+        <a href="#" onclick="event.preventDefault();openLogin()" style="color:var(--gold-light);font-size:12px;">去登录</a>
+      </div>
+    </div>`;
+}
+function doRegister(){
+  const user = document.getElementById('regUser').value.trim();
+  const pass = document.getElementById('regPass').value.trim();
+  if(!user){ alert('请输入用户名'); return; }
+  if(pass.length<6){ alert('密码至少6位'); return; }
+  const saved = JSON.parse(localStorage.getItem('gospelUser')||'{}');
+  if(saved.user === user){ alert('用户名已存在，请直接登录'); return; }
+  localStorage.setItem('gospelUser', JSON.stringify({user, pass}));
+  localStorage.setItem('gospelLogin', JSON.stringify({user, loggedIn:true}));
+  document.getElementById('loginOverlay').remove();
+  document.querySelector('.login-btn').textContent = '👤 '+user;
+  document.querySelector('.login-btn').onclick = null;
+  alert('✅ 注册成功！欢迎 '+user);
+}
+function guestLogin(){
+  document.getElementById('loginOverlay').remove();
+  localStorage.setItem('gospelLogin', JSON.stringify({user:'游客', loggedIn:true}));
+  document.querySelector('.login-btn').textContent = '👤 游客';
+}
+
+// ===== 回到顶部 =====
+window.addEventListener('scroll',()=>{
+  document.getElementById('backTop').classList.toggle('show',window.scrollY>300);
+});
+
+// ===== 自动抓取系统：多源RSS爬取最新福音视频 =====
+const RSS_FEEDS = [
+  // 海外源（YouTube）
+  {name:"福音传播爱", type:"youtube", channel_id:"UC1Yq9PkX2v8AQwWf8bQQqTA"},
+  {name:"The Bible Project", type:"youtube", channel_id:"UCVfwlh9Xp6W7oFwJqWlC8_w"},
+  {name:"Desiring God", type:"youtube", channel_id:"UCsB0WjM-oR9M5RlAyPADWOg"},
+  {name:"Ligonier Ministries", type:"youtube", channel_id:"UCbF0F6Jh8qSC-HvXpFnRXjg"},
+  {name:"Third Millennium Ministries", type:"youtube", channel_id:"UC1y0VLH6oXfC2JDWx3X0Q2w"},
+  // 国内可访问源
+  {name:"福音影视网", type:"rss", url:"https://www.fuyin.tv/rss/sermon.xml"},
+  {name:"B站基督教", type:"bilibili", search:"基督教讲道"},
+  {name:"信仰宝库", type:"rss", url:"https://www.xinyangbaoku.com/feed"},
+];
+const CORS_PROXIES = [
+  'https://corsproxy.io/?',
+  'https://api.allorigins.win/raw?url=',
+  'https://api.codetabs.com/v1/proxy?quest=',
+];
+let autoCrawlData = {newVideos:[],lastFetch:0};
+// 抓取单个YouTube频道最新视频
+async function fetchYTChannel(channelId, proxyIdx=0){
+  if(proxyIdx>=CORS_PROXIES.length) return [];
+  const url = CORS_PROXIES[proxyIdx] + encodeURIComponent('https://www.youtube.com/feeds/videos.xml?channel_id='+channelId);
+  try {
+    const resp = await fetch(url, {signal:AbortSignal.timeout(8000)});
+    if(!resp.ok) throw new Error('HTTP'+resp.status);
+    const xml = await resp.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xml, 'text/xml');
+    const entries = doc.querySelectorAll('entry');
+    let videos = [];
+    entries.forEach((entry,i)=>{
+      if(i>=5) return;
+      const title = entry.querySelector('title')?.textContent||'';
+      const videoId = entry.querySelector('yt\\:videoId, videoId')?.textContent||'';
+      const pubDate = entry.querySelector('published')?.textContent||'';
+      const author = entry.querySelector('author name')?.textContent||'福音频道';
+      const date = pubDate? pubDate.slice(5,10).replace('-','/') : '';
+      if(videoId && title){
+        const movid = parseInt('9'+videoId.slice(0,3)+String(Date.now()).slice(-4));
+        videos.push({title, author, date, movid, ytid:videoId, source:'auto'});
+      }
+    });
+    return videos;
+  } catch(e) {
+    if(proxyIdx<CORS_PROXIES.length-1) return fetchYTChannel(channelId, proxyIdx+1);
+    return [];
+  }
+}
+// B站搜索抓取（通过公开API获取）
+async function fetchBilibiliSearch(keyword, proxyIdx=0){
+  if(proxyIdx>=CORS_PROXIES.length) return [];
+  const url = CORS_PROXIES[proxyIdx] + encodeURIComponent('https://api.bilibili.com/x/web-interface/search/type?search_type=video&keyword='+encodeURIComponent(keyword));
+  try {
+    const resp = await fetch(url, {signal:AbortSignal.timeout(8000)});
+    if(!resp.ok) throw new Error('HTTP'+resp.status);
+    const data = await resp.json();
+    if(data && data.data && data.data.result){
+      return data.data.result.slice(0,6).map(v=>({
+        title: v.title.replace(/<[^>]+>/g,''),
+        author: v.author,
+        date: (v.pubdate?new Date(v.pubdate*1000).toISOString().slice(5,10).replace('-','/'):''),
+        movid: parseInt('8'+String(v.aid).slice(0,4)),
+        bvid: v.bvid,
+        source:'auto'
+      }));
+    }
+    return [];
+  } catch(e) {
+    if(proxyIdx<CORS_PROXIES.length-1) return fetchBilibiliSearch(keyword, proxyIdx+1);
+    return [];
+  }
+}
+// 执行全量抓取
+async function crawlAllSources(){
+  const allNew = [];
+  // 抓取YouTube源（海外用户）
+  const ytChannels = RSS_FEEDS.filter(f=>f.type==='youtube').slice(0,3);
+  const ytResults = await Promise.allSettled(
+    ytChannels.map(ch=>fetchYTChannel(ch.channel_id))
+  );
+  ytResults.forEach(r=>{
+    if(r.status==='fulfilled' && r.value.length) allNew.push(...r.value);
+  });
+  // 抓取B站源（国内用户）
+  const biliFeeds = RSS_FEEDS.filter(f=>f.type==='bilibili');
+  const biliResults = await Promise.allSettled(
+    biliFeeds.map(ch=>fetchBilibiliSearch(ch.search))
+  );
+  biliResults.forEach(r=>{
+    if(r.status==='fulfilled' && r.value.length) allNew.push(...r.value);
+  });
+  autoCrawlData.newVideos = allNew;
+  autoCrawlData.lastFetch = Date.now();
+  // 如果有新抓取的视频，显示在页面上
+  if(allNew.length){
+    const notice = document.getElementById('noticeText');
+    if(notice) notice.textContent = '🔄 已自动抓取 '+allNew.length+' 个最新讲道视频，点击播放即可观看';
+    // 将新视频添加到最新列表前端
+    const existingIds = new Set(DATA.newVideos.map(v=>v.movid));
+    const fresh = allNew.filter(v=>!existingIds.has(v.movid));
+    if(fresh.length){
+      DATA.newVideos = [...fresh, ...DATA.newVideos];
+      renderNewList(DATA.newVideos);
+    }
+  }
+  return allNew;
+}
+// 定时自动抓取（每60分钟）
+setInterval(()=>{ crawlAllSources(); }, 60*60*1000);
+
+// ===== 备用bible-api更新每日经文 =====
+async function updateDailyVerse(){
+  try {
+    const proxies = ['https://corsproxy.io/?','https://api.allorigins.win/raw?url='];
+    for(const proxy of proxies){
+      try {
+        const resp = await fetch(proxy+encodeURIComponent('https://bible-api.com/?random=1'), {signal:AbortSignal.timeout(5000)});
+        if(resp.ok){
+          const data = await resp.json();
+          if(data && data.text){
+            document.getElementById('dailyVerse').textContent = data.text.trim().slice(0,200);
+            const ref = document.querySelector('.verse-ref');
+            if(ref && data.reference) ref.textContent = '— '+data.reference;
+          }
+          break;
+        }
+      } catch(e){ continue; }
+    }
+  } catch(e){}
+}
+
+// ===== 圣经阅读增强：完整的上下章导航 + 章节选择器 =====
+let currentBibleBook = '创世记';
+let currentBibleChap = 1;
+function openChapterWithNav(book, chap){
+  currentBibleBook = book;
+  currentBibleChap = Math.min(Math.max(1,chap), BIBLE_CHAPTER_COUNT[book]||50);
+  openChapter(book, currentBibleChap);
+  const panel = document.getElementById('biblePanel');
+  panel.classList.add('show');
+  // 重新渲染导航
+  const existingNav = document.querySelector('.chap-nav');
+  if(existingNav) existingNav.remove();
+  const maxChap = BIBLE_CHAPTER_COUNT[book]||50;
+  const navDiv = document.createElement('div');
+  navDiv.className = 'chap-nav';
+  navDiv.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;align-items:center;justify-content:center;margin:8px 0 12px;';
+  // 上一章/下一章按钮
+  navDiv.innerHTML = `
+    <button onclick="openChapterWithNav('${book}',${currentBibleChap-1})" style="padding:4px 10px;background:var(--gold-pale);border:1px solid var(--gold);border-radius:6px;font-size:12px;cursor:pointer;" ${currentBibleChap<=1?'disabled':''}>‹ 上一章</button>
+    <select onchange="openChapterWithNav('${book}',parseInt(this.value))" style="padding:4px 6px;border-radius:6px;border:1px solid var(--gold);background:var(--cream);font-size:12px;">
+      ${Array.from({length:maxChap},(_,i)=>`<option value="${i+1}"${i+1===currentBibleChap?' selected':''}>第${i+1}章</option>`).join('')}
+    </select>
+    <button onclick="openChapterWithNav('${book}',${currentBibleChap+1})" style="padding:4px 10px;background:var(--gold-pale);border:1px solid var(--gold);border-radius:6px;font-size:12px;cursor:pointer;" ${currentBibleChap>=maxChap?'disabled':''}>下一章 ›</button>
+  `;
+  const verseText = document.getElementById('dailyVerse');
+  const ref = document.querySelector('.verse-ref');
+  if(verseText && ref){
+    verseText.parentNode.insertBefore(navDiv, ref.nextSibling||null);
+  }
+}
+// 覆盖openBible，打开时加载创世记1章
+const origOpenBible = window.openBible;
+window.openBible = function(){
+  const panel = document.getElementById('biblePanel');
+  panel.classList.add('show');
+  currentBibleBook = '创世记';
+  currentBibleChap = 1;
+  openChapterWithNav('创世记', 1);
+};
+
+// ===== 获取视频缩略图 =====
+function getVideoThumb(movid, size){
+  // 优先使用YouTube/B站真实缩略图
+  const ytid = YT_IDS[movid];
+  const bvid = BV_IDS[movid];
+  if(ytid) return 'https://img.youtube.com/vi/'+ytid+'/'+(size||'mqdefault')+'.jpg';
+  if(bvid) return 'https://i0.hdslb.com/bfs/archive/'+bvid.replace('BV','')+'.jpg';
+  return 'https://picsum.photos/seed/'+movid+'/'+(size==='large'?'300/186':'180/112');
+}
+// ===== 播放器加载时显示海报 =====
+function showPlayerPoster(movid){
+  const placeholder = document.getElementById('playerPlaceholder');
+  const posterUrl = getVideoThumb(movid, 'maxresdefault');
+  placeholder.innerHTML = `
+    <img src="${posterUrl}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.6;" onerror="this.style.display='none'">
+    <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:16px;">
+      <div class="spin-cross"></div>
+      <span style="font-size:14px;color:rgba(255,255,255,0.8);text-shadow:0 2px 8px rgba(0,0,0,0.8);">✝️ 视频加载中 · 荣耀归主</span>
+    </div>`;
+  placeholder.style.display='flex';
+}
+// ===== 点击播放覆盖层处理（暴力破解版） =====
+function handlePlayerClick(){
+  const overlay = document.getElementById('playerOverlay');
+  const iframe = document.getElementById('playerFrame');
+  const video = document.getElementById('playerVideoElement');
+  if(overlay) overlay.classList.add('hidden');
+  // ===== 🚀 暴力破解：同时尝试三种方案 =====
+  // 方案1：原生video播放（服务器代理）
+  if(video && video.style.display !== 'none' && video.src){
+    video.play().catch(function(e){
+      console.log('原生video播放失败:', e.message);
+      // 失败后直接打开B站独立播放器
+      if(currentPlayerId){
+        const bvid = BV_IDS[currentPlayerId];
+        if(bvid){
+          const biliPlayerUrl = 'https://player.bilibili.com/player.html?bvid='+bvid+'&autoplay=1&page=1&high_quality=1&danmaku=0&noinfo=1&as_wide=1&t=0';
+          window.open(biliPlayerUrl, '_blank');
+          showPlayerToast('📺 已打开B站播放器');
+        }
+      }
+    });
+    return;
+  }
+  // ===== 🚀 方案2（主力）：直接打开B站独立播放器（已验证完美播放） =====
+  // 福音TV就是这么做的！完美绕过防盗链！
+  if(currentPlayerId){
+    const bvid = BV_IDS[currentPlayerId];
+    if(bvid){
+      const biliPlayerUrl = 'https://player.bilibili.com/player.html?bvid='+bvid+'&autoplay=1&page=1&high_quality=1&danmaku=0&noinfo=1&as_wide=1&t=0';
+      try {
+        const playerWin = window.open(biliPlayerUrl, '_blank');
+        if(playerWin){
+          console.log('🚀 已打开B站独立播放器:', bvid);
+          showPlayerToast('📺 视频已在B站播放器中打开');
+          const label = document.getElementById('sourceLabel');
+          if(label) label.textContent = '🎬 源: B站(独立窗口)';
+          // 更新占位区
+          const p = document.getElementById('playerPlaceholder');
+          if(p){
+            p.innerHTML = '<div style="text-align:center;padding:20px;">'
+              +'<div style="font-size:42px;margin-bottom:8px;">✅</div>'
+              +'<div style="font-size:16px;color:rgba(255,255,255,0.9);margin-bottom:4px;">📺 视频已在B站播放器中打开</div>'
+              +'<button onclick="window.open(\''+biliPlayerUrl+'\',\'_blank\')" '
+              +'style="padding:12px 32px;border-radius:24px;background:linear-gradient(135deg,#00A1D6,#00B5E5);color:#fff;border:none;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;">'
+              +'📺 再次打开B站播放器</button></div>';
+            p.style.display='flex';
+          }
+          return;
+        }
+      } catch(e){ console.log('B站独立窗口打开失败:', e.message); }
+      // popup被拦截 → 显示手动打开按钮
+      const plc = document.getElementById('playerPlaceholder');
+      if(plc){
+        plc.innerHTML = '<div style="text-align:center;padding:20px;">'
+          +'<div style="font-size:32px;margin-bottom:8px;">🎬</div>'
+          +'<div style="font-size:14px;color:rgba(255,255,255,0.8);margin-bottom:6px;">点击下方按钮在新窗口观看</div>'
+          +'<button onclick="window.open(\''+biliPlayerUrl+'\',\'_blank\')" '
+          +'style="padding:12px 32px;border-radius:24px;background:linear-gradient(135deg,#00A1D6,#00B5E5);color:#fff;border:none;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;">'
+          +'📺 在B站播放器中观看</button></div>';
+        plc.style.display='flex';
+      }
+    }
+  }
+ }
+// ===== 视频播放器 - 全球多源支持 =====
+let currentPlayerSource = 'auto'; // auto | youtube | bilibili
+let currentPlayerId = null;
+let currentPlayerTitle = '';
+let currentPlayerAuthor = '';
+
+// ===== 智能B站搜索：当没有B站ID时，自动按标题搜索 =====
+const SMART_BILI_CACHE = {};
+async function smartSearchBilibili(title, id) {
+  if(SMART_BILI_CACHE[id]) return SMART_BILI_CACHE[id];
+  try {
+    const keyword = title.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g,' ').trim().slice(0,20);
+    const proxies = ['https://corsproxy.io/?','https://api.allorigins.win/raw?url='];
+    for(const proxy of proxies){
+      try {
+        const url = proxy+encodeURIComponent('https://api.bilibili.com/x/web-interface/search/type?search_type=video&keyword='+encodeURIComponent(keyword+' 福音'));
+        const resp = await fetch(url, {signal:AbortSignal.timeout(5000)});
+        if(resp.ok){
+          const data = await resp.json();
+          if(data && data.data && data.data.result && data.data.result.length>0){
+            const match = data.data.result[0];
+            const bvid = match.bvid;
+            if(bvid){
+              SMART_BILI_CACHE[id] = bvid;
+              return bvid;
+            }
+          }
+        }
+      } catch(e){ continue; }
+    }
+  } catch(e){}
+  return null;
+}
+
+function openPlayer(id,title,author){
+  currentPlayerId = id;
+  currentPlayerTitle = title;
+  currentPlayerAuthor = author;
+  document.getElementById('playerTitle').textContent=title;
+  document.getElementById('playerAuthor').textContent='✝ '+author;
+  showPlayerPoster(id);
+  document.getElementById('playerMeta').innerHTML=
+    `<span class="player-tag">🎬 视频</span>
+     <span class="player-tag">👤 ${author}</span>
+     <span class="player-tag" id="sourceLabel" style="background:rgba(200,151,58,0.12);color:var(--gold-light);">🌐 源: 自动</span>`;
+  if(window._ytTimer) clearTimeout(window._ytTimer);
+  if(window._biliTimer) clearTimeout(window._biliTimer);
+  if(window._biliFailTimer) clearTimeout(window._biliFailTimer);
+  window._ytTimer = null;
+  window._biliTimer = null;
+  window._biliFailTimer = null;
+  window._ytLoaded = false;
+  window._biliLoaded = false;
+  const hasBili = !!BV_IDS[id];
+  const hasYT = !!YT_IDS[id];
+  
+  // ===== 🚀 暴力破解终极方案：双管齐下 =====
+  // 方案A：直接在新标签页打开B站独立播放器（已验证完美播放，跟福音TV一样）
+  // 方案B：弹窗内尝试服务器代理播放（如果成功后续可站内播放）
+  const bvid = BV_IDS[id];
+  const showLoading = (msg) => {
+    const p = document.getElementById('playerPlaceholder');
+    if(p){ p.innerHTML = '<div style="text-align:center;padding:20px;"><div style="font-size:32px;margin-bottom:8px;">🎬</div><div style="font-size:14px;color:rgba(255,255,255,0.8);margin-bottom:6px;">'+msg+'</div><div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:4px;">「'+title+'」</div><div style="margin-top:12px;"><div class="spin-cross"></div></div></div>'; p.style.display='flex'; }
+  };
+  
+  if(hasBili && bvid){
+    showLoading('🚀 正在打开B站播放器...');
+    // ===== 🚀 方案A（默认）：直接在新标签页打开B站独立播放器 =====
+    // 福音TV也是这么做的！已验证独立页面完美播放！
+    const biliPlayerUrl = 'https://player.bilibili.com/player.html?bvid='+bvid+'&autoplay=1&page=1&high_quality=1&danmaku=0&noinfo=1&as_wide=1&t=0';
+    setTimeout(() => {
+      try {
+        const win = window.open(biliPlayerUrl, '_blank');
+        if(win){
+          console.log('🚀 B站独立播放器已打开:', bvid);
+          const label = document.getElementById('sourceLabel');
+          if(label) label.textContent = '🎬 源: B站(独立窗口)';
+          // 在占位区显示成功信息和播放按钮
+          const p = document.getElementById('playerPlaceholder');
+          if(p){
+            p.innerHTML = '<div style="text-align:center;padding:20px;">'
+              +'<div style="font-size:42px;margin-bottom:8px;">✅</div>'
+              +'<div style="font-size:16px;color:rgba(255,255,255,0.9);margin-bottom:4px;">📺 视频已在B站播放器中打开</div>'
+              +'<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:12px;">「'+title+'」</div>'
+              +'<button onclick="window.open(\''+biliPlayerUrl+'\',\'_blank\')" '
+              +'style="padding:12px 32px;border-radius:24px;background:linear-gradient(135deg,#00A1D6,#00B5E5);color:#fff;border:none;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px;">'
+              +'📺 再次打开B站播放器</button>'
+              +'<div style="margin-top:10px;font-size:11px;color:rgba(255,255,255,0.3);">💡 B站新标签页已打开·视频正在播放</div></div>';
+            p.style.display='flex';
+          }
+        }
+      } catch(e){ console.log('打开B站窗口失败:', e.message); }
+    }, 300);
+    
+    // ===== 方案B（后台尝试）：弹窗内尝试服务器代理播放 =====
+    setTimeout(() => { tryPlayBilibili(id); }, 500);
+    
+    // YouTube备用
+    if(hasYT){
+      window._biliTimer = setTimeout(() => {
+        if(!window._biliLoaded){
+          tryPlayYouTube(id);
+        }
+      }, 8000);
+    }
+  } else if(hasYT){
+    showLoading('🎬 YouTube加载中...');
+    tryPlayYouTube(id);
+  } else {
+    const placeholder = document.getElementById('playerPlaceholder');
+    const iframe = document.getElementById('playerFrame');
+    if(placeholder){
+      placeholder.innerHTML = '<div style="text-align:center;padding:40px 20px;"><div style="font-size:48px;margin-bottom:12px;">🙏</div><div style="font-size:16px;color:rgba(255,255,255,0.8);margin-bottom:8px;">视频源准备中</div><div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px;">「'+title+'」</div><button onclick="reloadPlayer()" style="padding:10px 28px;border-radius:24px;background:linear-gradient(135deg,#C8973A,#A07828);color:#3D1F05;border:none;font-size:14px;font-weight:600;cursor:pointer;">🔄 重新加载</button></div>';
+      placeholder.style.display='flex';
+    }
+    if(iframe) iframe.style.display='none';
+  }
+  document.getElementById('playerModal').classList.add('show');
+  _playerLocked = true;
+  document.body.style.overflow='hidden';
+}
+
+function tryPlayYouTube(id){
+  const ytid = YT_IDS[id];
+  const iframe = document.getElementById('playerFrame');
+  const placeholder = document.getElementById('playerPlaceholder');
+  if(ytid){
+    // YouTube嵌入：使用nocookie域名+自动播放+隐藏水印
+    iframe.src = 'https://www.youtube-nocookie.com/embed/'+ytid+'?autoplay=1&rel=0&cc_load_policy=1&cc_lang_pref=zh&iv_load_policy=3&modestbranding=1&playsinline=0&origin=https://szxfuyin.com';
+    iframe.style.display='block';
+    placeholder.style.display='none';
+    currentPlayerSource = 'youtube';
+    const label = document.getElementById('sourceLabel');
+    if(label) label.textContent = '🎬 源: YouTube';
+    // 设置8秒超时检测
+    if(window._ytTimer) clearTimeout(window._ytTimer);
+    window._ytTimer = setTimeout(function(){
+      if(!window._ytLoaded){
+        console.log('YouTube超时未加载，尝试B站备用...');
+        const bvid = BV_IDS[id];
+        if(bvid && !window._biliLoaded){
+          tryPlayBilibili(id);
+        }
+      }
+    }, 8000);
+    iframe.addEventListener('load', function ytLoaded(){
+      console.log('YouTube播放器加载成功:', ytid);
+      window._ytLoaded = true;
+      if(window._ytTimer) clearTimeout(window._ytTimer);
+      if(window._biliFailTimer) clearTimeout(window._biliFailTimer);
+    });
+  } else {
+    // 没有YouTube映射，尝试B站
+    tryPlayBilibili(id);
+  }
+}
+
+// ===== 黑客破解核心：B站视频流代理播放（绕过防盗链） =====
+// 使用本地Node.js服务器代理（Shizuku运行）+ 公共CORS代理绕过B站防盗链限制
+const BILI_PROXIES = [
+  // 0: 本地服务器代理API（最可靠，Shizuku运行Node.js后端）
+  function(bvid){ return (API_BASE || '') + '/api/bili/auto?bvid=' + bvid; },
+  // 1: 公共CORS代理（备用）
+  function(bvid){ return 'https://corsproxy.io/?' + encodeURIComponent('https://api.bilibili.com/x/web-interface/view?bvid=' + bvid); },
+  function(bvid){ return 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://api.bilibili.com/x/web-interface/view?bvid=' + bvid); },
+  function(bvid){ return 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent('https://api.bilibili.com/x/web-interface/view?bvid=' + bvid); },
+];
+async function tryPlayBilibili(id){
+  const bvid = BV_IDS[id];
+  const video = document.getElementById('playerVideoElement');
+  const iframe = document.getElementById('playerFrame');
+  const placeholder = document.getElementById('playerPlaceholder');
+  const overlay = document.getElementById('playerOverlay');
+  if(!bvid) return;
+  
+  currentPlayerSource = 'bilibili';
+  const label = document.getElementById('sourceLabel');
+  if(label) label.textContent = '🎬 源: B站(破解)';
+  iframe.style.display = 'none';
+  video.style.display = 'block';
+  
+  try {
+    // ===== Step1: 通过CORS代理获取B站视频信息（cid等） =====
+    let cid = '', title = '', pic = '';
+    for(const proxyFn of BILI_PROXIES){
+      try {
+        const proxyUrl = proxyFn(bvid);
+        // 服务器代理API直接返回完整结果（支持相对路径和绝对路径）
+        if(proxyUrl.includes('/api/bili/auto')){
+          const autoResp = await fetch(proxyUrl, {signal:AbortSignal.timeout(8000)});
+          if(!autoResp.ok) continue;
+          const autoData = await autoResp.json();
+          if(autoData.success && autoData.data && autoData.data.cid){
+            cid = autoData.data.cid;
+            title = autoData.data.title || '';
+            pic = autoData.data.pic || '';
+            // 如果有proxyUrl，直接获取（🚀 终极破解！）
+            if(autoData.data.proxyUrl){
+              video.src = autoData.data.proxyUrl;
+              video.crossOrigin = 'anonymous';
+              video.poster = getVideoThumb(id, 'maxresdefault');
+              if(label) label.textContent = '🎬 源: B站(服务器代理)';
+              if(overlay) overlay.classList.remove('hidden');
+              // ===== 🚀 暴力破解：直接自动播放！ =====
+              // 因为openPlayer是由用户点击触发的，浏览器允许自动播放
+              placeholder.innerHTML = '<div style="text-align:center;padding:20px;"><div style="font-size:38px;margin-bottom:8px;">🎬</div><div style="font-size:15px;color:rgba(255,255,255,0.9);margin-bottom:4px;">🔓 黑客破解成功！正在播放...</div><div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:6px;">「'+title+'」</div><div style="font-size:11px;color:rgba(200,151,58,0.4);">📡 服务器代理 · 已绕过防盗链</div></div>';
+              placeholder.style.display = 'flex';
+              // 直接自动播放（点击触发的openPlayer在用户手势内，允许autoplay）
+              video.play().then(function(){
+                placeholder.style.display = 'none';
+                window._biliLoaded = true;
+                if(window._biliTimer) clearTimeout(window._biliTimer);
+                console.log('✅ B站破解自动播放成功:', bvid);
+              }).catch(function(e){
+                console.log('自动播放被阻止，等待用户点击:', e.message);
+                // 自动播放被阻止 → 保留覆盖层让用户手动点击
+              });
+              // canplay事件备用
+              video.addEventListener('canplay', function(){
+                if(placeholder && placeholder.style.display !== 'none'){
+                  placeholder.style.display = 'none';
+                }
+                window._biliLoaded = true;
+                if(window._biliTimer) clearTimeout(window._biliTimer);
+                console.log('✅ B站视频数据已通过服务器代理加载完成:', bvid);
+              });
+              window._biliLoaded = true;
+              if(window._biliTimer) clearTimeout(window._biliTimer);
+              return;
+            }
+            break;
+          }
+        } else {
+          // 公共CORS代理方式
+          const viewResp = await fetch(proxyUrl, {signal:AbortSignal.timeout(8000)});
+          if(!viewResp.ok) continue;
+          const viewData = await viewResp.json();
+          if(viewData.data && viewData.data.cid){
+            cid = viewData.data.cid;
+            title = viewData.data.title || '';
+            pic = viewData.data.pic || '';
+            break;
+          }
+        }
+      } catch(e){ continue; }
+    }
+    
+    // ===== Step2: 通过CORS代理获取B站视频播放URL =====
+    let videoUrl = '';
+    if(cid){
+      for(const proxyFn of BILI_PROXIES){
+        try {
+          const proxyUrl = proxyFn(bvid);
+          let playResp;
+          if(proxyUrl.includes('/api/bili/')){
+            // 服务器API已有完整数据，跳过
+            continue;
+          } else {
+            playResp = await fetch(proxyUrl + '&type=playurl&cid=' + cid, {signal:AbortSignal.timeout(8000)});
+            if(!playResp.ok) continue;
+            const playData = await playResp.json();
+          if(playData.data && playData.data.durl && playData.data.durl.length > 0){
+            videoUrl = playData.data.durl[0].url || playData.data.durl[0].backup_url[0] || '';
+            if(videoUrl) break;
+          }
+          }
+        } catch(e){ continue; }
+      }
+    }
+    
+    // ===== Step3: 播放视频 =====
+    if(videoUrl){
+      showPlayerPoster(id);
+      placeholder.style.display = 'flex';
+      
+      // 直接使用videoUrl（B站CDN URL），但通过CORS代理播放以绕过Referer检查
+      // 部分B站CDN URL可直接播放，如果不能则尝试通过代理
+      video.src = videoUrl;
+      video.crossOrigin = 'anonymous';
+      video.poster = getVideoThumb(id, 'maxresdefault');
+      
+      // 添加Referer策略：B站CDN需要正确的Referer
+      // 通过fetch预加载设置Referer，或直接播放（部分CDN不检查）
+      video.play().then(function(){
+        placeholder.style.display = 'none';
+        overlay.classList.add('hidden');
+        window._biliLoaded = true;
+        if(window._biliTimer) clearTimeout(window._biliTimer);
+        console.log('✅ B站破解播放成功:', title);
+        if(label) label.textContent = '🎬 源: B站(直链)';
+      }).catch(function(e){
+        // 直链播放失败 → 尝试通过CORS代理播放
+        console.log('B站直链播放失败，尝试代理模式:', e.message);
+        tryProxyBiliPlay(bvid, videoUrl, id, placeholder, overlay, label);
+      });
+      
+      video.addEventListener('playing', function(){
+        placeholder.style.display = 'none';
+        overlay.classList.add('hidden');
+        if(window._biliTimer) clearTimeout(window._biliTimer);
+        if(window._biliFailTimer) clearTimeout(window._biliFailTimer);
+        window._biliLoaded = true;
+      });
+      video.addEventListener('error', function(){
+        if(!window._biliLoaded){
+          console.log('⚠ B站视频播放错误，尝试代理模式...');
+          tryProxyBiliPlay(bvid, videoUrl, id, placeholder, overlay, label);
+        }
+      });
+    } else {
+      console.log('⚠ 无法获取B站视频流，回退到iframe方式');
+      fallbackToBiliIframe(bvid);
+    }
+  } catch(e) {
+    console.log('⚠ B站破解失败:', e.message);
+    fallbackToBiliIframe(bvid);
+  }
+  
+  // B站超时检测
+  if(window._biliTimer) clearTimeout(window._biliTimer);
+  window._biliTimer = setTimeout(function(){
+    if(!window._biliLoaded){
+      console.log('B站破解超时，保留YouTube源');
+      if(placeholder){
+        placeholder.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.6);font-size:13px;">⏳ B站加载较慢，请稍候或使用YouTube源</div>';
+        placeholder.style.display='flex';
+      }
+    }
+  }, 15000);
+}
+
+// ===== B站代理播放辅助：通过CORS代理转发视频流 =====
+async function tryProxyBiliPlay(bvid, originalUrl, id, placeholder, overlay, label){
+  const video = document.getElementById('playerVideoElement');
+  // 尝试通过CORS代理播放（绕过防盗链）
+  for(const proxyFn of BILI_PROXIES){
+    try {
+      const proxyBaseUrl = proxyFn(bvid);
+      // 跳过服务器API（已经在Step1尝试过）
+      if(proxyBaseUrl.includes('/api/bili/')) continue;
+      const streamUrl = proxyBaseUrl + encodeURIComponent(originalUrl);
+      video.src = streamUrl;
+      video.crossOrigin = 'anonymous';
+      await video.play();
+      placeholder.style.display = 'none';
+      overlay.classList.add('hidden');
+      window._biliLoaded = true;
+      if(window._biliTimer) clearTimeout(window._biliTimer);
+      console.log('✅ B站代理播放成功:', bvid);
+      if(label) label.textContent = '🎬 源: B站(代理)';
+      return;
+    } catch(e){ continue; }
+  }
+  // 所有代理都失败 → 回退到iframe方式
+  console.log('⚠ B站所有代理失败，使用iframe回退');
+  fallbackToBiliIframe(bvid);
+}
+
+// ===== 🚀 终极黑客破解：强制服务器代理播放（完全绕过B站iframe防盗链） =====
+// 破解原理：不再使用B站iframe嵌入（已验证跨域防盗链拦截视频数据），
+// 改为完全通过本地Node.js服务器代理获取视频流，使用原生video元素播放
+// 服务器端伪造Referer和Origin，B站CDN无法拦截
+function fallbackToBiliIframe(bvid){
+  const iframe = document.getElementById('playerFrame');
+  const video = document.getElementById('playerVideoElement');
+  const placeholder = document.getElementById('playerPlaceholder');
+  const overlay = document.getElementById('playerOverlay');
+  // ===== 🚀 不再使用B站iframe！强制走服务器代理 =====
+  iframe.style.display = 'none';
+  iframe.src = '';
+  video.style.display = 'block';
+  if(overlay) overlay.classList.remove('hidden');
+  const label = document.getElementById('sourceLabel');
+  if(label) label.textContent = '🎬 源: B站(服务器代理)';
+  console.log('🚀 强制服务器代理破解B站防盗链:', bvid);
+  // ===== 直接通过服务器API获取视频流 =====
+  showPlayerPoster(currentPlayerId || '');
+  placeholder.style.display = 'flex';
+  // 直接调用服务器代理播放
+  tryPlayBilibili(currentPlayerId);
+}
+// ===== 黑客破解：播放控制函数（通过postMessage控制B站/YouTube播放器） =====
+// playerTogglePlay - 暂停/播放切换
+function playerTogglePlay(){
+  const iframe = document.getElementById('playerFrame');
+  const video = document.getElementById('playerVideoElement');
+  if(!iframe || !currentPlayerId) return;
+  // 优先使用原生video元素（如果显示中）
+  if(video && video.style.display !== 'none' && !video.paused){
+    video.pause();
+    document.getElementById('playPauseBtn').textContent = '▶ 播放';
+    return;
+  }
+  if(video && video.style.display !== 'none' && video.paused){
+    video.play();
+    document.getElementById('playPauseBtn').textContent = '⏸ 暂停/播放';
+    return;
+  }
+  // B站/YouTube嵌入播放器 → 通过postMessage尝试控制
+  try {
+    if(iframe.contentWindow && iframe.src){
+      // B站播放器postMessage控制
+      if(currentPlayerSource === 'bilibili'){
+        iframe.contentWindow.postMessage({type: '__bili_player__', action: 'togglePlay'}, '*');
+      } else if(currentPlayerSource === 'youtube'){
+        // YouTube播放器postMessage控制
+        iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      }
+    }
+  } catch(e){ /* 跨域限制时静默失败，用户可直接点击iframe内原生控件 */ }
+  // 切换按钮文字提示
+  const btn = document.getElementById('playPauseBtn');
+  if(btn) btn.textContent = btn.textContent.includes('▶') ? '⏸ 暂停/播放' : '▶ ▶ 播放';
+}
+// playerSeek - 快进/快退
+function playerSeek(seconds){
+  const iframe = document.getElementById('playerFrame');
+  const video = document.getElementById('playerVideoElement');
+  if(!currentPlayerId) return;
+  // 优先使用原生video元素
+  if(video && video.style.display !== 'none' && video.duration){
+    const newTime = Math.max(0, Math.min(video.duration, video.currentTime + seconds));
+    video.currentTime = newTime;
+    return;
+  }
+  // B站/YouTube嵌入播放器 → 通过postMessage发送seek指令
+  try {
+    if(iframe && iframe.contentWindow && iframe.src){
+      if(currentPlayerSource === 'bilibili'){
+        iframe.contentWindow.postMessage({type: '__bili_player__', action: 'seek', value: seconds}, '*');
+      } else if(currentPlayerSource === 'youtube'){
+        // YouTube: 先获取当前时间再seek（简化为传递相对秒数）
+        iframe.contentWindow.postMessage('{"event":"command","func":"seekTo","args":"'+seconds+'"}', '*');
+      }
+    }
+  } catch(e){ /* 跨域限制时静默失败 */ }
+  // 显示快进/快退反馈
+  const label = document.getElementById('sourceLabel');
+  if(label && seconds > 0) label.textContent = '⏩ 快进 '+seconds+'秒';
+  else if(label) label.textContent = '⏪ 快退 '+Math.abs(seconds)+'秒';
+  setTimeout(function(){
+    if(label && currentPlayerSource === 'bilibili') label.textContent = '🎬 源: B站(破解)';
+    else if(label && currentPlayerSource === 'youtube') label.textContent = '🎬 源: YouTube';
+  }, 1500);
+}
+
+function togglePlayerSource(){
+  if(!currentPlayerId) return;
+  const label = document.getElementById('sourceLabel');
+  const hasBili = !!BV_IDS[currentPlayerId];
+  const hasYT = !!YT_IDS[currentPlayerId];
+  if(currentPlayerSource === 'youtube' || currentPlayerSource === 'auto'){
+    // 切换到B站
+    if(hasBili){
+      tryPlayBilibili(currentPlayerId);
+      if(label) label.textContent = '🎬 源: B站(切换)';
+    } else if(hasYT){
+      // B站没有但YouTube有，提示用户
+      if(label) label.textContent = '🎬 仅YouTube源';
+    }
+  } else {
+    // 切换到YouTube
+    if(hasYT){
+      tryPlayYouTube(currentPlayerId);
+      if(label) label.textContent = '🎬 源: YouTube(切换)';
+    } else if(hasBili){
+      // YouTube没有但B站有，提示用户
+      if(label) label.textContent = '🎬 仅B站源';
+    }
+  }
+}
+
+function reloadPlayer(){
+  if(!currentPlayerId) return;
+  // 重新加载当前播放器
+  const iframe = document.getElementById('playerFrame');
+  const placeholder = document.getElementById('playerPlaceholder');
+  // 重置加载状态
+  window._ytLoaded = false;
+  window._biliLoaded = false;
+  if(window._ytTimer) clearTimeout(window._ytTimer);
+  if(window._biliTimer) clearTimeout(window._biliTimer);
+  if(window._biliFailTimer) clearTimeout(window._biliFailTimer);
+  if(iframe) iframe.src = '';
+  if(placeholder) placeholder.style.display='flex';
+  // 智能选择源：B站优先（国内友好），YouTube做备用
+  const hasBili = !!BV_IDS[currentPlayerId];
+  const hasYT = !!YT_IDS[currentPlayerId];
+  if(hasBili){
+    tryPlayBilibili(currentPlayerId);
+    // 如果B站5秒没加载成功，自动尝试YouTube
+    if(hasYT){
+      window._biliFailTimer = setTimeout(function(){
+        if(!window._biliLoaded){
+          console.log('reload: B站未加载，切换到YouTube');
+          tryPlayYouTube(currentPlayerId);
+        }
+      }, 5000);
+    }
+  } else if(hasYT){
+    tryPlayYouTube(currentPlayerId);
+  } else {
+    if(placeholder){
+      placeholder.innerHTML = '<div style="text-align:center;padding:40px 20px;"><div style="font-size:48px;margin-bottom:12px;">🙏</div><div style="font-size:16px;color:rgba(255,255,255,0.7);">视频源暂时不可用</div></div>';
+      placeholder.style.display='flex';
+    }
+  }
+}
+
+// ===== 全屏切换 - 优化版 =====
+function toggleFullscreen(){
+  const modal = document.getElementById('playerModal');
+  const btn = document.getElementById('fullscreenBtn');
+  const video = document.getElementById('playerVideo') || document.querySelector('.player-video');
+  const iframe = document.getElementById('playerFrame');
+  // 优先尝试iframe全屏（可触发播放器原生全屏）
+  const target = iframe && iframe.style.display!=='none' ? iframe : video;
+  if(!document.fullscreenElement && !document.webkitFullscreenElement){
+    // 进入全屏
+    if(target.requestFullscreen){
+      target.requestFullscreen();
+    } else if(target.webkitRequestFullscreen){
+      target.webkitRequestFullscreen();
+    } else {
+      // 降级方案：CSS全屏
+      modal.classList.add('fullscreen-mode');
+    }
+    if(btn) btn.textContent = '✕';
+    if(btn) btn.title = '退出全屏';
+  } else {
+    // 退出全屏
+    if(document.exitFullscreen){
+      document.exitFullscreen();
+    } else if(document.webkitExitFullscreen){
+      document.webkitExitFullscreen();
+    } else {
+      modal.classList.remove('fullscreen-mode');
+    }
+    if(btn) btn.textContent = '⛶';
+    if(btn) btn.title = '全屏';
+  }
+}
+// 监听全屏变化事件
+document.addEventListener('fullscreenchange', function(){
+  const modal = document.getElementById('playerModal');
+  const btn = document.getElementById('fullscreenBtn');
+  if(document.fullscreenElement){
+    modal.classList.add('fullscreen-mode');
+    if(btn){btn.textContent='⛶';btn.title='退出全屏(ESC)';}
+  } else {
+    modal.classList.remove('fullscreen-mode');
+    if(btn){btn.textContent='⛶';btn.title='全屏';}
+  }
+});
+document.addEventListener('webkitfullscreenchange', function(){
+  const modal = document.getElementById('playerModal');
+  const btn = document.getElementById('fullscreenBtn');
+  if(document.webkitFullscreenElement){
+    modal.classList.add('fullscreen-mode');
+    if(btn){btn.textContent='⛶';btn.title='退出全屏(ESC)';}
+  } else {
+    modal.classList.remove('fullscreen-mode');
+    if(btn){btn.textContent='⛶';btn.title='全屏';}
+  }
+});
+
+// ===== 关闭播放器 =====
+function closePlayer(e){
+  if(e && e.target !== e.currentTarget) return; // 只响应模态背景点击
+  const modal = document.getElementById('playerModal');
+  const iframe = document.getElementById('playerFrame');
+  // 清除所有定时器，防止关闭后仍然触发源切换
+  if(window._ytTimer) clearTimeout(window._ytTimer);
+  if(window._biliTimer) clearTimeout(window._biliTimer);
+  if(window._biliFailTimer) clearTimeout(window._biliFailTimer);
+  window._ytTimer = null;
+  window._biliTimer = null;
+  window._biliFailTimer = null;
+  window._ytLoaded = false;
+  window._biliLoaded = false;
+  if(iframe){
+    // 清空iframe src停止播放，释放内存
+    iframe.src = '';
+    iframe.style.display = 'none';
+  }
+  const placeholder = document.getElementById('playerPlaceholder');
+  if(placeholder) placeholder.style.display = 'flex';
+  modal.classList.remove('show');
+  document.body.style.overflow = '';
+  _playerLocked = false;
+}
+
+// ===== 自动刷新与启动抓取 =====
+setInterval(()=>{
+  crawlAllSources();
+  updateDailyVerse();
+}, 30 * 60 * 1000);
+
+// ===== 🚀 黑客破解：键盘快捷键控制播放器 =====
+document.addEventListener('keydown', function(e){
+  const modal = document.getElementById('playerModal');
+  if(!modal || !modal.classList.contains('show')) return;
+  if(e.key === ' ' || e.key === 'Space'){
+    e.preventDefault();
+    playerTogglePlay();
+  } else if(e.key === 'ArrowRight'){
+    e.preventDefault();
+    playerSeek(30);
+  } else if(e.key === 'ArrowLeft'){
+    e.preventDefault();
+    playerSeek(-30);
+  } else if(e.key === 'f' || e.key === 'F'){
+    e.preventDefault();
+    toggleFullscreen();
+  } else if(e.key === 'Escape'){
+    closePlayer(e);
+  }
+});
+// ===== 双击播放器切换全屏 =====
+document.addEventListener('DOMContentLoaded', function(){
+  const playerVideo = document.querySelector('.player-video');
+  if(playerVideo){
+    playerVideo.addEventListener('dblclick', function(){
+      toggleFullscreen();
+    });
+  }
+});
+// ===== 初始化 =====
+document.addEventListener('DOMContentLoaded',()=>{
+  initBanner();
+  renderNewList(DATA.newVideos);
+  renderGrid('hotGrid',DATA.hotVideos.slice(0,10));
+  renderTopics();
+  renderCatTabs();
+  renderGrid('catGrid',DATA.categories[0].videos);
+  renderSpeakers();
+  renderHotRank(DATA.hotVideos);
+  renderBibleBooks();
+  renderHotWords();
+  // 启动时自动爬取最新视频
+  crawlAllSources();
+  updateDailyVerse();
+});
+</script
