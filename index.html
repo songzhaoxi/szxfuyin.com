@@ -1088,6 +1088,7 @@ ul{list-style:none;}
     <a href="#" onclick="navTo('cat_21',this)"><span class="s-icon">🎞️</span>福音视频</a>
     <a href="#" onclick="navTo('cat_26',this)"><span class="s-icon">🎼</span>圣乐崇拜</a>
     <a href="#" onclick="navTo('cat_290',this)"><span class="s-icon">🎓</span>神学课程</a>
+    <a href="#" onclick="navTo('cat_25',this)"><span class="s-icon">🌱</span>初信造就</a>
   </div>
 
   <div class="sidebar-divider"></div>
@@ -1341,515 +1342,2396 @@ ul{list-style:none;}
 <!-- 回到顶部 -->
 <button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 <script>
-// ===== 真实视频数据：movid → YouTube视频ID映射 =====
+// API基础地址（空=同域，生产环境请配置完整URL）
+const API_BASE = '';
 const YT_IDS = {
-  // 史普罗
-  3952:"o7RsGcaQ4D0", 3951:"qjHPdTXK3iE", 3950:"8MTvCthRcaY", 3949:"HxRlYLH2lLc", 3948:"MlBgFyTYPRg",
-  // 陈可嘉 / 复活节
-  3947:"Sxe20AzwbZI", 3946:"E6h_3pZLVk0", 3945:"M_V2iM8Z3hM",
-  // 冯秉诚
-  3063:"Tf4Z5y-IkAk", 3039:"UYIByoCNBPs", 3836:"KMs2NxFhp80", 3931:"m7MdN6HJmW0",
-  // 约翰派博
-  2999:"SQZFBzW1CdA", 3925:"wL4LmQqRYN8",
-  // 林慈信
-  2997:"JHQcBwKftoc", 2492:"tX5KJltVYns",
-  // 提摩太·凯勒
-  2765:"_Qul32OdPx8",
-  // 冬至
-  2723:"gPqFnq1tIAQ",
-  // 蔡丽贞
-  2511:"N4F3aFCVZjc",
-  // 唐崇荣
-  2491:"9fO0cHXiGEM",
-  // 刘志雄
-  3039:"hVhY_8cmS2c", 2935:"6ESHzf_PA_k", 3933:"8Uq3_6RWDcA",
-  // 于宏洁
-  3936:"-o7kBP3qHGQ",
-  // 苏立忠
-  3932:"pe4YQdxZ2xI", 3027:"RkJhKJ5l2-k",
-  // 吴继扬
-  3938:"hQwUjbZhjY0",
-  // 麦安迪
-  3050:"h5dSqkQJcLE",
-  // 泰德·特里普
-  3035:"0GA_ycXXhNY",
-  // 游智婷 / 赞美诗歌
-  3942:"BHlVJZVFhac",
-  // 西门 / 国度音乐会
-  3926:"v7RxC5JFACo", 3889:"3_GdfQDHr8c",
-  // 大卫鲍森
-  0:"VY_TVo7kHqE",  // 备用
-  // The Bible Project
-  3945:"eVx4yIoaOfo",
-  // ===== 真实福音电影YouTube =====
-  // 耶稣传4K国语
-  2001:"CCToPMy_RRU",
-  // 耶稣传(1979)
-  2002:"CCToPMy_RRU",
-  // 圣经故事
-  2003:"UqFZ8H4xJ6M",
-  // 耶稣的一生
-  2004:"L4o4N6WcR4Q",
-  // 耶稣的足迹
-  2005:"dQn1Wp2jYhg",
-  // 基督教讲道
-  2006:"pZaFv6E7CZo",
-  // 复活节讲道
-  2007:"hPZRn6UKJ9A",
-  // ===== 真实福音动漫YouTube =====
-  // 妙妙书
-  2011:"Y6NnxHDSKo8",
-  // 圣经故事动画
-  2012:"E1rNOAbDN7s",
-  // 圣经动画
-  2013:"oMt2KMXjT2c",
-  // ===== 真实赞美诗歌YouTube =====
-  // 一小时敬拜歌曲
-  2031:"5J2eV4RCsZQ",
-  // 全然向祢
-  2032:"BHlVJZVFhac",
-  // 尼克胡哲见证
-  2021:"6Fz9d2vFqI0",
-  // ===== 新增福音电影 =====
-  2100:"BXDOXknTG-o", // 耶稣传-上集 补充版
-  2101:"p0UqYVY_kdA", // 耶稣传4K沪语版
-  2102:"aM-oKUQ9JP8", // 圣经故事第一季第一集
-  2103:"CbEUqt9BidA", // 圣经故事合集讲解
-  2104:"vCYGpo04aVA", // 基督的最后诱惑赏析
-  2105:"q4rPnNAWjbs", // 圣经故事-创世纪
-  // ===== 新增福音动漫 =====
-  2200:"E1rNOAbDN7s", // 妙妙书2-兄弟之争
-  2201:"oMt2KMXjT2c", // 妙妙书4-考验
-  2202:"Y6NnxHDSKo8", // 超级妙妙书
-  2203:"nH0yj0MaYRw", // 圣经故事动画合集
-  // ===== 新增福音见证 =====
-  2300:"m7MdN6HJmW0", // 刘志雄-认识真理
-  2301:"6ESHzf_PA_k", // 刘志雄-牵手一世情
-  2302:"8Uq3_6RWDcA", // 刘志雄-患癌经历
-  2303:"KMs2NxFhp80", // 冯秉诚-信心见证
-  // ===== 新增赞美诗歌 =====
-  2400:"5J2eV4RCsZQ", // 每一天都是恩典
-  2401:"o7RsGcaQ4D0", // 云上太阳
-  2402:"M_V2iM8Z3hM", // 赞美之泉敬拜
-  // ===== 新增婚姻家庭 =====
-  2500:"h5dSqkQJcLE", // 圣经中的婚姻真谛
-  2501:"0GA_ycXXhNY", // 合神心意的家庭
-  // ===== 新增福音慕道 =====
-  2600:"Sxe20AzwbZI", // 耶稣是谁-福音信息
-  2601:"Tf4Z5y-IkAk", // 认识耶稣得平安
-  // ===== 新增福音证道 =====
-  2700:"VY_TVo7kHqE", // 于宏洁讲道精选
-  2701:"8MTvCthRcaY", // 唐崇荣讲道集
-  // ===== 新增属灵成长 =====
-   2800:"HxRlYLH2lLc", // 属灵生命成长
-   2801:"MlBgFyTYPRg", // 每日灵修
-   // ===== 新增福音视频YouTube =====
-   3000:"CCToPMy_RRU", // 福音视频精选
-   3001:"UqFZ8H4xJ6M", // 耶稣生平
-   3002:"L4o4N6WcR4Q", // 十字架的爱
-   3003:"dQn1Wp2jYhg", // 福音故事
-   3004:"pZaFv6E7CZo", // 信仰见证
-   3005:"hPZRn6UKJ9A", // 恩典365
-   3006:"BXDOXknTG-o", // 灵修分享
-   3007:"p0UqYVY_kdA", // 每日灵粮
-   3008:"aM-oKUQ9JP8", // 福音真理
-   3009:"CbEUqt9BidA", // 十架救恩
-   // ===== 新增圣乐崇拜YouTube =====
-   3100:"vCYGpo04aVA", // 圣乐赞美
-   3101:"q4rPnNAWjbs", // 传统圣诗
-   3102:"5J2eV4RCsZQ", // 教会合唱
-   3103:"BHlVJZVFhac", // 圣乐敬拜
-   3104:"6Fz9d2vFqI0", // 荣耀颂赞
-   3105:"o7RsGcaQ4D0", // 管风琴圣乐
-   3106:"qjHPdTXK3iE", // 合唱赞美
-   3107:"8MTvCthRcaY", // 诗班献唱
-   // ===== 新增神学课程YouTube =====
-   3200:"HxRlYLH2lLc", // 系统神学
-   3201:"MlBgFyTYPRg", // 圣经神学
-   3202:"Sxe20AzwbZI", // 教会历史
-   3203:"E6h_3pZLVk0", // 释经学
-   3204:"M_V2iM8Z3hM", // 护教学
-   3205:"Tf4Z5y-IkAk", // 门徒训练
-   3206:"UYIByoCNBPs", // 宣教学
-   3207:"KMs2NxFhp80", // 教牧辅导
- };
-// ===== B站(Bilibili)视频ID映射（中国友好） =====
+  1001:"_T3GcH3bPzE",
+  1002:"8lF1vDCj7Fs",
+  1003:"Hq4sa6Q-ZrY",
+  1004:"Ou1GWhh_xgg",
+  1005:"MlBgFyTYPRg",
+  1006:"Q1J0IXR5iK4",
+  1007:"Sxe20AzwbZI",
+  1008:"o7RsGcaQ4D0",
+  1009:"zDxR0mJ8T5k",
+  1010:"E6h_3pZLVk0",
+  1011:"8MTvCthRcaY",
+  1012:"HxRlYLH2lLc",
+  1013:"qjHPdTXK3iE",
+  1014:"M_V2iM8Z3hM",
+  1015:"Tf4Z5y-IkAk",
+  1016:"UYIByoCNBPs",
+  1017:"KMs2NxFhp80",
+  1018:"8lF1vDCj7Fs",
+  1019:"Sxe20AzwbZI",
+  1020:"E6h_3pZLVk0",
+  1021:"8lF1vDCj7Fs",
+  1022:"_T3GcH3bPzE",
+  1023:"_T3GcH3bPzE",
+  1024:"8lF1vDCj7Fs",
+  1025:"Hq4sa6Q-ZrY",
+  1026:"Ou1GWhh_xgg",
+  1027:"MlBgFyTYPRg",
+  1028:"Y6NnxHDSKo8",
+  1029:"Sxe20AzwbZI",
+  1030:"o7RsGcaQ4D0",
+  1031:"E6h_3pZLVk0",
+  1032:"8MTvCthRcaY",
+  1033:"qjHPdTXK3iE",
+  1034:"M_V2iM8Z3hM",
+  1035:"6Fz9d2vFqI0",
+  1036:"-o7kBP3qHGQ",
+  1037:"5J2eV4RCsZQ",
+  1038:"BHlVJZVFhac",
+  1039:"E1rNOAbDN7s",
+  1040:"oMt2KMXjT2c",
+  1041:"nH0yj0MaYRw",
+  1042:"m7MdN6HJmW0",
+  1043:"UYIByoCNBPs",
+  1044:"KMs2NxFhp80",
+  1045:"qjHPdTXK3iE",
+  1046:"o7RsGcaQ4D0",
+  1047:"E6h_3pZLVk0",
+  1048:"h5dSqkQJcLE",
+  1049:"0GA_ycXXhNY",
+  1050:"JHQcBwKftoc",
+  1051:"_Qul32OdPx8",
+  1052:"9fO0cHXiGEM",
+  1053:"vCYGpo04aVA",
+  1054:"q4rPnNAWjbs",
+  1055:"5J2eV4RCsZQ",
+  1056:"tX5KJltVYns",
+  1057:"9fO0cHXiGEM",
+  1058:"-o7kBP3qHGQ",
+  1059:"m7MdN6HJmW0",
+  1060:"0GA_ycXXhNY",
+  1061:"Sxe20AzwbZI",
+  1062:"JHQcBwKftoc",
+  1063:"JHQcBwKftoc",
+  1064:"o7RsGcaQ4D0",
+  1065:"vCYGpo04aVA",
+  1066:"q4rPnNAWjbs",
+  1067:"5J2eV4RCsZQ",
+  1068:"_T3GcH3bPzE",
+  1069:"6Fz9d2vFqI0",
+  1070:"KMs2NxFhp80",
+  1071:"eVx4yIoaOfo",
+  1072:"m7MdN6HJmW0",
+  1073:"m7MdN6HJmW0",
+  1074:"o7RsGcaQ4D0",
+  1075:"h5dSqkQJcLE",
+  1076:"0GA_ycXXhNY",
+  1077:"Sxe20AzwbZI",
+  1078:"pe4YQdxZ2xI",
+  1079:"pe4YQdxZ2xI",
+  1080:"pe4YQdxZ2xI",
+  1081:"RkJhKJ5l2-k",
+  1082:"RkJhKJ5l2-k",
+  1083:"KMs2NxFhp80",
+  1084:"UYIByoCNBPs",
+  1085:"6Fz9d2vFqI0",
+  1086:"6Fz9d2vFqI0",
+  1087:"0GA_ycXXhNY",
+  1088:"0GA_ycXXhNY",
+  1089:"KMs2NxFhp80",
+};
 const BV_IDS = {
-  // 史普罗 - B站有大量史普罗讲道合集
-  3952:"BV1YJ411B7Nq", 3951:"BV1wJ411B7Nq", 3950:"BV1cJ411i7Nq", 3949:"BV1sJ411i7Nq", 3948:"BV1uJ411i7Nq",
-  // 冯秉诚 - B站福音布道
-  3063:"BV1db411i7Nq", 3039:"BV1db411i7Nq", 3836:"BV1YJ411B7Nq", 3931:"BV1wJ411B7Nq",
-  // 唐崇荣
-  2491:"BV1s4411k7Nq",
-  // 刘志雄
-  3039:"BV1cJ411i7Nq", 2935:"BV1uJ411i7Nq", 3933:"BV1YJ411B7Nq",
-  // 赞美诗歌 / 敬拜
-  3942:"BV1b4411k7Nq", 3926:"BV1b4411k7Nq", 3889:"BV1b4411k7Nq",
-  // 大卫鲍森 - B站有全集
-  0:"BV1Jb411i7Nq",
-  // Bible Project
-  3945:"BV1cb411k7Nq",
-  // ===== 真实B站福音电影 =====
-  // 耶稣传4K国语台配
-  2001:"BV1MyqnBeEVo",
-  2002:"BV1BCZKB8ERd",
-  // 圣经故事4K画质
-  2003:"BV1kj411d7pK",
-  // 耶稣的一生
-  2004:"BV1mU411U7te",
-  // 耶稣的足迹（中配）
-  2005:"BV1u8Ngz3EUT",
-  // 基督教讲道
-  2006:"BV1Mq5BzkEjf",
-  // 复活节讲道
-  2007:"BV1QyG3zNEMD",
-  // ===== 真实B站福音动漫 =====
-  // 妙妙书
-  2011:"BV121yYY4E1G",
-  // 圣经故事动画
-  2012:"BV1f8vyBVENK",
-  // 圣经动画
-  2013:"BV1NumQY1ErS",
-  // ===== 真实B站赞美诗歌 =====
-  // 一小时最美敬拜歌曲
-  2031:"BV1zRnRzdEbF",
-  // 全然向祢钢琴版
-  2032:"BV1t79gYSEW1",
-  // 尼克胡哲见证
-  2021:"BV1Fb411k7Nq",
-  // ===== 新增福音电影B站 =====
-  2100:"BV1DtRWBXEkp", // 耶稣传-上集
-  2101:"BV1rR2gBEEqY", // 耶稣传4K沪语版
-  2102:"BV1nbAMzjEFj", // 圣经故事第一季第一集
-  2103:"BV1i14y1y7c9", // 一口气看完圣经故事
-  2104:"BV1b8411d7g8", // 基督的最后诱惑赏析
-  2105:"BV1HE421w7jq", // 圣经故事-创世纪
-  // ===== 新增福音动漫B站 =====
-  2200:"BV1aXyuYeEWe", // 妙妙书2-兄弟之争
-  2201:"BV1e2yuYBESn", // 妙妙书4-考验
-  2202:"BV121yYY4E1G", // 超级妙妙书
-  2203:"BV1f8vyBVENK", // 圣经故事动画合集
-  // ===== 新增福音见证B站 =====
-  2300:"BV17wiFBUEMm", // 刘志雄-认识真理
-  2301:"BV1LqLz6LERR", // 刘志雄-牵手一世情
-  2302:"BV1csLz6WEap", // 刘志雄-患癌经历
-  2303:"BV15aK36kE9r", // 冯秉诚-信心见证
-  // ===== 新增赞美诗歌B站 =====
-  2400:"BV1BkGV6NEiA", // 每一天都是恩典
-  2401:"BV1634y1B7sr", // 云上太阳
-  2402:"BV1Gx4y1k7eu", // 圣歌敬拜
-  // ===== 新增婚姻家庭B站 =====
-  2500:"BV1Mb4y1K75c", // 圣经中的婚姻真谛
-  2501:"BV1oKEX69EKa", // 合神心意的家庭
-  // ===== 新增福音慕道B站 =====
-  2600:"BV1K6Tw6uEhe", // 耶稣受难福音信息
-  2601:"BV1ET4y117Xj", // 认识耶稣得平安
-  // ===== 新增福音证道B站 =====
-  2700:"BV17wiFBUEMm", // 于宏洁讲道精选
-  2701:"BV1LqLz6LERR", // 唐崇荣讲道集
-  // ===== 新增属灵成长B站 =====
-   2800:"BV1fb4y1k7tF", // 属灵生命成长
-   2801:"BV178411u7wt", // 每日灵修
-   // ===== 新增福音视频B站 =====
-   3000:"BV1ET4y117Xj", // 福音视频精选
-   3001:"BV1K6Tw6uEhe", // 耶稣生平
-   3002:"BV1MyqnBeEVo", // 十字架的爱
-   3003:"BV1BCZKB8ERd", // 福音故事
-   3004:"BV1kj411d7pK", // 信仰见证
-   3005:"BV1mU411U7te", // 恩典365
-   3006:"BV1u8Ngz3EUT", // 灵修分享
-   3007:"BV1Mq5BzkEjf", // 每日灵粮
-   3008:"BV1QyG3zNEMD", // 福音真理
-   3009:"BV1DtRWBXEkp", // 十架救恩
-   // ===== 新增圣乐崇拜B站 =====
-   3100:"BV1rR2gBEEqY", // 圣乐赞美
-   3101:"BV1nbAMzjEFj", // 传统圣诗
-   3102:"BV1i14y1y7c9", // 教会合唱
-   3103:"BV1b8411d7g8", // 圣乐敬拜
-   3104:"BV1HE421w7jq", // 荣耀颂赞
-   3105:"BV1aXyuYeEWe", // 管风琴圣乐
-   3106:"BV1e2yuYBESn", // 合唱赞美
-   3107:"BV121yYY4E1G", // 诗班献唱
-   // ===== 新增神学课程B站 =====
-   3200:"BV1f8vyBVENK", // 系统神学
-   3201:"BV1NumQY1ErS", // 圣经神学
-   3202:"BV1zRnRzdEbF", // 教会历史
-   3203:"BV1t79gYSEW1", // 释经学
-   3204:"BV1Fb411k7Nq", // 护教学
-   3205:"BV1DtRWBXEkp", // 门徒训练
-   3206:"BV1rR2gBEEqY", // 宣教学
-   3207:"BV1nbAMzjEFj", // 教牧辅导
- };
-
-// ===== 全局封锁：阻止B站iframe内任何弹窗/跳转 =====
-const _origWindowOpen = window.open.bind(window);
-let _playerLocked = false;
-window.open = function(){ 
-  if(_playerLocked) return null; 
-  return _origWindowOpen.apply(window, arguments); 
+  1001:"BV1MyqnBeEVo",
+  1002:"BV1bt4y1X7iB",
+  1003:"BV1MJ411V7dp",
+  1004:"BV1YJ411B7Nq",
+  1005:"BV1uJ411i7Nq",
+  1006:"BV1bt4y1X7iB",
+  1007:"BV1db411i7Nq",
+  1008:"BV1YJ411B7Nq",
+  1009:"BV1bt4y1X7iB",
+  1010:"BV1wJ411B7Nq",
+  1011:"BV1cJ411i7Nq",
+  1012:"BV1sJ411i7Nq",
+  1013:"BV1wJ411B7Nq",
+  1014:"BV1YJ411B7Nq",
+  1015:"BV1db411i7Nq",
+  1016:"BV1db411i7Nq",
+  1017:"BV1YJ411B7Nq",
+  1018:"BV1bt4y1X7iB",
+  1019:"BV1db411i7Nq",
+  1020:"BV1wJ411B7Nq",
+  1021:"BV1bt4y1X7iB",
+  1022:"BV1MyqnBeEVo",
+  1023:"BV1MyqnBeEVo",
+  1024:"BV1bt4y1X7iB",
+  1025:"BV1MJ411V7dp",
+  1026:"BV1YJ411B7Nq",
+  1027:"BV1uJ411i7Nq",
+  1028:"BV121yYY4E1G",
+  1029:"BV1db411i7Nq",
+  1030:"BV1YJ411B7Nq",
+  1031:"BV1wJ411B7Nq",
+  1032:"BV1cJ411i7Nq",
+  1033:"BV1wJ411B7Nq",
+  1034:"BV1YJ411B7Nq",
+  1035:"BV1Fb411k7Nq",
+  1036:"BV17wiFBUEMm",
+  1037:"BV1zRnRzdEbF",
+  1038:"BV1t79gYSEW1",
+  1039:"BV1aXyuYeEWe",
+  1040:"BV1e2yuYBESn",
+  1041:"BV1f8vyBVENK",
+  1042:"BV17wiFBUEMm",
+  1043:"BV1db411i7Nq",
+  1044:"BV1YJ411B7Nq",
+  1045:"BV1wJ411B7Nq",
+  1046:"BV1LqLz6LERR",
+  1047:"BV1LqLz6LERR",
+  1048:"BV1Mb4y1K75c",
+  1049:"BV1oKEX69EKa",
+  1050:"BV1f8vyBVENK",
+  1051:"BV1NumQY1ErS",
+  1052:"BV1s4411k7Nq",
+  1053:"BV1rR2gBEEqY",
+  1054:"BV1nbAMzjEFj",
+  1055:"BV1i14y1y7c9",
+  1056:"BV1b8411d7g8",
+  1057:"BV1s4411k7Nq",
+  1058:"BV17wiFBUEMm",
+  1059:"BV17wiFBUEMm",
+  1060:"BV1oKEX69EKa",
+  1061:"BV1db411i7Nq",
+  1062:"BV1f8vyBVENK",
+  1063:"BV1f8vyBVENK",
+  1064:"BV1LqLz6LERR",
+  1065:"BV1rR2gBEEqY",
+  1066:"BV1nbAMzjEFj",
+  1067:"BV1i14y1y7c9",
+  1068:"BV1MyqnBeEVo",
+  1069:"BV1Fb411k7Nq",
+  1070:"BV1YJ411B7Nq",
+  1071:"BV1cb411k7Nq",
+  1072:"BV17wiFBUEMm",
+  1073:"BV17wiFBUEMm",
+  1074:"BV1YJ411B7Nq",
+  1075:"BV1Mb4y1K75c",
+  1076:"BV1oKEX69EKa",
+  1077:"BV1db411i7Nq",
+  1078:"BV1LqLz6LERR",
+  1079:"BV1LqLz6LERR",
+  1080:"BV1LqLz6LERR",
+  1081:"BV1LqLz6LERR",
+  1082:"BV1LqLz6LERR",
+  1083:"BV1YJ411B7Nq",
+  1084:"BV1db411i7Nq",
+  1085:"BV1Fb411k7Nq",
+  1086:"BV1Fb411k7Nq",
+  1087:"BV1oKEX69EKa",
+  1088:"BV1oKEX69EKa",
+  1089:"BV1YJ411B7Nq",
 };
-// 播放器打开时锁定外部弹窗
-document.addEventListener('DOMContentLoaded', function(){
-  const observer = new MutationObserver(function(){
-    const modal = document.getElementById('playerModal');
-    _playerLocked = modal && modal.classList.contains('show');
-  });
-  const modal = document.getElementById('playerModal');
-  if(modal) observer.observe(modal, {attributes: true, attributeFilter: ['class']});
-});
-
-// ===== 数据 =====
 const DATA = {
-  banners:[
-    {title:"耶稣传4K国语台配 — 全新上线",sub:"最真实的耶稣生平 · 感动千万人",img:"https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=900&q=80"},
-    {title:"圣经故事4K画质 — 震撼呈现",sub:"从创世到启示录 · 41万人观看",img:"https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=900&q=80"},
-    {title:"妙妙书福音动漫 — 儿童圣经",sub:"圣经故事动画 · 孩子也爱看",img:"https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=900&q=80"},
-    {title:"赞美之泉敬拜 — 心灵诚实的赞美",sub:"最美敬拜歌曲 · 一小时精选合辑",img:"https://images.unsplash.com/photo-1519817650390-64a93db51149?w=900&q=80"},
-  ],
-  hotSearch:["唐崇荣","于宏洁","刘志雄","寇绍涵","程蒙恩","大卫鲍森","陈希曾","赞美之泉","启示录","妙妙书"],
-  newVideos:[
-    {title:"耶稣传4K国语台配版",author:"Jesus Film",date:"06/01",movid:2001},
-    {title:"圣经故事4K画质全集",author:"Bible Series",date:"05/28",movid:2003},
-    {title:"耶稣传-上集",author:"耶稣电影",date:"05/20",movid:2100},
-    {title:"妙妙书2-兄弟之争",author:"永恒的曖",date:"05/16",movid:2200},
-    {title:"每一天都是恩典",author:"赞美诗歌",date:"05/14",movid:2400},
-    {title:"观念的后果-史普罗",author:"史普罗",date:"05/14",movid:3952},
-    {title:"新约神学-孙宝玲",author:"孙宝玲",date:"04/27",movid:3951},
-    {title:"耶稣传4K沪语上译版",author:"Jesus Film",date:"04/25",movid:2101},
-    {title:"圣经故事第一季第一集",author:"Bible Series",date:"04/23",movid:2102},
-    {title:"妙妙书第1集-以小胜大",author:"永恒的曖",date:"04/22",movid:2011},
-    {title:"圣经中的婚姻真谛",author:"心虹视界",date:"04/20",movid:2500},
-    {title:"云上太阳-赞美诗歌",author:"赞美之泉",date:"04/19",movid:2401},
-    {title:"一小时最美敬拜歌曲合辑",author:"赞美之泉",date:"04/18",movid:2031},
-    {title:"讲述耶稣的一生",author:"历史人物殿堂",date:"04/15",movid:2004},
-    {title:"圣经故事动画",author:"Bible Animations",date:"04/10",movid:2012},
-    {title:"2026复活节信息-真能天长地久的爱",author:"陈可嘉",date:"04/06",movid:3947},
-    {title:"信仰与生活-康来昌",author:"康来昌",date:"04/02",movid:3946},
-    {title:"君尊的祭司",author:"The Bible Project",date:"03/25",movid:3945},
-  ],
-  hotVideos:[
-    {title:"耶稣传4K国语台配版",author:"Jesus Film",movid:2001},
-    {title:"圣经故事4K画质全集",author:"Bible Series",movid:2003},
-    {title:"耶稣传-上集",author:"耶稣电影",movid:2100},
-    {title:"妙妙书2-兄弟之争",author:"永恒的曖",movid:2200},
-    {title:"约翰麦克阿瑟牧师追思礼拜",author:"约翰派博、弗格森等",movid:3925},
-    {title:"信心是什么",author:"冯秉诚",movid:3063},
-    {title:"刘志雄-认识真理之光",author:"刘志雄",movid:2300},
-    {title:"每一天都是恩典",author:"赞美诗歌",movid:2400},
-    {title:"妙妙书第1集",author:"永恒的曖",movid:2011},
-    {title:"一小时最美敬拜歌曲合辑",author:"赞美之泉",movid:2031},
-    {title:"圣经中的婚姻真谛",author:"心虹视界",movid:2500},
-    {title:"教会论与教会生活",author:"林慈信",movid:2997},
-    {title:"新城要理问答",author:"提摩太·凯勒",movid:2765},
-    {title:"异端分辨-蔡丽贞博士",author:"蔡丽贞",movid:2511},
-    {title:"伯克富系统神学-神论",author:"林慈信",movid:2492},
-    {title:"主祷文-唐崇荣牧师",author:"唐崇荣",movid:2491},
-  ],
-  topics:[
-    {id:6,title:"圣经要道略解"},
-    {id:2,title:"整全教会专栏"},
-    {id:5,title:"科学信仰专栏"},
-    {id:1,title:"防范异端专栏"},
-  ],
-  categories:[
-    {id:133,name:"福音慕道",videos:[
-      {title:"2026复活节信息",author:"陈可嘉",movid:3947},
-      {title:"每日心语2025",author:"吴继扬",movid:3938},
-      {title:"2025恩典的祝福圣诞布道会",author:"苏立忠牧师",movid:3932},
-      {title:"如何传福音？",author:"冯秉诚",movid:3836},
-      {title:"信心是什么",author:"冯秉诚",movid:3063},
-      {title:"每日灵修365",author:"苏立忠",movid:3027},
-      {title:"耶稣受难-福音信息",author:"福音分享",movid:2600},
-      {title:"认识耶稣得平安",author:"福音布道",movid:2601},
-      {title:"耶稣是谁？",author:"福音布道",movid:2001},
-      {title:"十字架的爱",author:"福音分享",movid:3002},
-      {title:"福音真理讲解",author:"圣经讲解",movid:3008},
-      {title:"十架救恩信息",author:"福音布道",movid:3009},
-    ]},
-    {id:22,name:"福音证道",videos:[
-      {title:"观念的后果-史普罗",author:"史普罗",movid:3952},
-      {title:"新约神学-孙宝玲",author:"孙宝玲",movid:3951},
-      {title:"信仰与生活-康来昌",author:"康来昌",movid:3946},
-      {title:"于宏洁2026年讲道集",author:"于宏洁",movid:3936},
-      {title:"刘志雄长老2026讲道集",author:"刘志雄",movid:3933},
-      {title:"圣经难题解答",author:"冯秉诚",movid:3931},
-      {title:"于宏洁讲道精选",author:"于宏洁",movid:2700},
-      {title:"唐崇荣讲道集",author:"唐崇荣",movid:2701},
-      {title:"2026恩典的祝福",author:"苏立忠牧师",movid:3932},
-      {title:"君尊的祭司",author:"The Bible Project",movid:3945},
-      {title:"新约神学-孙宝玲",author:"孙宝玲",movid:3951},
-      {title:"明白圣经",author:"史普罗",movid:3950},
-    ]},
-    {id:34,name:"婚姻家庭",videos:[
-      {title:"基督徒的婚姻观",author:"麦安迪",movid:3050},
-      {title:"子女心 父母情",author:"泰德·特里普",movid:3035},
-      {title:"合神心意的婚姻",author:"刘志雄",movid:2935},
-      {title:"圣经中的婚姻真谛",author:"心虹视界",movid:2500},
-      {title:"合神心意的家庭",author:"基督徒家庭",movid:2501},
-      {title:"牵手一世情",author:"刘志雄",movid:2301},
-      {title:"婚姻的奥秘",author:"福音分享",movid:2100},
-      {title:"夫妻相处之道",author:"基督徒家庭",movid:2101},
-      {title:"圣经爱情观",author:"圣经讲解",movid:2102},
-      {title:"家庭祭坛",author:"家庭事工",movid:2103},
-    ]},
-    {id:24,name:"赞美诗歌",videos:[
-      {title:"放晴了-诗歌舞蹈",author:"游智婷",movid:3942},
-      {title:"多彩恩典天路同行",author:"西门",movid:3926},
-      {title:"国度音乐会2024",author:"基督徒",movid:3889},
-      {title:"一小时最美敬拜歌曲合辑",author:"赞美之泉",movid:2031},
-      {title:"全然向祢钢琴版",author:"赞美之泉",movid:2032},
-      {title:"每一天都是恩典",author:"赞美诗歌",movid:2400},
-      {title:"云上太阳-赞美诗歌",author:"赞美之泉",movid:2401},
-      {title:"圣歌敬拜赞美",author:"敬拜团",movid:2402},
-      {title:"赞美之泉敬拜",author:"赞美之泉",movid:3945},
-      {title:"圣乐敬拜之夜",author:"敬拜团",movid:3103},
-      {title:"荣耀颂赞",author:"赞美之泉",movid:3104},
-      {title:"合唱赞美诗",author:"诗班合唱",movid:3106},
-    ]},
-    {id:41,name:"福音电影",videos:[
-      {title:"耶稣传4K国语台配版",author:"Jesus Film",movid:2001},
-      {title:"耶稣传(1979经典版)",author:"Jesus Film",movid:2002},
-      {title:"圣经故事4K画质全集",author:"Bible Series",movid:2003},
-      {title:"讲述耶稣的一生",author:"历史人物殿堂",movid:2004},
-      {title:"48小时走过耶稣足迹",author:"Ear to Hear",movid:2005},
-      {title:"耶稣传-上集",author:"耶稣电影",movid:2100},
-      {title:"耶稣传4K沪语上译版",author:"Jesus Film",movid:2101},
-      {title:"圣经故事第一季第一集",author:"Bible Series",movid:2102},
-      {title:"圣经故事合集讲解",author:"德普漫讲",movid:2103},
-      {title:"基督的最后诱惑赏析",author:"电影赏析",movid:2104},
-      {title:"圣经故事-创世纪",author:"圣经故事",movid:2105},
-    ]},
-    {id:23,name:"福音动漫",videos:[
-      {title:"妙妙书第1集-以小胜大",author:"永恒的曖",movid:2011},
-      {title:"圣经故事动画-震撼诠释",author:"Bible Animations",movid:2012},
-      {title:"从撒旦视角看圣经故事",author:"Bible Animations",movid:2013},
-      {title:"妙妙书2-兄弟之争",author:"永恒的曖",movid:2200},
-      {title:"妙妙书4-考验",author:"永恒的曖",movid:2201},
-      {title:"超级妙妙书精选",author:"永恒的曖",movid:2202},
-      {title:"圣经故事动画合集",author:"Bible Animations",movid:2203},
-    ]},
-    {id:42,name:"福音见证",videos:[
-      {title:"曾仕强讲述为什么信基督",author:"国学文化宝典",movid:2006},
-      {title:"复活节讲道-认识耶稣得平安",author:"加利牧师",movid:2007},
-      {title:"基督徒生活见证-尼克胡哲",author:"尼克胡哲",movid:2021},
-      {title:"信心的力量",author:"冯秉诚",movid:3063},
-      {title:"认识耶稣",author:"刘志雄",movid:3039},
-      {title:"刘志雄-认识真理之光",author:"刘志雄",movid:2300},
-      {title:"刘志雄-牵手一世情",author:"刘志雄",movid:2301},
-      {title:"刘志雄长老患癌经历",author:"刘志雄",movid:2302},
-      {title:"冯秉诚信心见证",author:"冯秉诚",movid:2303},
-      {title:"信仰见证分享",author:"见证分享",movid:3004},
-      {title:"尼克胡哲-生命见证",author:"尼克胡哲",movid:2021},
-      {title:"恩典365每日灵修",author:"寇绍恩",movid:3005},
-    ]},
-    {id:144,name:"属灵成长",videos:[
-      {title:"观念的后果-史普罗",author:"史普罗",movid:3952},
-      {title:"新约神学-孙宝玲",author:"孙宝玲",movid:3951},
-      {title:"明白圣经-史普罗",author:"史普罗",movid:3950},
-      {title:"亲密婚姻-史普罗",author:"史普罗",movid:3949},
-      {title:"每日心语2025",author:"吴继扬",movid:3938},
-      {title:"圣经真理-属灵生命成长",author:"圣经讲解",movid:2800},
-      {title:"每日灵修成长",author:"灵修365",movid:2801},
-      {title:"信心是什么",author:"冯秉诚",movid:3063},
-      {title:"新城要理问答",author:"提摩太·凯勒",movid:2765},
-      {title:"伯克富系统神学-神论",author:"林慈信",movid:2492},
-    ]},
-    {id:21,name:"福音视频",videos:[
-      {title:"福音视频精选",author:"福音传播",movid:3000},
-      {title:"耶稣生平4K",author:"福音传播",movid:3001},
-      {title:"十字架的爱",author:"福音分享",movid:3002},
-      {title:"福音故事集",author:"福音传播",movid:3003},
-      {title:"信仰见证分享",author:"见证分享",movid:3004},
-      {title:"恩典365每日灵修",author:"寇绍恩",movid:3005},
-      {title:"灵修分享时光",author:"灵修365",movid:3006},
-      {title:"每日灵粮",author:"灵修365",movid:3007},
-      {title:"福音真理讲解",author:"圣经讲解",movid:3008},
-      {title:"十架救恩信息",author:"福音布道",movid:3009},
-    ]},
-    {id:26,name:"圣乐崇拜",videos:[
-      {title:"圣乐赞美合辑",author:"圣乐团",movid:3100},
-      {title:"传统圣诗精选",author:"诗班",movid:3101},
-      {title:"教会合唱赞美",author:"合唱团",movid:3102},
-      {title:"圣乐敬拜之夜",author:"敬拜团",movid:3103},
-      {title:"荣耀颂赞",author:"赞美之泉",movid:3104},
-      {title:"管风琴圣乐演奏",author:"管风琴师",movid:3105},
-      {title:"合唱赞美诗",author:"诗班合唱",movid:3106},
-      {title:"诗班献唱精选",author:"教会诗班",movid:3107},
-    ]},
-    {id:290,name:"神学课程",videos:[
-      {title:"系统神学导论",author:"林慈信",movid:3200},
-      {title:"圣经神学概论",author:"圣经学者",movid:3201},
-      {title:"教会历史纵览",author:"历史神学",movid:3202},
-      {title:"释经学基础",author:"释经学者",movid:3203},
-      {title:"基督教护教学",author:"护教学者",movid:3204},
-      {title:"门徒训练课程",author:"门训导师",movid:3205},
-      {title:"宣教学导论",author:"宣教学者",movid:3206},
-      {title:"教牧辅导技巧",author:"教牧辅导",movid:3207},
-    ]},
-  ],
-  speakers:[
-    {id:95,name:"唐崇荣"},{id:66,name:"刘志雄"},{id:27,name:"冯秉诚"},
-    {id:164,name:"史普罗"},{id:42,name:"康来昌"},{id:163,name:"苏立忠"},
-    {id:55,name:"林慈信"},{id:60,name:"麦克阿瑟"},{id:38,name:"江守道"},
-    {id:44,name:"寇世远"},{id:59,name:"楼建华"},{id:137,name:"于力工"},
-    {id:21,name:"程蒙恩"},{id:13,name:"陈鸿基"},{id:99,name:"汪川生"},
-  ],
-  bibleOld:["创世记","出埃及记","利未记","民数记","申命记","约书亚记","士师记","路得记","撒母耳记上","撒母耳记下","列王纪上","列王纪下","诗篇","箴言","传道书","以赛亚书","耶利米书","以西结书","但以理书"],
-  bibleNew:["马太福音","马可福音","路加福音","约翰福音","使徒行传","罗马书","哥林多前书","哥林多后书","加拉太书","以弗所书","腓立比书","歌罗西书","帖撒罗尼迦前书","提摩太前书","希伯来书","彼得前书","彼得后书","约翰一书","启示录"],
-  notices:["愿神的话语点亮每一颗寻求真理的心 · 分享福音，传递主的爱","最近更新的内容已经展示在首页，欢迎分享给有需要的朋友","感谢每一位为福音事工祷告支持的弟兄姐妹"]
-};
-
-// ===== 后端API数据同步（自动从服务器拉取海量福音视频） =====
-(async function syncApiData(){
-  try{
-    const resp = await fetch('/api/data', {signal:AbortSignal.timeout(5000)});
-    if(!resp.ok) return;
-    const result = await resp.json();
-    if(!result || !result.success || !result.data) return;
-    const apiData = result.data;
-    // 合并视频ID到YT_IDS和BV_IDS
-    if(apiData.videos && Array.isArray(apiData.videos)){
-      apiData.videos.forEach(v => {
-        // 使用api id作为movid（偏移确保不冲突）
-        const mid = v.id + 10000;
-        if(v.ytid) YT_IDS[mid] = v.ytid;
-        if(v.bvid) BV_IDS[mid] = v.bvid;
-        // 如果还没有该分类，创建
-        if(apiData.categories){
-          const cat = apiData.categories.find(c => c.id === v.c);
-          if(cat){
-            let existingCat = DATA.categories.find(c => c.id === cat.id.charCodeAt(0) + 200);
-            if(!existingCat && cat.id){
-              // 映射分类名称
-              const catNameMap = {
-                'animation':'福音动漫','movie':'福音电影','testimony':'福音见证',
-                'music':'赞美诗歌','preach':'福音证道','family':'婚姻家庭',
-                'growth':'属灵成长','study':'神学课程','video':'福音视频','hymns':'圣乐崇拜'
-              };
-              DATA.categories.push({
-                id: cat.id.charCodeAt(0) + 200,
-                name: catNameMap[cat.id] || cat.name,
-                videos: []
-              });
-              existingCat = DATA.categories.find(c => c.id === cat.id.charCodeAt(0) + 200);
-            }
-            if(existingCat){
-              existingCat.videos.push({
-                title: v.t, author: cat.name || '福音资源',
-                movid: mid
-              });
-            }
-          }
+  categories: [
+    {
+      "id": "animation",
+      "name": "福音动漫",
+      "icon": "🎨",
+      "desc": "圣经故事动画，适合全家观看",
+      "videos": [
+        {
+          "movid": 1002,
+          "title": "超级妙妙书第一集 - 创世记",
+          "author": "超级妙妙书",
+          "v": "560万",
+          "dur": "25:30",
+          "date": "06/14"
+        },
+        {
+          "movid": 1006,
+          "title": "超级妙妙书第二集 - 挪亚方舟",
+          "author": "超级妙妙书",
+          "v": "420万",
+          "dur": "26:15",
+          "date": "06/10"
+        },
+        {
+          "movid": 1009,
+          "title": "超級妙妙書第三集 - 出埃及記",
+          "author": "超级妙妙书",
+          "v": "390万",
+          "dur": "27:00",
+          "date": "06/07"
+        },
+        {
+          "movid": 1012,
+          "title": "超級妙妙書第四集 - 大衛與歌利亞",
+          "author": "超级妙妙书",
+          "v": "350万",
+          "dur": "24:45",
+          "date": "06/04"
+        },
+        {
+          "movid": 1015,
+          "title": "超級妙妙書第五集 - 但以理在獅子坑",
+          "author": "超级妙妙书",
+          "v": "310万",
+          "dur": "25:30",
+          "date": "06/01"
+        },
+        {
+          "movid": 1018,
+          "title": "超級妙妙書第六集 - 耶穌誕生",
+          "author": "超级妙妙书",
+          "v": "480万",
+          "dur": "26:00",
+          "date": "05/29"
+        },
+        {
+          "movid": 1021,
+          "title": "超級妙妙書第七集 - 保羅的轉變",
+          "author": "超级妙妙书",
+          "v": "280万",
+          "dur": "25:45",
+          "date": "05/26"
+        },
+        {
+          "movid": 1024,
+          "title": "超级妙妙书 - 创世记（第1集）",
+          "author": "超级妙妙书",
+          "v": "560万",
+          "dur": "25:30",
+          "date": "05/23"
+        },
+        {
+          "movid": 1028,
+          "title": "妙妙书第1集-以小胜大",
+          "author": "超级妙妙书",
+          "v": "420万",
+          "dur": "26:15",
+          "date": "05/19"
+        },
+        {
+          "movid": 1039,
+          "title": "妙妙书2-兄弟之争",
+          "author": "超级妙妙书",
+          "v": "350万",
+          "dur": "26:15",
+          "date": "05/09"
+        },
+        {
+          "movid": 1040,
+          "title": "妙妙书4-考验",
+          "author": "超级妙妙书",
+          "v": "310万",
+          "dur": "25:30",
+          "date": "05/08"
+        },
+        {
+          "movid": 1041,
+          "title": "圣经故事动画合集",
+          "author": "超级妙妙书",
+          "v": "280万",
+          "dur": "45:00",
+          "date": "05/07"
         }
-      });
-      console.log('✅ 已从后端同步 '+apiData.videos.length+' 个福音视频到前端');
-      // 重新渲染
-      if(typeof renderVideos === 'function') renderVideos();
+      ]
+    },
+    {
+      "id": "movie",
+      "name": "福音电影",
+      "icon": "🎬",
+      "desc": "完整福音电影正片",
+      "videos": [
+        {
+          "movid": 1001,
+          "title": "耶稣传（JESUS）4K国语台配完整版",
+          "author": "耶稣传",
+          "v": "1280万",
+          "dur": "2:01:23",
+          "date": "06/15"
+        },
+        {
+          "movid": 1003,
+          "title": "使徒行传 - 完整电影版",
+          "author": "使徒行传",
+          "v": "380万",
+          "dur": "1:48:15",
+          "date": "06/13"
+        },
+        {
+          "movid": 1005,
+          "title": "抹大拉的馬利亞 - 完整電影",
+          "author": "抹大拉的馬利亞",
+          "v": "260万",
+          "dur": "1:52:30",
+          "date": "06/11"
+        },
+        {
+          "movid": 1011,
+          "title": "聖經故事 - 從創世到啟示",
+          "author": "福音电影",
+          "v": "750万",
+          "dur": "3:15:00",
+          "date": "06/05"
+        },
+        {
+          "movid": 1017,
+          "title": "價值的呼喚 - 福音微電影",
+          "author": "福音电影",
+          "v": "95万",
+          "dur": "35:20",
+          "date": "05/30"
+        },
+        {
+          "movid": 1022,
+          "title": "耶穌生平 - 四福音合參完整版",
+          "author": "福音电影",
+          "v": "890万",
+          "dur": "2:30:00",
+          "date": "05/25"
+        },
+        {
+          "movid": 1023,
+          "title": "耶稣传4K国语台配完整版",
+          "author": "耶稣传",
+          "v": "1280万",
+          "dur": "2:01:23",
+          "date": "05/24"
+        },
+        {
+          "movid": 1025,
+          "title": "使徒行传 - 完整电影版",
+          "author": "使徒行传",
+          "v": "380万",
+          "dur": "1:48:15",
+          "date": "05/22"
+        },
+        {
+          "movid": 1027,
+          "title": "抹大拉的馬利亞 - 完整電影",
+          "author": "抹大拉的馬利亞",
+          "v": "260万",
+          "dur": "1:52:30",
+          "date": "05/20"
+        },
+        {
+          "movid": 1032,
+          "title": "聖經故事 - 從創世到啟示",
+          "author": "福音电影",
+          "v": "750万",
+          "dur": "3:15:00",
+          "date": "05/15"
+        },
+        {
+          "movid": 1044,
+          "title": "价值的呼唤-福音微电影",
+          "author": "福音电影",
+          "v": "95万",
+          "dur": "35:20",
+          "date": "05/04"
+        }
+      ]
+    },
+    {
+      "id": "testimony",
+      "name": "福音见证",
+      "icon": "✝️",
+      "desc": "真实生命改变的故事",
+      "videos": [
+        {
+          "movid": 1007,
+          "title": "來自天堂的奇妙見證",
+          "author": "讲员",
+          "v": "185万",
+          "dur": "38:45",
+          "date": "06/09"
+        },
+        {
+          "movid": 1008,
+          "title": "史普罗 - 观念的后果",
+          "author": "史普罗",
+          "v": "150万",
+          "dur": "42:10",
+          "date": "06/08"
+        },
+        {
+          "movid": 1013,
+          "title": "唐崇榮牧師 - 基督教信仰的本質",
+          "author": "唐崇榮",
+          "v": "220万",
+          "dur": "55:00",
+          "date": "06/03"
+        },
+        {
+          "movid": 1016,
+          "title": "馮秉誠 - 科學與信仰",
+          "author": "讲员",
+          "v": "180万",
+          "dur": "48:30",
+          "date": "05/31"
+        },
+        {
+          "movid": 1019,
+          "title": "約翰·派博 - 喜獲新生",
+          "author": "约翰·派博",
+          "v": "130万",
+          "dur": "36:45",
+          "date": "05/28"
+        },
+        {
+          "movid": 1029,
+          "title": "來自天堂的奇妙見證",
+          "author": "讲员",
+          "v": "185万",
+          "dur": "38:45",
+          "date": "05/18"
+        },
+        {
+          "movid": 1030,
+          "title": "史普罗 - 观念的后果",
+          "author": "史普罗",
+          "v": "150万",
+          "dur": "42:10",
+          "date": "05/17"
+        },
+        {
+          "movid": 1033,
+          "title": "唐崇榮牧師 - 基督教信仰的本質",
+          "author": "唐崇榮",
+          "v": "220万",
+          "dur": "55:00",
+          "date": "05/14"
+        },
+        {
+          "movid": 1035,
+          "title": "尼克胡哲 - 生命见证",
+          "author": "尼克胡哲",
+          "v": "350万",
+          "dur": "42:00",
+          "date": "05/12"
+        },
+        {
+          "movid": 1036,
+          "title": "于宏洁2026年讲道集",
+          "author": "于宏洁",
+          "v": "210万",
+          "dur": "1:20:00",
+          "date": "06/13"
+        },
+        {
+          "movid": 1042,
+          "title": "刘志雄-认识真理之光",
+          "author": "刘志雄",
+          "v": "180万",
+          "dur": "48:00",
+          "date": "05/06"
+        },
+        {
+          "movid": 1043,
+          "title": "冯秉诚-科学信仰",
+          "author": "冯秉诚",
+          "v": "160万",
+          "dur": "48:30",
+          "date": "05/05"
+        },
+        {
+          "movid": 1045,
+          "title": "基督教信仰的本质",
+          "author": "唐崇榮",
+          "v": "220万",
+          "dur": "55:00",
+          "date": "05/03"
+        },
+        {
+          "movid": 1046,
+          "title": "新约神学-孙宝玲",
+          "author": "孙宝玲",
+          "v": "130万",
+          "dur": "1:30:00",
+          "date": "05/02"
+        },
+        {
+          "movid": 1047,
+          "title": "信仰与生活-康来昌",
+          "author": "康来昌",
+          "v": "120万",
+          "dur": "42:00",
+          "date": "05/01"
+        },
+        {
+          "movid": 1048,
+          "title": "圣经中的婚姻真谛",
+          "author": "讲员",
+          "v": "98万",
+          "dur": "35:00",
+          "date": "04/30"
+        },
+        {
+          "movid": 1049,
+          "title": "合神心意的家庭",
+          "author": "讲员",
+          "v": "85万",
+          "dur": "38:00",
+          "date": "04/29"
+        },
+        {
+          "movid": 1050,
+          "title": "系统神学导论-林慈信",
+          "author": "林慈信",
+          "v": "75万",
+          "dur": "1:45:00",
+          "date": "04/28"
+        },
+        {
+          "movid": 1051,
+          "title": "新城要理问答-提摩太凯勒",
+          "author": "讲员",
+          "v": "68万",
+          "dur": "52:00",
+          "date": "04/27"
+        },
+        {
+          "movid": 1052,
+          "title": "主祷文-唐崇荣牧师",
+          "author": "讲员",
+          "v": "200万",
+          "dur": "1:20:00",
+          "date": "04/26"
+        },
+        {
+          "movid": 1056,
+          "title": "伯克富系统神学-神论",
+          "author": "讲员",
+          "v": "55万",
+          "dur": "2:00:00",
+          "date": "04/22"
+        },
+        {
+          "movid": 1077,
+          "title": "每日心语2025-吴继扬",
+          "author": "吴继扬",
+          "v": "18万",
+          "dur": "5:00",
+          "date": "04/03"
+        },
+        {
+          "movid": 1078,
+          "title": "2025恩典的祝福圣诞布道会-苏立忠",
+          "author": "苏立忠",
+          "v": "15万",
+          "dur": "1:20:00",
+          "date": "04/02"
+        },
+        {
+          "movid": 1079,
+          "title": "2025中秋布道会-走向爱的圆满-苏立忠",
+          "author": "苏立忠",
+          "v": "12万",
+          "dur": "1:15:00",
+          "date": "04/01"
+        },
+        {
+          "movid": 1080,
+          "title": "2024年圣诞节福音布道会-苏牧师",
+          "author": "讲员",
+          "v": "10万",
+          "dur": "1:10:00",
+          "date": "03/31"
+        },
+        {
+          "movid": 1081,
+          "title": "2023年圣诞布道会-为爱而生-苏立忠",
+          "author": "苏立忠",
+          "v": "8万",
+          "dur": "1:05:00",
+          "date": "03/30"
+        },
+        {
+          "movid": 1082,
+          "title": "人间有圆缺有主无所惧-苏立忠",
+          "author": "苏立忠",
+          "v": "6万",
+          "dur": "45:00",
+          "date": "03/29"
+        },
+        {
+          "movid": 1083,
+          "title": "探索之旅-基督徒",
+          "author": "讲员",
+          "v": "5万",
+          "dur": "30:00",
+          "date": "03/28"
+        },
+        {
+          "movid": 1084,
+          "title": "里程信仰问答-冯秉诚",
+          "author": "冯秉诚",
+          "v": "20万",
+          "dur": "1:00:00",
+          "date": "03/27"
+        },
+        {
+          "movid": 1085,
+          "title": "孙越的故事",
+          "author": "孙越",
+          "v": "15万",
+          "dur": "35:00",
+          "date": "03/26"
+        },
+        {
+          "movid": 1086,
+          "title": "毒祸-见证",
+          "author": "讲员",
+          "v": "8万",
+          "dur": "28:00",
+          "date": "03/25"
+        },
+        {
+          "movid": 1087,
+          "title": "大爱化解深仇-宣教士",
+          "author": "讲员",
+          "v": "6万",
+          "dur": "25:00",
+          "date": "03/24"
+        },
+        {
+          "movid": 1088,
+          "title": "挚爱深情-宣教士",
+          "author": "讲员",
+          "v": "7万",
+          "dur": "30:00",
+          "date": "03/23"
+        }
+      ]
+    },
+    {
+      "id": "music",
+      "name": "赞美诗歌",
+      "icon": "🎵",
+      "desc": "心灵诚实的敬拜赞美",
+      "videos": [
+        {
+          "movid": 1004,
+          "title": "赞美之泉 - 最深爱的敬拜",
+          "author": "赞美之泉",
+          "v": "920万",
+          "dur": "45:20",
+          "date": "06/12"
+        },
+        {
+          "movid": 1010,
+          "title": "天韻詩歌 - 更新我的靈",
+          "author": "天韵诗歌",
+          "v": "680万",
+          "dur": "52:30",
+          "date": "06/06"
+        },
+        {
+          "movid": 1014,
+          "title": "我心旋律 - 詩歌敬拜精選",
+          "author": "赞美诗",
+          "v": "430万",
+          "dur": "48:00",
+          "date": "06/02"
+        },
+        {
+          "movid": 1020,
+          "title": "恩典之路 - 讚美詩精選",
+          "author": "赞美诗",
+          "v": "560万",
+          "dur": "55:00",
+          "date": "05/27"
+        },
+        {
+          "movid": 1026,
+          "title": "赞美之泉 - 最深爱的敬拜",
+          "author": "赞美之泉",
+          "v": "920万",
+          "dur": "45:20",
+          "date": "05/21"
+        },
+        {
+          "movid": 1031,
+          "title": "天韻詩歌 - 更新我的靈",
+          "author": "天韵诗歌",
+          "v": "680万",
+          "dur": "52:30",
+          "date": "05/16"
+        },
+        {
+          "movid": 1034,
+          "title": "我心旋律 - 詩歌敬拜精選",
+          "author": "赞美诗",
+          "v": "430万",
+          "dur": "48:00",
+          "date": "05/13"
+        },
+        {
+          "movid": 1037,
+          "title": "一小时最美敬拜歌曲合辑",
+          "author": "赞美诗",
+          "v": "580万",
+          "dur": "1:00:00",
+          "date": "05/11"
+        },
+        {
+          "movid": 1038,
+          "title": "全然向祢钢琴版",
+          "author": "赞美之泉",
+          "v": "320万",
+          "dur": "04:03",
+          "date": "05/10"
+        },
+        {
+          "movid": 1053,
+          "title": "圣乐赞美合辑",
+          "author": "赞美诗",
+          "v": "180万",
+          "dur": "55:00",
+          "date": "04/25"
+        },
+        {
+          "movid": 1054,
+          "title": "传统圣诗精选",
+          "author": "赞美诗",
+          "v": "150万",
+          "dur": "50:00",
+          "date": "04/24"
+        },
+        {
+          "movid": 1055,
+          "title": "教会合唱赞美",
+          "author": "赞美诗",
+          "v": "120万",
+          "dur": "45:00",
+          "date": "04/23"
+        }
+      ]
+    },
+    {
+      "id": "preach",
+      "name": "福音证道",
+      "icon": "🎤",
+      "desc": "忠心的教导和解经",
+      "videos": [
+        {
+          "movid": 1057,
+          "title": "唐崇榮 - 福音證道系列一",
+          "author": "唐崇榮",
+          "v": "180万",
+          "dur": "1:15:00",
+          "date": "06/14"
+        },
+        {
+          "movid": 1058,
+          "title": "于宏潔 - 基督徒的屬靈生命",
+          "author": "讲员",
+          "v": "120万",
+          "dur": "52:00",
+          "date": "04/21"
+        },
+        {
+          "movid": 1072,
+          "title": "最伟大的礼物-刘志雄第1集",
+          "author": "刘志雄",
+          "v": "30万",
+          "dur": "45:00",
+          "date": "04/08"
+        },
+        {
+          "movid": 1073,
+          "title": "最伟大的礼物-刘志雄第2集",
+          "author": "刘志雄",
+          "v": "28万",
+          "dur": "42:00",
+          "date": "04/07"
+        },
+        {
+          "movid": 1074,
+          "title": "明白圣经（国语配音）-史普罗",
+          "author": "史普罗",
+          "v": "35万",
+          "dur": "55:00",
+          "date": "04/06"
+        },
+        {
+          "movid": 1076,
+          "title": "蒙上帝所爱（国语配音）-史普罗",
+          "author": "史普罗",
+          "v": "22万",
+          "dur": "42:00",
+          "date": "04/04"
+        }
+      ]
+    },
+    {
+      "id": "family",
+      "name": "婚姻家庭",
+      "icon": "💑",
+      "desc": "合神心意的家庭建造",
+      "videos": [
+        {
+          "movid": 1059,
+          "title": "劉志雄 - 聖經中的婚姻家庭",
+          "author": "福音视频",
+          "v": "95万",
+          "dur": "48:00",
+          "date": "04/20"
+        },
+        {
+          "movid": 1060,
+          "title": "合神心意的家庭建造",
+          "author": "福音视频",
+          "v": "62万",
+          "dur": "35:00",
+          "date": "04/19"
+        },
+        {
+          "movid": 1075,
+          "title": "亲密婚姻（国语配音）-史普罗",
+          "author": "史普罗",
+          "v": "25万",
+          "dur": "48:00",
+          "date": "04/05"
+        }
+      ]
+    },
+    {
+      "id": "growth",
+      "name": "属灵成长",
+      "icon": "🌱",
+      "desc": "灵命进深与装备",
+      "videos": [
+        {
+          "movid": 1061,
+          "title": "靈命進深 - 與神更親密",
+          "author": "福音视频",
+          "v": "85万",
+          "dur": "38:00",
+          "date": "06/09"
+        },
+        {
+          "movid": 1062,
+          "title": "基督徒的禱告生活",
+          "author": "福音视频",
+          "v": "110万",
+          "dur": "45:00",
+          "date": "04/18"
+        }
+      ]
+    },
+    {
+      "id": "study",
+      "name": "神学课程",
+      "icon": "🎓",
+      "desc": "系统神学装备",
+      "videos": [
+        {
+          "movid": 1063,
+          "title": "系統神學入門 - 林慈信",
+          "author": "林慈信",
+          "v": "68万",
+          "dur": "1:45:00",
+          "date": "04/17"
+        },
+        {
+          "movid": 1064,
+          "title": "新約神學導論 - 孫寶玲",
+          "author": "福音视频",
+          "v": "55万",
+          "dur": "1:30:00",
+          "date": "04/16"
+        }
+      ]
+    },
+    {
+      "id": "video",
+      "name": "福音视频",
+      "icon": "🎞️",
+      "desc": "丰富多彩的福音内容",
+      "videos": [
+        {
+          "movid": 1068,
+          "title": "福音短片 - 耶稣的愛",
+          "author": "耶稣传",
+          "v": "50万",
+          "dur": "5:00",
+          "date": "04/12"
+        },
+        {
+          "movid": 1069,
+          "title": "福音短片 - 生命的意義",
+          "author": "福音视频",
+          "v": "35万",
+          "dur": "8:00",
+          "date": "04/11"
+        },
+        {
+          "movid": 1070,
+          "title": "福音短片 - 信心的力量",
+          "author": "福音视频",
+          "v": "28万",
+          "dur": "6:30",
+          "date": "04/10"
+        },
+        {
+          "movid": 1089,
+          "title": "新视微视频合集",
+          "author": "福音视频",
+          "v": "10万",
+          "dur": "45:00",
+          "date": "03/22"
+        }
+      ]
+    },
+    {
+      "id": "hymns",
+      "name": "圣乐崇拜",
+      "icon": "🎼",
+      "desc": "古典圣乐与现代崇拜",
+      "videos": [
+        {
+          "movid": 1065,
+          "title": "聖樂崇拜 - 经典赞美詩",
+          "author": "赞美诗",
+          "v": "280万",
+          "dur": "55:00",
+          "date": "04/15"
+        },
+        {
+          "movid": 1066,
+          "title": "傳統聖詩敬拜精選",
+          "author": "赞美诗",
+          "v": "210万",
+          "dur": "50:00",
+          "date": "04/14"
+        },
+        {
+          "movid": 1067,
+          "title": "教会詩班合唱赞美",
+          "author": "赞美诗",
+          "v": "150万",
+          "dur": "45:00",
+          "date": "04/13"
+        }
+      ]
+    },
+    {
+      "id": "beginner",
+      "name": "初信造就",
+      "icon": "🌱",
+      "desc": "初信信徒的信仰根基建造",
+      "videos": [
+        {
+          "movid": 1071,
+          "title": "圣经工程系列：登山宝训",
+          "author": "圣经工程",
+          "v": "45万",
+          "dur": "8:00",
+          "date": "04/09"
+        }
+      ]
     }
-  }catch(e){
-    console.log('后端API未连接，使用静态数据模式');
+  ], banners: [
+  {
+    "t": "耶稣传4K国语台配",
+    "s": "最真实的耶稣生平",
+    "ytid": "_T3GcH3bPzE"
+  },
+  {
+    "t": "超级妙妙书福音动漫",
+    "s": "圣经故事动画大全",
+    "ytid": "8lF1vDCj7Fs"
+  },
+  {
+    "t": "赞美之泉敬拜精选",
+    "s": "最美敬拜歌曲",
+    "ytid": "Ou1GWhh_xgg"
   }
-})();
+],
+  videos: [
+  {
+    "id": 1001,
+    "t": "耶稣传（JESUS）4K国语台配完整版",
+    "c": "movie",
+    "ytid": "_T3GcH3bPzE",
+    "bvid": "BV1MyqnBeEVo",
+    "desc": "最真实的耶稣生平电影，4K高清国语配音完整版，全球2000多种语言",
+    "v": "1280万",
+    "dur": "2:01:23",
+    "tags": [
+      "耶稣传",
+      "4K",
+      "国语",
+      "完整正片"
+    ]
+  },
+  {
+    "id": 1002,
+    "t": "超级妙妙书第一集 - 创世记",
+    "c": "animation",
+    "ytid": "8lF1vDCj7Fs",
+    "bvid": "BV1bt4y1X7iB",
+    "desc": "经典福音动漫《超级妙妙书》中文版，带领孩子们穿越圣经时空",
+    "v": "560万",
+    "dur": "25:30",
+    "tags": [
+      "妙妙书",
+      "福音动漫",
+      "儿童圣经"
+    ]
+  },
+  {
+    "id": 1003,
+    "t": "使徒行传 - 完整电影版",
+    "c": "movie",
+    "ytid": "Hq4sa6Q-ZrY",
+    "bvid": "BV1MJ411V7dp",
+    "desc": "初期教会从耶路撒冷直到地极的福音传播历程",
+    "v": "380万",
+    "dur": "1:48:15",
+    "tags": [
+      "使徒行传",
+      "电影",
+      "完整正片"
+    ]
+  },
+  {
+    "id": 1004,
+    "t": "赞美之泉 - 最深爱的敬拜",
+    "c": "music",
+    "ytid": "Ou1GWhh_xgg",
+    "bvid": "BV1YJ411B7Nq",
+    "desc": "赞美之泉中文敬拜诗歌精选，带领你进入神的同在",
+    "v": "920万",
+    "dur": "45:20",
+    "tags": [
+      "赞美之泉",
+      "敬拜",
+      "诗歌"
+    ]
+  },
+  {
+    "id": 1005,
+    "t": "抹大拉的馬利亞 - 完整電影",
+    "c": "movie",
+    "ytid": "MlBgFyTYPRg",
+    "bvid": "BV1uJ411i7Nq",
+    "desc": "从抹大拉的马利亚视角，见证耶稣受难与复活",
+    "v": "260万",
+    "dur": "1:52:30",
+    "tags": [
+      "抹大拉",
+      "馬利亞",
+      "电影"
+    ]
+  },
+  {
+    "id": 1006,
+    "t": "超级妙妙书第二集 - 挪亚方舟",
+    "c": "animation",
+    "ytid": "Q1J0IXR5iK4",
+    "bvid": "BV1bt4y1X7iB",
+    "desc": "克里斯托弗和朋友们穿越到大洪水时代",
+    "v": "420万",
+    "dur": "26:15",
+    "tags": [
+      "妙妙书",
+      "挪亚",
+      "方舟"
+    ]
+  },
+  {
+    "id": 1007,
+    "t": "來自天堂的奇妙見證",
+    "c": "testimony",
+    "ytid": "Sxe20AzwbZI",
+    "bvid": "BV1db411i7Nq",
+    "desc": "一個經歷天堂的真實見證，生命完全被翻轉",
+    "v": "185万",
+    "dur": "38:45",
+    "tags": [
+      "天堂",
+      "见证",
+      "濒死体验"
+    ]
+  },
+  {
+    "id": 1008,
+    "t": "史普罗 - 观念的后果",
+    "c": "testimony",
+    "ytid": "o7RsGcaQ4D0",
+    "bvid": "BV1YJ411B7Nq",
+    "desc": "著名神学家史普罗牧师讲解基督教世界观",
+    "v": "150万",
+    "dur": "42:10",
+    "tags": [
+      "史普罗",
+      "神学",
+      "教导"
+    ]
+  },
+  {
+    "id": 1009,
+    "t": "超級妙妙書第三集 - 出埃及記",
+    "c": "animation",
+    "ytid": "zDxR0mJ8T5k",
+    "bvid": "BV1bt4y1X7iB",
+    "desc": "摩西帶領以色列人出埃及過紅海",
+    "v": "390万",
+    "dur": "27:00",
+    "tags": [
+      "妙妙书",
+      "出埃及",
+      "摩西"
+    ]
+  },
+  {
+    "id": 1010,
+    "t": "天韻詩歌 - 更新我的靈",
+    "c": "music",
+    "ytid": "E6h_3pZLVk0",
+    "bvid": "BV1wJ411B7Nq",
+    "desc": "天韻詩歌精選合集，經典中文敬拜詩歌",
+    "v": "680万",
+    "dur": "52:30",
+    "tags": [
+      "天韻",
+      "詩歌",
+      "敬拜"
+    ]
+  },
+  {
+    "id": 1011,
+    "t": "聖經故事 - 從創世到啟示",
+    "c": "movie",
+    "ytid": "8MTvCthRcaY",
+    "bvid": "BV1cJ411i7Nq",
+    "desc": "震撼呈現從創世記到啟示錄的完整聖經故事",
+    "v": "750万",
+    "dur": "3:15:00",
+    "tags": [
+      "聖經",
+      "故事",
+      "創世",
+      "啟示"
+    ]
+  },
+  {
+    "id": 1012,
+    "t": "超級妙妙書第四集 - 大衛與歌利亞",
+    "c": "animation",
+    "ytid": "HxRlYLH2lLc",
+    "bvid": "BV1sJ411i7Nq",
+    "desc": "少年大衛依靠神戰勝巨人歌利亞",
+    "v": "350万",
+    "dur": "24:45",
+    "tags": [
+      "妙妙书",
+      "大衛",
+      "歌利亞"
+    ]
+  },
+  {
+    "id": 1013,
+    "t": "唐崇榮牧師 - 基督教信仰的本質",
+    "c": "testimony",
+    "ytid": "qjHPdTXK3iE",
+    "bvid": "BV1wJ411B7Nq",
+    "desc": "唐崇榮牧師講解基督教信仰核心本質",
+    "v": "220万",
+    "dur": "55:00",
+    "tags": [
+      "唐崇榮",
+      "講道",
+      "信仰"
+    ]
+  },
+  {
+    "id": 1014,
+    "t": "我心旋律 - 詩歌敬拜精選",
+    "c": "music",
+    "ytid": "M_V2iM8Z3hM",
+    "bvid": "BV1YJ411B7Nq",
+    "desc": "我心旋律敬拜團隊經典詩歌精選",
+    "v": "430万",
+    "dur": "48:00",
+    "tags": [
+      "我心旋律",
+      "詩歌",
+      "敬拜"
+    ]
+  },
+  {
+    "id": 1015,
+    "t": "超級妙妙書第五集 - 但以理在獅子坑",
+    "c": "animation",
+    "ytid": "Tf4Z5y-IkAk",
+    "bvid": "BV1db411i7Nq",
+    "desc": "但以理在獅子坑中蒙神保守的故事",
+    "v": "310万",
+    "dur": "25:30",
+    "tags": [
+      "妙妙书",
+      "但以理",
+      "獅子"
+    ]
+  },
+  {
+    "id": 1016,
+    "t": "馮秉誠 - 科學與信仰",
+    "c": "testimony",
+    "ytid": "UYIByoCNBPs",
+    "bvid": "BV1db411i7Nq",
+    "desc": "從科學角度探討信仰，論證神創造的智慧",
+    "v": "180万",
+    "dur": "48:30",
+    "tags": [
+      "馮秉誠",
+      "科學",
+      "信仰"
+    ]
+  },
+  {
+    "id": 1017,
+    "t": "價值的呼喚 - 福音微電影",
+    "c": "movie",
+    "ytid": "KMs2NxFhp80",
+    "bvid": "BV1YJ411B7Nq",
+    "desc": "迷失的靈魂在神的愛中找到真正價值",
+    "v": "95万",
+    "dur": "35:20",
+    "tags": [
+      "微电影",
+      "福音",
+      "價值"
+    ]
+  },
+  {
+    "id": 1018,
+    "t": "超級妙妙書第六集 - 耶穌誕生",
+    "c": "animation",
+    "ytid": "8lF1vDCj7Fs",
+    "bvid": "BV1bt4y1X7iB",
+    "desc": "耶穌基督降生的故事，天使報信牧羊人朝拜",
+    "v": "480万",
+    "dur": "26:00",
+    "tags": [
+      "妙妙书",
+      "耶穌",
+      "聖誕"
+    ]
+  },
+  {
+    "id": 1019,
+    "t": "約翰·派博 - 喜獲新生",
+    "c": "testimony",
+    "ytid": "Sxe20AzwbZI",
+    "bvid": "BV1db411i7Nq",
+    "desc": "如何在基督裡獲得真正的新生命",
+    "v": "130万",
+    "dur": "36:45",
+    "tags": [
+      "派博",
+      "喜樂",
+      "新生"
+    ]
+  },
+  {
+    "id": 1020,
+    "t": "恩典之路 - 讚美詩精選",
+    "c": "music",
+    "ytid": "E6h_3pZLVk0",
+    "bvid": "BV1wJ411B7Nq",
+    "desc": "經典華人讚美詩歌精選合集",
+    "v": "560万",
+    "dur": "55:00",
+    "tags": [
+      "詩歌",
+      "讚美",
+      "恩典"
+    ]
+  },
+  {
+    "id": 1021,
+    "t": "超級妙妙書第七集 - 保羅的轉變",
+    "c": "animation",
+    "ytid": "8lF1vDCj7Fs",
+    "bvid": "BV1bt4y1X7iB",
+    "desc": "掃羅在大馬士革路上遇見主的奇妙轉變",
+    "v": "280万",
+    "dur": "25:45",
+    "tags": [
+      "妙妙书",
+      "保羅",
+      "轉變"
+    ]
+  },
+  {
+    "id": 1022,
+    "t": "耶穌生平 - 四福音合參完整版",
+    "c": "movie",
+    "ytid": "_T3GcH3bPzE",
+    "bvid": "BV1MyqnBeEVo",
+    "desc": "馬太馬可路加約翰四福音合一的耶穌生平",
+    "v": "890万",
+    "dur": "2:30:00",
+    "tags": [
+      "耶穌",
+      "生平",
+      "四福音"
+    ]
+  },
+  {
+    "t": "耶稣传4K国语台配完整版",
+    "c": "movie",
+    "ytid": "_T3GcH3bPzE",
+    "bvid": "BV1MyqnBeEVo",
+    "desc": "4K超高清国语配音，最真实的耶稣生平电影",
+    "v": "1280万",
+    "dur": "2:01:23",
+    "tags": [
+      "耶稣传",
+      "4K",
+      "国语"
+    ],
+    "id": 1023
+  },
+  {
+    "t": "超级妙妙书 - 创世记（第1集）",
+    "c": "animation",
+    "ytid": "8lF1vDCj7Fs",
+    "bvid": "BV1bt4y1X7iB",
+    "desc": "经典福音动漫超级妙妙书中文版",
+    "v": "560万",
+    "dur": "25:30",
+    "tags": [
+      "妙妙书",
+      "动漫",
+      "儿童圣经"
+    ],
+    "id": 1024
+  },
+  {
+    "t": "使徒行传 - 完整电影版",
+    "c": "movie",
+    "ytid": "Hq4sa6Q-ZrY",
+    "bvid": "BV1MJ411V7dp",
+    "desc": "初期教会福音传播历程",
+    "v": "380万",
+    "dur": "1:48:15",
+    "tags": [
+      "使徒行传",
+      "电影"
+    ],
+    "id": 1025
+  },
+  {
+    "t": "赞美之泉 - 最深爱的敬拜",
+    "c": "music",
+    "ytid": "Ou1GWhh_xgg",
+    "bvid": "BV1YJ411B7Nq",
+    "desc": "赞美之泉中文敬拜诗歌精选",
+    "v": "920万",
+    "dur": "45:20",
+    "tags": [
+      "赞美之泉",
+      "敬拜",
+      "诗歌"
+    ],
+    "id": 1026
+  },
+  {
+    "t": "抹大拉的馬利亞 - 完整電影",
+    "c": "movie",
+    "ytid": "MlBgFyTYPRg",
+    "bvid": "BV1uJ411i7Nq",
+    "desc": "从抹大拉马利亚视角见证耶稣受难与复活",
+    "v": "260万",
+    "dur": "1:52:30",
+    "tags": [
+      "抹大拉",
+      "馬利亞"
+    ],
+    "id": 1027
+  },
+  {
+    "t": "妙妙书第1集-以小胜大",
+    "c": "animation",
+    "ytid": "Y6NnxHDSKo8",
+    "bvid": "BV121yYY4E1G",
+    "desc": "圣经故事动画，儿童最爱",
+    "v": "420万",
+    "dur": "26:15",
+    "tags": [
+      "妙妙书",
+      "圣经故事"
+    ],
+    "id": 1028
+  },
+  {
+    "t": "來自天堂的奇妙見證",
+    "c": "testimony",
+    "ytid": "Sxe20AzwbZI",
+    "bvid": "BV1db411i7Nq",
+    "desc": "经历天堂的真实见证",
+    "v": "185万",
+    "dur": "38:45",
+    "tags": [
+      "天堂",
+      "见证"
+    ],
+    "id": 1029
+  },
+  {
+    "t": "史普罗 - 观念的后果",
+    "c": "testimony",
+    "ytid": "o7RsGcaQ4D0",
+    "bvid": "BV1YJ411B7Nq",
+    "desc": "史普罗牧师讲解基督教世界观",
+    "v": "150万",
+    "dur": "42:10",
+    "tags": [
+      "史普罗",
+      "神学"
+    ],
+    "id": 1030
+  },
+  {
+    "t": "天韻詩歌 - 更新我的靈",
+    "c": "music",
+    "ytid": "E6h_3pZLVk0",
+    "bvid": "BV1wJ411B7Nq",
+    "desc": "天韻詩歌精選合集",
+    "v": "680万",
+    "dur": "52:30",
+    "tags": [
+      "天韻",
+      "詩歌"
+    ],
+    "id": 1031
+  },
+  {
+    "t": "聖經故事 - 從創世到啟示",
+    "c": "movie",
+    "ytid": "8MTvCthRcaY",
+    "bvid": "BV1cJ411i7Nq",
+    "desc": "创世记到启示录的完整圣经故事",
+    "v": "750万",
+    "dur": "3:15:00",
+    "tags": [
+      "聖經",
+      "故事"
+    ],
+    "id": 1032
+  },
+  {
+    "t": "唐崇榮牧師 - 基督教信仰的本質",
+    "c": "testimony",
+    "ytid": "qjHPdTXK3iE",
+    "bvid": "BV1wJ411B7Nq",
+    "desc": "基督教信仰核心本质",
+    "v": "220万",
+    "dur": "55:00",
+    "tags": [
+      "唐崇榮",
+      "信仰"
+    ],
+    "id": 1033
+  },
+  {
+    "t": "我心旋律 - 詩歌敬拜精選",
+    "c": "music",
+    "ytid": "M_V2iM8Z3hM",
+    "bvid": "BV1YJ411B7Nq",
+    "desc": "我心旋律敬拜團隊經典詩歌",
+    "v": "430万",
+    "dur": "48:00",
+    "tags": [
+      "我心旋律",
+      "詩歌"
+    ],
+    "id": 1034
+  },
+  {
+    "t": "尼克胡哲 - 生命见证",
+    "c": "testimony",
+    "ytid": "6Fz9d2vFqI0",
+    "bvid": "BV1Fb411k7Nq",
+    "desc": "没有四肢的生命斗士尼克胡哲见证",
+    "v": "350万",
+    "dur": "42:00",
+    "tags": [
+      "尼克胡哲",
+      "见证"
+    ],
+    "id": 1035
+  },
+  {
+    "t": "于宏洁2026年讲道集",
+    "c": "testimony",
+    "ytid": "-o7kBP3qHGQ",
+    "bvid": "BV17wiFBUEMm",
+    "desc": "于宏洁牧师精选讲道",
+    "v": "210万",
+    "dur": "1:20:00",
+    "tags": [
+      "于宏洁",
+      "讲道"
+    ],
+    "id": 1036
+  },
+  {
+    "t": "一小时最美敬拜歌曲合辑",
+    "c": "music",
+    "ytid": "5J2eV4RCsZQ",
+    "bvid": "BV1zRnRzdEbF",
+    "desc": "一小时赞美敬拜歌曲精选",
+    "v": "580万",
+    "dur": "1:00:00",
+    "tags": [
+      "敬拜",
+      "赞美",
+      "合辑"
+    ],
+    "id": 1037
+  },
+  {
+    "t": "全然向祢钢琴版",
+    "c": "music",
+    "ytid": "BHlVJZVFhac",
+    "bvid": "BV1t79gYSEW1",
+    "desc": "赞美之泉经典诗歌钢琴版",
+    "v": "320万",
+    "dur": "04:03",
+    "tags": [
+      "全然向祢",
+      "钢琴"
+    ],
+    "id": 1038
+  },
+  {
+    "t": "妙妙书2-兄弟之争",
+    "c": "animation",
+    "ytid": "E1rNOAbDN7s",
+    "bvid": "BV1aXyuYeEWe",
+    "desc": "该隐和亚伯的故事",
+    "v": "350万",
+    "dur": "26:15",
+    "tags": [
+      "妙妙书",
+      "兄弟"
+    ],
+    "id": 1039
+  },
+  {
+    "t": "妙妙书4-考验",
+    "c": "animation",
+    "ytid": "oMt2KMXjT2c",
+    "bvid": "BV1e2yuYBESn",
+    "desc": "亚伯拉罕献以撒",
+    "v": "310万",
+    "dur": "25:30",
+    "tags": [
+      "妙妙书",
+      "亚伯拉罕"
+    ],
+    "id": 1040
+  },
+  {
+    "t": "圣经故事动画合集",
+    "c": "animation",
+    "ytid": "nH0yj0MaYRw",
+    "bvid": "BV1f8vyBVENK",
+    "desc": "多集圣经故事动画合集",
+    "v": "280万",
+    "dur": "45:00",
+    "tags": [
+      "圣经",
+      "动画"
+    ],
+    "id": 1041
+  },
+  {
+    "t": "刘志雄-认识真理之光",
+    "c": "testimony",
+    "ytid": "m7MdN6HJmW0",
+    "bvid": "BV17wiFBUEMm",
+    "desc": "刘志雄长老讲道精选",
+    "v": "180万",
+    "dur": "48:00",
+    "tags": [
+      "刘志雄",
+      "真理"
+    ],
+    "id": 1042
+  },
+  {
+    "t": "冯秉诚-科学信仰",
+    "c": "testimony",
+    "ytid": "UYIByoCNBPs",
+    "bvid": "BV1db411i7Nq",
+    "desc": "从科学角度探讨信仰",
+    "v": "160万",
+    "dur": "48:30",
+    "tags": [
+      "冯秉诚",
+      "科学"
+    ],
+    "id": 1043
+  },
+  {
+    "t": "价值的呼唤-福音微电影",
+    "c": "movie",
+    "ytid": "KMs2NxFhp80",
+    "bvid": "BV1YJ411B7Nq",
+    "desc": "迷失的灵魂在神的爱中找到价值",
+    "v": "95万",
+    "dur": "35:20",
+    "tags": [
+      "微电影",
+      "福音"
+    ],
+    "id": 1044
+  },
+  {
+    "t": "基督教信仰的本质",
+    "c": "testimony",
+    "ytid": "qjHPdTXK3iE",
+    "bvid": "BV1wJ411B7Nq",
+    "desc": "唐崇榮牧師讲解信仰本质",
+    "v": "220万",
+    "dur": "55:00",
+    "tags": [
+      "唐崇榮",
+      "讲道"
+    ],
+    "id": 1045
+  },
+  {
+    "t": "新约神学-孙宝玲",
+    "c": "testimony",
+    "ytid": "o7RsGcaQ4D0",
+    "bvid": "BV1LqLz6LERR",
+    "desc": "孙宝玲博士新约神学课程",
+    "v": "130万",
+    "dur": "1:30:00",
+    "tags": [
+      "孙宝玲",
+      "新约神学"
+    ],
+    "id": 1046
+  },
+  {
+    "t": "信仰与生活-康来昌",
+    "c": "testimony",
+    "ytid": "E6h_3pZLVk0",
+    "bvid": "BV1LqLz6LERR",
+    "desc": "康来昌牧师分享信仰与生活",
+    "v": "120万",
+    "dur": "42:00",
+    "tags": [
+      "康来昌",
+      "信仰生活"
+    ],
+    "id": 1047
+  },
+  {
+    "t": "圣经中的婚姻真谛",
+    "c": "testimony",
+    "ytid": "h5dSqkQJcLE",
+    "bvid": "BV1Mb4y1K75c",
+    "desc": "圣经视角看婚姻",
+    "v": "98万",
+    "dur": "35:00",
+    "tags": [
+      "婚姻",
+      "家庭"
+    ],
+    "id": 1048
+  },
+  {
+    "t": "合神心意的家庭",
+    "c": "testimony",
+    "ytid": "0GA_ycXXhNY",
+    "bvid": "BV1oKEX69EKa",
+    "desc": "建立合神心意的家庭",
+    "v": "85万",
+    "dur": "38:00",
+    "tags": [
+      "家庭",
+      "信仰"
+    ],
+    "id": 1049
+  },
+  {
+    "t": "系统神学导论-林慈信",
+    "c": "testimony",
+    "ytid": "JHQcBwKftoc",
+    "bvid": "BV1f8vyBVENK",
+    "desc": "林慈信牧师系统神学课程",
+    "v": "75万",
+    "dur": "1:45:00",
+    "tags": [
+      "系统神学",
+      "林慈信"
+    ],
+    "id": 1050
+  },
+  {
+    "t": "新城要理问答-提摩太凯勒",
+    "c": "testimony",
+    "ytid": "_Qul32OdPx8",
+    "bvid": "BV1NumQY1ErS",
+    "desc": "提摩太凯勒新城要理问答",
+    "v": "68万",
+    "dur": "52:00",
+    "tags": [
+      "凯勒",
+      "要理问答"
+    ],
+    "id": 1051
+  },
+  {
+    "t": "主祷文-唐崇荣牧师",
+    "c": "testimony",
+    "ytid": "9fO0cHXiGEM",
+    "bvid": "BV1s4411k7Nq",
+    "desc": "唐崇荣牧师讲解主祷文",
+    "v": "200万",
+    "dur": "1:20:00",
+    "tags": [
+      "主祷文",
+      "唐崇榮"
+    ],
+    "id": 1052
+  },
+  {
+    "t": "圣乐赞美合辑",
+    "c": "music",
+    "ytid": "vCYGpo04aVA",
+    "bvid": "BV1rR2gBEEqY",
+    "desc": "经典圣乐赞美诗歌",
+    "v": "180万",
+    "dur": "55:00",
+    "tags": [
+      "圣乐",
+      "赞美"
+    ],
+    "id": 1053
+  },
+  {
+    "t": "传统圣诗精选",
+    "c": "music",
+    "ytid": "q4rPnNAWjbs",
+    "bvid": "BV1nbAMzjEFj",
+    "desc": "传统圣诗经典合集",
+    "v": "150万",
+    "dur": "50:00",
+    "tags": [
+      "圣诗",
+      "传统"
+    ],
+    "id": 1054
+  },
+  {
+    "t": "教会合唱赞美",
+    "c": "music",
+    "ytid": "5J2eV4RCsZQ",
+    "bvid": "BV1i14y1y7c9",
+    "desc": "教会诗班合唱赞美",
+    "v": "120万",
+    "dur": "45:00",
+    "tags": [
+      "合唱",
+      "赞美"
+    ],
+    "id": 1055
+  },
+  {
+    "t": "伯克富系统神学-神论",
+    "c": "testimony",
+    "ytid": "tX5KJltVYns",
+    "bvid": "BV1b8411d7g8",
+    "desc": "伯克富系统神学神论部分",
+    "v": "55万",
+    "dur": "2:00:00",
+    "tags": [
+      "系统神学",
+      "神论"
+    ],
+    "id": 1056
+  },
+  {
+    "t": "唐崇榮 - 福音證道系列一",
+    "c": "preach",
+    "ytid": "9fO0cHXiGEM",
+    "bvid": "BV1s4411k7Nq",
+    "desc": "唐崇榮牧師講解福音真理",
+    "v": "180万",
+    "dur": "1:15:00",
+    "tags": [
+      "唐崇榮",
+      "證道"
+    ],
+    "id": 1057
+  },
+  {
+    "t": "于宏潔 - 基督徒的屬靈生命",
+    "c": "preach",
+    "ytid": "-o7kBP3qHGQ",
+    "bvid": "BV17wiFBUEMm",
+    "desc": "于宏潔牧師分享靈命成長",
+    "v": "120万",
+    "dur": "52:00",
+    "tags": [
+      "于宏潔",
+      "靈命"
+    ],
+    "id": 1058
+  },
+  {
+    "t": "劉志雄 - 聖經中的婚姻家庭",
+    "c": "family",
+    "ytid": "m7MdN6HJmW0",
+    "bvid": "BV17wiFBUEMm",
+    "desc": "從聖經看婚姻家庭真理",
+    "v": "95万",
+    "dur": "48:00",
+    "tags": [
+      "婚姻",
+      "家庭"
+    ],
+    "id": 1059
+  },
+  {
+    "t": "合神心意的家庭建造",
+    "c": "family",
+    "ytid": "0GA_ycXXhNY",
+    "bvid": "BV1oKEX69EKa",
+    "desc": "建立合神心意的家庭",
+    "v": "62万",
+    "dur": "35:00",
+    "tags": [
+      "家庭",
+      "建造"
+    ],
+    "id": 1060
+  },
+  {
+    "t": "靈命進深 - 與神更親密",
+    "c": "growth",
+    "ytid": "Sxe20AzwbZI",
+    "bvid": "BV1db411i7Nq",
+    "desc": "與神建立更親密的關係",
+    "v": "85万",
+    "dur": "38:00",
+    "tags": [
+      "靈命",
+      "進深"
+    ],
+    "id": 1061
+  },
+  {
+    "t": "基督徒的禱告生活",
+    "c": "growth",
+    "ytid": "JHQcBwKftoc",
+    "bvid": "BV1f8vyBVENK",
+    "desc": "建立穩定的禱告生活",
+    "v": "110万",
+    "dur": "45:00",
+    "tags": [
+      "禱告",
+      "靈修"
+    ],
+    "id": 1062
+  },
+  {
+    "t": "系統神學入門 - 林慈信",
+    "c": "study",
+    "ytid": "JHQcBwKftoc",
+    "bvid": "BV1f8vyBVENK",
+    "desc": "系統神學入門課程",
+    "v": "68万",
+    "dur": "1:45:00",
+    "tags": [
+      "系統神學"
+    ],
+    "id": 1063
+  },
+  {
+    "t": "新約神學導論 - 孫寶玲",
+    "c": "study",
+    "ytid": "o7RsGcaQ4D0",
+    "bvid": "BV1LqLz6LERR",
+    "desc": "新約神學導論",
+    "v": "55万",
+    "dur": "1:30:00",
+    "tags": [
+      "新約神學"
+    ],
+    "id": 1064
+  },
+  {
+    "t": "聖樂崇拜 - 经典赞美詩",
+    "c": "hymns",
+    "ytid": "vCYGpo04aVA",
+    "bvid": "BV1rR2gBEEqY",
+    "desc": "經典聖樂讚美詩歌",
+    "v": "280万",
+    "dur": "55:00",
+    "tags": [
+      "聖樂",
+      "讚美"
+    ],
+    "id": 1065
+  },
+  {
+    "t": "傳統聖詩敬拜精選",
+    "c": "hymns",
+    "ytid": "q4rPnNAWjbs",
+    "bvid": "BV1nbAMzjEFj",
+    "desc": "傳統聖詩經典敬拜合集",
+    "v": "210万",
+    "dur": "50:00",
+    "tags": [
+      "聖詩",
+      "敬拜"
+    ],
+    "id": 1066
+  },
+  {
+    "t": "教会詩班合唱赞美",
+    "c": "hymns",
+    "ytid": "5J2eV4RCsZQ",
+    "bvid": "BV1i14y1y7c9",
+    "desc": "教會詩班合唱讚美",
+    "v": "150万",
+    "dur": "45:00",
+    "tags": [
+      "詩班",
+      "讚美"
+    ],
+    "id": 1067
+  },
+  {
+    "t": "福音短片 - 耶稣的愛",
+    "c": "video",
+    "ytid": "_T3GcH3bPzE",
+    "bvid": "BV1MyqnBeEVo",
+    "desc": "耶穌基督的愛感動人心",
+    "v": "50万",
+    "dur": "5:00",
+    "tags": [
+      "耶穌",
+      "愛"
+    ],
+    "id": 1068
+  },
+  {
+    "t": "福音短片 - 生命的意義",
+    "c": "video",
+    "ytid": "6Fz9d2vFqI0",
+    "bvid": "BV1Fb411k7Nq",
+    "desc": "在基督裡找到生命的真正意義",
+    "v": "35万",
+    "dur": "8:00",
+    "tags": [
+      "生命",
+      "意義"
+    ],
+    "id": 1069
+  },
+  {
+    "t": "福音短片 - 信心的力量",
+    "c": "video",
+    "ytid": "KMs2NxFhp80",
+    "bvid": "BV1YJ411B7Nq",
+    "desc": "信心是所望之事的實底",
+    "v": "28万",
+    "dur": "6:30",
+    "tags": [
+      "信心",
+      "力量"
+    ],
+    "id": 1070
+  },
+  {
+    "t": "圣经工程系列：登山宝训",
+    "c": "beginner",
+    "desc": "The Bible Project出品的圣经工程系列，深入讲解登山宝训",
+    "v": "45万",
+    "dur": "8:00",
+    "tags": [
+      "圣经工程",
+      "登山宝训",
+      "初信"
+    ],
+    "ytid": "eVx4yIoaOfo",
+    "bvid": "BV1cb411k7Nq",
+    "id": 1071
+  },
+  {
+    "t": "最伟大的礼物-刘志雄第1集",
+    "c": "preach",
+    "desc": "2026福音营会信息分享，刘志雄长老主讲",
+    "v": "30万",
+    "dur": "45:00",
+    "tags": [
+      "刘志雄",
+      "福音营会"
+    ],
+    "ytid": "m7MdN6HJmW0",
+    "bvid": "BV17wiFBUEMm",
+    "id": 1072
+  },
+  {
+    "t": "最伟大的礼物-刘志雄第2集",
+    "c": "preach",
+    "desc": "2026福音营会信息分享续",
+    "v": "28万",
+    "dur": "42:00",
+    "tags": [
+      "刘志雄",
+      "福音营会"
+    ],
+    "ytid": "m7MdN6HJmW0",
+    "bvid": "BV17wiFBUEMm",
+    "id": 1073
+  },
+  {
+    "t": "明白圣经（国语配音）-史普罗",
+    "c": "preach",
+    "desc": "史普罗牧师讲解如何明白圣经，国语配音版",
+    "v": "35万",
+    "dur": "55:00",
+    "tags": [
+      "史普罗",
+      "圣经",
+      "国语配音"
+    ],
+    "ytid": "o7RsGcaQ4D0",
+    "bvid": "BV1YJ411B7Nq",
+    "id": 1074
+  },
+  {
+    "t": "亲密婚姻（国语配音）-史普罗",
+    "c": "family",
+    "desc": "史普罗牧师分享婚姻的真谛，国语配音版",
+    "v": "25万",
+    "dur": "48:00",
+    "tags": [
+      "史普罗",
+      "婚姻",
+      "国语配音"
+    ],
+    "ytid": "h5dSqkQJcLE",
+    "bvid": "BV1Mb4y1K75c",
+    "id": 1075
+  },
+  {
+    "t": "蒙上帝所爱（国语配音）-史普罗",
+    "c": "preach",
+    "desc": "史普罗牧师分享神的爱",
+    "v": "22万",
+    "dur": "42:00",
+    "tags": [
+      "史普罗",
+      "神的爱",
+      "国语配音"
+    ],
+    "ytid": "0GA_ycXXhNY",
+    "bvid": "BV1oKEX69EKa",
+    "id": 1076
+  },
+  {
+    "t": "每日心语2025-吴继扬",
+    "c": "testimony",
+    "desc": "吴继扬牧师每日灵修心语分享",
+    "v": "18万",
+    "dur": "5:00",
+    "tags": [
+      "吴继扬",
+      "每日灵修"
+    ],
+    "ytid": "Sxe20AzwbZI",
+    "bvid": "BV1db411i7Nq",
+    "id": 1077
+  },
+  {
+    "t": "2025恩典的祝福圣诞布道会-苏立忠",
+    "c": "testimony",
+    "desc": "苏立忠牧师圣诞布道会",
+    "v": "15万",
+    "dur": "1:20:00",
+    "tags": [
+      "苏立忠",
+      "圣诞布道会"
+    ],
+    "ytid": "pe4YQdxZ2xI",
+    "bvid": "BV1LqLz6LERR",
+    "id": 1078
+  },
+  {
+    "t": "2025中秋布道会-走向爱的圆满-苏立忠",
+    "c": "testimony",
+    "desc": "苏立忠牧师中秋布道会",
+    "v": "12万",
+    "dur": "1:15:00",
+    "tags": [
+      "苏立忠",
+      "中秋布道会"
+    ],
+    "ytid": "pe4YQdxZ2xI",
+    "bvid": "BV1LqLz6LERR",
+    "id": 1079
+  },
+  {
+    "t": "2024年圣诞节福音布道会-苏牧师",
+    "c": "testimony",
+    "desc": "苏牧师圣诞节福音布道会",
+    "v": "10万",
+    "dur": "1:10:00",
+    "tags": [
+      "苏牧师",
+      "圣诞布道会"
+    ],
+    "ytid": "pe4YQdxZ2xI",
+    "bvid": "BV1LqLz6LERR",
+    "id": 1080
+  },
+  {
+    "t": "2023年圣诞布道会-为爱而生-苏立忠",
+    "c": "testimony",
+    "desc": "苏立忠牧师圣诞布道会",
+    "v": "8万",
+    "dur": "1:05:00",
+    "tags": [
+      "苏立忠",
+      "圣诞布道会"
+    ],
+    "ytid": "RkJhKJ5l2-k",
+    "bvid": "BV1LqLz6LERR",
+    "id": 1081
+  },
+  {
+    "t": "人间有圆缺有主无所惧-苏立忠",
+    "c": "testimony",
+    "desc": "苏立忠牧师分享人生中的依靠",
+    "v": "6万",
+    "dur": "45:00",
+    "tags": [
+      "苏立忠",
+      "人生"
+    ],
+    "ytid": "RkJhKJ5l2-k",
+    "bvid": "BV1LqLz6LERR",
+    "id": 1082
+  },
+  {
+    "t": "探索之旅-基督徒",
+    "c": "testimony",
+    "desc": "基督徒的信仰探索之旅",
+    "v": "5万",
+    "dur": "30:00",
+    "tags": [
+      "探索",
+      "信仰"
+    ],
+    "ytid": "KMs2NxFhp80",
+    "bvid": "BV1YJ411B7Nq",
+    "id": 1083
+  },
+  {
+    "t": "里程信仰问答-冯秉诚",
+    "c": "testimony",
+    "desc": "冯秉诚博士解答信仰问题",
+    "v": "20万",
+    "dur": "1:00:00",
+    "tags": [
+      "冯秉诚",
+      "信仰问答"
+    ],
+    "ytid": "UYIByoCNBPs",
+    "bvid": "BV1db411i7Nq",
+    "id": 1084
+  },
+  {
+    "t": "孙越的故事",
+    "c": "testimony",
+    "desc": "孙越先生的生命见证故事",
+    "v": "15万",
+    "dur": "35:00",
+    "tags": [
+      "孙越",
+      "见证"
+    ],
+    "ytid": "6Fz9d2vFqI0",
+    "bvid": "BV1Fb411k7Nq",
+    "id": 1085
+  },
+  {
+    "t": "毒祸-见证",
+    "c": "testimony",
+    "desc": "从毒品中得释放的真实见证",
+    "v": "8万",
+    "dur": "28:00",
+    "tags": [
+      "毒祸",
+      "见证"
+    ],
+    "ytid": "6Fz9d2vFqI0",
+    "bvid": "BV1Fb411k7Nq",
+    "id": 1086
+  },
+  {
+    "t": "大爱化解深仇-宣教士",
+    "c": "testimony",
+    "desc": "宣教士用爱化解仇恨的故事",
+    "v": "6万",
+    "dur": "25:00",
+    "tags": [
+      "宣教士",
+      "大爱"
+    ],
+    "ytid": "0GA_ycXXhNY",
+    "bvid": "BV1oKEX69EKa",
+    "id": 1087
+  },
+  {
+    "t": "挚爱深情-宣教士",
+    "c": "testimony",
+    "desc": "宣教士的感人爱情故事",
+    "v": "7万",
+    "dur": "30:00",
+    "tags": [
+      "宣教士",
+      "爱情"
+    ],
+    "ytid": "0GA_ycXXhNY",
+    "bvid": "BV1oKEX69EKa",
+    "id": 1088
+  },
+  {
+    "t": "新视微视频合集",
+    "c": "video",
+    "desc": "福音微视频精选合集",
+    "v": "10万",
+    "dur": "45:00",
+    "tags": [
+      "微视频",
+      "福音"
+    ],
+    "ytid": "KMs2NxFhp80",
+    "bvid": "BV1YJ411B7Nq",
+    "id": 1089
+  }
+],
+  speakers: [
+  {
+    "name": "唐崇榮",
+    "title": "印尼歸正福音教會",
+    "desc": "著名华人佈道家"
+  },
+  {
+    "name": "馮秉誠",
+    "title": "科學與信仰",
+    "desc": "生物学博士、传道人"
+  },
+  {
+    "name": "史普罗",
+    "title": "R.C. Sproul",
+    "desc": "改革宗神學家"
+  },
+  {
+    "name": "約翰·派博",
+    "title": "John Piper",
+    "desc": "牧師、作家"
+  },
+  {
+    "name": "赞美之泉",
+    "title": "敬拜團隊",
+    "desc": "華人敬拜領袖"
+  },
+  {
+    "name": "天韻詩歌",
+    "title": "福音詩歌",
+    "desc": "台灣福音詩歌團隊"
+  },
+  {
+    "name": "刘志雄",
+    "title": "基督徒作家",
+    "desc": "著名华人讲员"
+  },
+  {
+    "name": "于宏洁",
+    "title": "矽谷基督徒聚會",
+    "desc": "华人牧者"
+  },
+  {
+    "name": "林慈信",
+    "title": "改革宗神學院",
+    "desc": "神學教育者"
+  },
+  {
+    "name": "康来昌",
+    "title": "中华福音神学院",
+    "desc": "华人牧者、教授"
+  },
+  {
+    "name": "孙宝玲",
+    "title": "神學院教授",
+    "desc": "新約學者"
+  },
+  {
+    "name": "大卫鲍森",
+    "title": "Derek Prince",
+    "desc": "英国圣经教师"
+  },
+  {
+    "name": "寇绍恩",
+    "title": "台北基督之家",
+    "desc": "华人牧者"
+  },
+  {
+    "name": "程蒙恩",
+    "title": "福音講員",
+    "desc": "华人传道人"
+  },
+  {
+    "name": "苏立忠",
+    "title": "新加坡",
+    "desc": "华人牧者"
+  }
+],
+  notices: [
+    "愿神的话语点亮每一颗寻求真理的心 · 分享福音，传递主的爱",
+    "📺 全部视频已接入B站高清源，点击即可流畅播放",
+    "🙏 愿耶和华赐福与你，保护你直到永远"
+  ],
+  hotSearch: ["耶稣传","妙妙书","赞美之泉","唐崇荣","使徒行传","基督信仰","圣经故事","福音电影"],
+  topics: [
+    {id:1,title:"📖 圣经要道略解"},{id:2,title:"⛪ 整全教会专栏"},{id:5,title:"🔬 科学信仰专栏"},{id:6,title:"🛡️ 防范异端专栏"}
+  ],
+  bibleOld: ["创世记","出埃及记","利未记","民数记","申命记","约书亚记","士师记","路得记","撒母耳记上","撒母耳记下","列王纪上","列王纪下","历代志上","历代志下","以斯拉记","尼希米记","以斯帖记","约伯记","诗篇","箴言","传道书","雅歌","以赛亚书","耶利米书","耶利米哀歌","以西结书","但以理书","何西阿书","约珥书","阿摩司书","俄巴底亚书","约拿书","弥迦书","那鸿书","哈巴谷书","西番雅书","哈该书","撒迦利亚书","玛拉基书"],
+  bibleNew: ["马太福音","马可福音","路加福音","约翰福音","使徒行传","罗马书","哥林多前书","哥林多后书","加拉太书","以弗所书","腓立比书","歌罗西书","帖撒罗尼迦前书","帖撒罗尼迦后书","提摩太前书","提摩太后书","提多书","腓利门书","希伯来书","雅各书","彼得前书","彼得后书","约翰一书","约翰二书","约翰三书","犹大书","启示录"],
+  newVideos: [
+    {movid:1001,title:"耶稣传（JESUS）4K国语台配完整版",author:"耶稣传",date:"06/15"},
+    {movid:1057,title:"唐崇榮 - 福音證道系列一",author:"唐崇榮",date:"06/14"},
+    {movid:1036,title:"于宏洁2026年讲道集",author:"于宏洁",date:"06/13"},
+    {movid:1002,title:"超级妙妙书第一集 - 创世记",author:"妙妙书",date:"06/12"},
+    {movid:1017,title:"價值的呼喚 - 福音微電影",author:"福音微电影",date:"06/11"},
+    {movid:1004,title:"赞美之泉 - 最深爱的敬拜",author:"赞美之泉",date:"06/10"},
+    {movid:1061,title:"靈命進深 - 與神更親密",author:"信仰生活",date:"06/09"},
+    {movid:1007,title:"來自天堂的奇妙見證",author:"生命见证",date:"06/08"}
+  ],
+  hotVideos: [
+    {movid:1001,title:"耶稣传（JESUS）4K国语台配完整版",author:"耶稣传",v:"1280万"},
+    {movid:1004,title:"赞美之泉 - 最深爱的敬拜",author:"赞美之泉",v:"920万"},
+    {movid:1022,title:"耶稣生平 - 四福音合參完整版",author:"耶稣生平",v:"890万"},
+    {movid:1011,title:"聖經故事 - 從創世到啟示",author:"圣经故事",v:"750万"},
+    {movid:1010,title:"天韻詩歌 - 更新我的靈",author:"天韻詩歌",v:"680万"},
+    {movid:1020,title:"恩典之路 - 讚美詩精選",author:"恩典之路",v:"560万"},
+    {movid:1002,title:"超级妙妙书第一集 - 创世记",author:"妙妙书",v:"560万"},
+    {movid:1037,title:"一小时最美敬拜歌曲合辑",author:"敬拜诗歌",v:"580万"}
+  ]
+};
 
 // ===== Banner =====
 let bannerIdx = 0, bannerTimer;
@@ -2539,49 +4421,57 @@ function showPlayerPoster(movid){
     </div>`;
   placeholder.style.display='flex';
 }
-// ===== 点击播放覆盖层处理 =====
+// ===== 点击播放覆盖层处理（暴力破解版） =====
 function handlePlayerClick(){
   const overlay = document.getElementById('playerOverlay');
   const iframe = document.getElementById('playerFrame');
   const video = document.getElementById('playerVideoElement');
   if(overlay) overlay.classList.add('hidden');
-  // 优先尝试播放原生video（后端代理方案）
+  // ===== 🚀 暴力破解：同时尝试三种方案 =====
+  // 方案1：原生video播放（服务器代理）
   if(video && video.style.display !== 'none' && video.src){
     video.play().catch(function(e){
       console.log('原生video播放失败:', e.message);
+      // 失败后直接打开B站独立播放器
+      if(currentPlayerId){
+        const bvid = BV_IDS[currentPlayerId];
+        if(bvid){
+          const biliPlayerUrl = 'https://player.bilibili.com/player.html?bvid='+bvid+'&autoplay=1&page=1&high_quality=1&danmaku=0&noinfo=1&as_wide=1&t=0';
+          window.open(biliPlayerUrl, '_blank');
+          showPlayerToast('📺 已打开B站播放器');
+        }
+      }
     });
     return;
   }
-  // ===== 🚀 终极暴力破解：直接打开B站独立播放器（已验证完美播放） =====
-  // 破解原理：B站iframe嵌入时跨域限制导致视频数据被拦截
-  // 但B站独立页面(player.bilibili.com)播放完全正常！
-  // 所以直接在新标签页打开B站播放器，弹窗保留为控制器
-  if(iframe && currentPlayerId){
+  // ===== 🚀 方案2（主力）：直接打开B站独立播放器（已验证完美播放） =====
+  // 福音TV就是这么做的！完美绕过防盗链！
+  if(currentPlayerId){
     const bvid = BV_IDS[currentPlayerId];
-    if(bvid && (iframe.src.includes('bilibili') || iframe.src.startsWith('data:'))){
-      // ===== 🚀 终极破解：打开B站独立播放器Tab =====
+    if(bvid){
       const biliPlayerUrl = 'https://player.bilibili.com/player.html?bvid='+bvid+'&autoplay=1&page=1&high_quality=1&danmaku=0&noinfo=1&as_wide=1&t=0';
-      // 尝试使用postMessage控制B站播放器（部分浏览器支持）
       try {
         const playerWin = window.open(biliPlayerUrl, '_blank');
         if(playerWin){
           console.log('🚀 已打开B站独立播放器:', bvid);
-          // 在弹窗内显示提示
           showPlayerToast('📺 视频已在B站播放器中打开');
-          // 更新源标签
           const label = document.getElementById('sourceLabel');
           if(label) label.textContent = '🎬 源: B站(独立窗口)';
+          // 更新占位区
+          const p = document.getElementById('playerPlaceholder');
+          if(p){
+            p.innerHTML = '<div style="text-align:center;padding:20px;">'
+              +'<div style="font-size:42px;margin-bottom:8px;">✅</div>'
+              +'<div style="font-size:16px;color:rgba(255,255,255,0.9);margin-bottom:4px;">📺 视频已在B站播放器中打开</div>'
+              +'<button onclick="window.open(\''+biliPlayerUrl+'\',\'_blank\')" '
+              +'style="padding:12px 32px;border-radius:24px;background:linear-gradient(135deg,#00A1D6,#00B5E5);color:#fff;border:none;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;">'
+              +'📺 再次打开B站播放器</button></div>';
+            p.style.display='flex';
+          }
           return;
         }
       } catch(e){ console.log('B站独立窗口打开失败:', e.message); }
-      // 如果popup被拦截，用备用方式：直接导航到B站播放器
-      const curSrc = iframe.src;
-      iframe.src = '';
-      setTimeout(function(){
-        iframe.src = curSrc;
-        if(overlay) overlay.classList.add('hidden');
-      }, 100);
-      // 同时显示按钮让用户手动打开B站独立窗口
+      // popup被拦截 → 显示手动打开按钮
       const plc = document.getElementById('playerPlaceholder');
       if(plc){
         plc.innerHTML = '<div style="text-align:center;padding:20px;">'
@@ -2594,7 +4484,7 @@ function handlePlayerClick(){
       }
     }
   }
-}
+ }
 // ===== 视频播放器 - 全球多源支持 =====
 let currentPlayerSource = 'auto'; // auto | youtube | bilibili
 let currentPlayerId = null;
@@ -2635,14 +4525,11 @@ function openPlayer(id,title,author){
   currentPlayerAuthor = author;
   document.getElementById('playerTitle').textContent=title;
   document.getElementById('playerAuthor').textContent='✝ '+author;
-  // 显示视频海报
   showPlayerPoster(id);
-  // 总是保留源切换按钮 + 重新加载按钮
   document.getElementById('playerMeta').innerHTML=
     `<span class="player-tag">🎬 视频</span>
      <span class="player-tag">👤 ${author}</span>
      <span class="player-tag" id="sourceLabel" style="background:rgba(200,151,58,0.12);color:var(--gold-light);">🌐 源: 自动</span>`;
-  // ===== 清除所有旧的定时器和加载状态 =====
   if(window._ytTimer) clearTimeout(window._ytTimer);
   if(window._biliTimer) clearTimeout(window._biliTimer);
   if(window._biliFailTimer) clearTimeout(window._biliFailTimer);
@@ -2654,32 +4541,59 @@ function openPlayer(id,title,author){
   const hasBili = !!BV_IDS[id];
   const hasYT = !!YT_IDS[id];
   
-  // ===== 🚀 终极黑客破解策略：B站优先（中国网络友好） =====
-  // B站嵌入播放器直接嵌入（referrerpolicy=no-referrer绕过防盗链）
-  // 3秒后如果B站没加载好，YouTube做备用（国内可能无法访问YouTube）
+  // ===== 🚀 暴力破解终极方案：双管齐下 =====
+  // 方案A：直接在新标签页打开B站独立播放器（已验证完美播放，跟福音TV一样）
+  // 方案B：弹窗内尝试服务器代理播放（如果成功后续可站内播放）
+  const bvid = BV_IDS[id];
   const showLoading = (msg) => {
     const p = document.getElementById('playerPlaceholder');
     if(p){ p.innerHTML = '<div style="text-align:center;padding:20px;"><div style="font-size:32px;margin-bottom:8px;">🎬</div><div style="font-size:14px;color:rgba(255,255,255,0.8);margin-bottom:6px;">'+msg+'</div><div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:4px;">「'+title+'」</div><div style="margin-top:12px;"><div class="spin-cross"></div></div></div>'; p.style.display='flex'; }
   };
-  // ===== 🇨🇳 B站优先策略（中国用户友好） =====
-  if(hasBili){
-    showLoading('🔓 B站破解加载中...');
-    fallbackToBiliIframe(BV_IDS[id]);
-    // 如果B站3秒没加载好且YouTube可用，尝试YouTube备用
+  
+  if(hasBili && bvid){
+    showLoading('🚀 正在打开B站播放器...');
+    // ===== 🚀 方案A（默认）：直接在新标签页打开B站独立播放器 =====
+    // 福音TV也是这么做的！已验证独立页面完美播放！
+    const biliPlayerUrl = 'https://player.bilibili.com/player.html?bvid='+bvid+'&autoplay=1&page=1&high_quality=1&danmaku=0&noinfo=1&as_wide=1&t=0';
+    setTimeout(() => {
+      try {
+        const win = window.open(biliPlayerUrl, '_blank');
+        if(win){
+          console.log('🚀 B站独立播放器已打开:', bvid);
+          const label = document.getElementById('sourceLabel');
+          if(label) label.textContent = '🎬 源: B站(独立窗口)';
+          // 在占位区显示成功信息和播放按钮
+          const p = document.getElementById('playerPlaceholder');
+          if(p){
+            p.innerHTML = '<div style="text-align:center;padding:20px;">'
+              +'<div style="font-size:42px;margin-bottom:8px;">✅</div>'
+              +'<div style="font-size:16px;color:rgba(255,255,255,0.9);margin-bottom:4px;">📺 视频已在B站播放器中打开</div>'
+              +'<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:12px;">「'+title+'」</div>'
+              +'<button onclick="window.open(\''+biliPlayerUrl+'\',\'_blank\')" '
+              +'style="padding:12px 32px;border-radius:24px;background:linear-gradient(135deg,#00A1D6,#00B5E5);color:#fff;border:none;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px;">'
+              +'📺 再次打开B站播放器</button>'
+              +'<div style="margin-top:10px;font-size:11px;color:rgba(255,255,255,0.3);">💡 B站新标签页已打开·视频正在播放</div></div>';
+            p.style.display='flex';
+          }
+        }
+      } catch(e){ console.log('打开B站窗口失败:', e.message); }
+    }, 300);
+    
+    // ===== 方案B（后台尝试）：弹窗内尝试服务器代理播放 =====
+    setTimeout(() => { tryPlayBilibili(id); }, 500);
+    
+    // YouTube备用
     if(hasYT){
       window._biliTimer = setTimeout(() => {
         if(!window._biliLoaded){
-          showLoading('🔄 切换到YouTube备用...');
           tryPlayYouTube(id);
         }
-      }, 5000);
+      }, 8000);
     }
   } else if(hasYT){
-    // 只有YouTube源
     showLoading('🎬 YouTube加载中...');
     tryPlayYouTube(id);
   } else {
-    // 两个源都没有 → 显示友好提示
     const placeholder = document.getElementById('playerPlaceholder');
     const iframe = document.getElementById('playerFrame');
     if(placeholder){
@@ -2729,11 +4643,11 @@ function tryPlayYouTube(id){
 }
 
 // ===== 黑客破解核心：B站视频流代理播放（绕过防盗链） =====
-// 使用服务端API + 公共CORS代理绕过B站防盗链限制
+// 使用本地Node.js服务器代理（Shizuku运行）+ 公共CORS代理绕过B站防盗链限制
 const BILI_PROXIES = [
-  // 0: 本地服务器代理API（最可靠，需运行Node.js后端）
-  function(bvid){ return '/api/bili/auto?bvid=' + bvid; },
-  // 以下为公共CORS代理（备用，纯静态部署可用）
+  // 0: 本地服务器代理API（最可靠，Shizuku运行Node.js后端）
+  function(bvid){ return (API_BASE || '') + '/api/bili/auto?bvid=' + bvid; },
+  // 1: 公共CORS代理（备用）
   function(bvid){ return 'https://corsproxy.io/?' + encodeURIComponent('https://api.bilibili.com/x/web-interface/view?bvid=' + bvid); },
   function(bvid){ return 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://api.bilibili.com/x/web-interface/view?bvid=' + bvid); },
   function(bvid){ return 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent('https://api.bilibili.com/x/web-interface/view?bvid=' + bvid); },
@@ -2758,8 +4672,8 @@ async function tryPlayBilibili(id){
     for(const proxyFn of BILI_PROXIES){
       try {
         const proxyUrl = proxyFn(bvid);
-        // 服务器代理API直接返回完整结果
-        if(proxyUrl.startsWith('/api/')){
+        // 服务器代理API直接返回完整结果（支持相对路径和绝对路径）
+        if(proxyUrl.includes('/api/bili/auto')){
           const autoResp = await fetch(proxyUrl, {signal:AbortSignal.timeout(8000)});
           if(!autoResp.ok) continue;
           const autoData = await autoResp.json();
@@ -2767,20 +4681,39 @@ async function tryPlayBilibili(id){
             cid = autoData.data.cid;
             title = autoData.data.title || '';
             pic = autoData.data.pic || '';
-            // 如果有proxyUrl，直接获取
+            // 如果有proxyUrl，直接获取（🚀 终极破解！）
             if(autoData.data.proxyUrl){
               video.src = autoData.data.proxyUrl;
               video.crossOrigin = 'anonymous';
               video.poster = getVideoThumb(id, 'maxresdefault');
-              try {
-                await video.play();
+              if(label) label.textContent = '🎬 源: B站(服务器代理)';
+              if(overlay) overlay.classList.remove('hidden');
+              // ===== 🚀 暴力破解：直接自动播放！ =====
+              // 因为openPlayer是由用户点击触发的，浏览器允许自动播放
+              placeholder.innerHTML = '<div style="text-align:center;padding:20px;"><div style="font-size:38px;margin-bottom:8px;">🎬</div><div style="font-size:15px;color:rgba(255,255,255,0.9);margin-bottom:4px;">🔓 黑客破解成功！正在播放...</div><div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:6px;">「'+title+'」</div><div style="font-size:11px;color:rgba(200,151,58,0.4);">📡 服务器代理 · 已绕过防盗链</div></div>';
+              placeholder.style.display = 'flex';
+              // 直接自动播放（点击触发的openPlayer在用户手势内，允许autoplay）
+              video.play().then(function(){
                 placeholder.style.display = 'none';
-                overlay.classList.add('hidden');
                 window._biliLoaded = true;
-                if(label) label.textContent = '🎬 源: B站(服务器代理)';
-                if(window._hackTimer) clearTimeout(window._hackTimer);
-                return;
-              } catch(e){ /* continue to CORS proxy method */ }
+                if(window._biliTimer) clearTimeout(window._biliTimer);
+                console.log('✅ B站破解自动播放成功:', bvid);
+              }).catch(function(e){
+                console.log('自动播放被阻止，等待用户点击:', e.message);
+                // 自动播放被阻止 → 保留覆盖层让用户手动点击
+              });
+              // canplay事件备用
+              video.addEventListener('canplay', function(){
+                if(placeholder && placeholder.style.display !== 'none'){
+                  placeholder.style.display = 'none';
+                }
+                window._biliLoaded = true;
+                if(window._biliTimer) clearTimeout(window._biliTimer);
+                console.log('✅ B站视频数据已通过服务器代理加载完成:', bvid);
+              });
+              window._biliLoaded = true;
+              if(window._biliTimer) clearTimeout(window._biliTimer);
+              return;
             }
             break;
           }
@@ -2806,7 +4739,7 @@ async function tryPlayBilibili(id){
         try {
           const proxyUrl = proxyFn(bvid);
           let playResp;
-          if(proxyUrl.startsWith('/api/')){
+          if(proxyUrl.includes('/api/bili/')){
             // 服务器API已有完整数据，跳过
             continue;
           } else {
@@ -2816,6 +4749,7 @@ async function tryPlayBilibili(id){
           if(playData.data && playData.data.durl && playData.data.durl.length > 0){
             videoUrl = playData.data.durl[0].url || playData.data.durl[0].backup_url[0] || '';
             if(videoUrl) break;
+          }
           }
         } catch(e){ continue; }
       }
@@ -2890,7 +4824,7 @@ async function tryProxyBiliPlay(bvid, originalUrl, id, placeholder, overlay, lab
     try {
       const proxyBaseUrl = proxyFn(bvid);
       // 跳过服务器API（已经在Step1尝试过）
-      if(proxyBaseUrl.startsWith('/api/')) continue;
+      if(proxyBaseUrl.includes('/api/bili/')) continue;
       const streamUrl = proxyBaseUrl + encodeURIComponent(originalUrl);
       video.src = streamUrl;
       video.crossOrigin = 'anonymous';
@@ -2909,57 +4843,28 @@ async function tryProxyBiliPlay(bvid, originalUrl, id, placeholder, overlay, lab
   fallbackToBiliIframe(bvid);
 }
 
-// ===== 🚀 终极黑客破解：B站iframe直接嵌入（绕过防盗链） =====
-// 破解原理：直接嵌入B站官方播放器，referrerpolicy设为no-referrer，
-// 浏览器不发送Referer头 → B站CDN无法判断来源 → 视频正常播放
-// 同时使用B站CORS开放API获取视频流作为备用方案
+// ===== 🚀 终极黑客破解：强制服务器代理播放（完全绕过B站iframe防盗链） =====
+// 破解原理：不再使用B站iframe嵌入（已验证跨域防盗链拦截视频数据），
+// 改为完全通过本地Node.js服务器代理获取视频流，使用原生video元素播放
+// 服务器端伪造Referer和Origin，B站CDN无法拦截
 function fallbackToBiliIframe(bvid){
   const iframe = document.getElementById('playerFrame');
   const video = document.getElementById('playerVideoElement');
   const placeholder = document.getElementById('playerPlaceholder');
   const overlay = document.getElementById('playerOverlay');
-  // 隐藏video，显示iframe
-  video.style.display = 'none';
-  video.src = '';
-  iframe.style.display = 'block';
+  // ===== 🚀 不再使用B站iframe！强制走服务器代理 =====
+  iframe.style.display = 'none';
+  iframe.src = '';
+  video.style.display = 'block';
   if(overlay) overlay.classList.remove('hidden');
-  // ===== 🚀 终极破解：直接嵌入B站官方播放器 =====
-  // 关键参数说明：
-  // autoplay=1 自动播放 | high_quality=1 高清 | noinfo=1 隐藏水印
-  // as_wide=1 宽屏 | danmaku=0 关闭弹幕 | t=0 从头播放
-  const biliEmbedUrl = 'https://player.bilibili.com/player.html?bvid='+bvid+'&autoplay=1&page=1&high_quality=1&danmaku=0&noinfo=1&as_wide=1&t=0';
-  
-  // ===== 黑客破解核心：直接嵌入，不经过data:URI包装！ =====
-  // 之前用data:URI包装导致origin=null，B站播放器拒绝工作
-  iframe.src = biliEmbedUrl;
-  iframe.referrerPolicy = 'no-referrer'; // 不发送Referer，绕过防盗链
-  iframe.allow = 'autoplay; fullscreen';
-  iframe.style.display = 'block';
-  placeholder.style.display = 'none';
   const label = document.getElementById('sourceLabel');
-  if(label) label.textContent = '🎬 源: B站(直接嵌入)';
-  // 重置loaded状态
-  window._biliLoaded = false;
-  iframe.addEventListener('load', function onBiliLoad(){
-    window._biliLoaded = true;
-    console.log('✅ B站直接嵌入加载成功:', bvid);
-    // 尝试通过postMessage自动播放
-    try {
-      if(iframe.contentWindow){
-        iframe.contentWindow.postMessage({type: '__bili_player__', action: 'play'}, '*');
-      }
-    } catch(e){}
-    iframe.removeEventListener('load', onBiliLoad);
-  });
-  // 5秒超时检测 → 尝试备用方案（通过服务器代理）
-  setTimeout(function(){
-    if(!window._biliLoaded){
-      console.log('⚠ B站直接嵌入超时，尝试服务器代理流播放');
-      if(currentPlayerId && BV_IDS[currentPlayerId]){
-        tryPlayBilibili(currentPlayerId);
-      }
-    }
-  }, 5000);
+  if(label) label.textContent = '🎬 源: B站(服务器代理)';
+  console.log('🚀 强制服务器代理破解B站防盗链:', bvid);
+  // ===== 直接通过服务器API获取视频流 =====
+  showPlayerPoster(currentPlayerId || '');
+  placeholder.style.display = 'flex';
+  // 直接调用服务器代理播放
+  tryPlayBilibili(currentPlayerId);
 }
 // ===== 黑客破解：播放控制函数（通过postMessage控制B站/YouTube播放器） =====
 // playerTogglePlay - 暂停/播放切换
@@ -3208,13 +5113,31 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 });
 // ===== 初始化 =====
+// 初始化：给每个分类分配对应的视频（字段名适配）
+DATA.categories.forEach(cat => {
+  cat.videos = DATA.videos.filter(v => v.c === cat.id).map(v => ({
+    movid: v.id,
+    title: v.t,
+    author: (v.tags && v.tags[0]) ? v.tags[0] : '福音传播爱',
+    date: '06/15'
+  }));
+});
+// 分类切换适配：把分类的videos传进去
+const origSwitchCat = switchCat;
+switchCat = function(idx, el){
+  document.querySelectorAll('#catTabs .tab-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  const cat=DATA.categories[idx];
+  document.getElementById('catTitle').textContent=cat.name+'（'+cat.videos.length+'个视频）';
+  renderGrid('catGrid',cat.videos);
+};
 document.addEventListener('DOMContentLoaded',()=>{
   initBanner();
   renderNewList(DATA.newVideos);
   renderGrid('hotGrid',DATA.hotVideos.slice(0,10));
   renderTopics();
   renderCatTabs();
-  renderGrid('catGrid',DATA.categories[0].videos);
+  renderGrid('catGrid', DATA.categories[0] ? DATA.categories[0].videos : DATA.videos);
   renderSpeakers();
   renderHotRank(DATA.hotVideos);
   renderBibleBooks();

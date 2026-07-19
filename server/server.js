@@ -6,6 +6,9 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
+const http = require('http');
+const { URL } = require('url');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -290,6 +293,168 @@ app.put('/api/data', (req, res) => {
     res.json({ success: true, message: '数据保存成功' });
   } else {
     res.status(500).json({ success: false, message: '保存失败' });
+  }
+});
+
+// ============================================================
+// ===== 🚀 B站(Bilibili)黑客破解代理 - 绕过防盗链 =====
+// ============================================================
+// 原理：服务器端代发请求，伪造Referer来源为bilibili.com，
+// 从而绕过B站CDN的防盗链验证，让视频在szxfuyin.com正常播放
+// ============================================================
+
+// B站API请求通用函数 - 带Referer伪装
+function biliFetch(url) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const mod = u.protocol === 'https:' ? https : http;
+    const options = {
+      hostname: u.hostname,
+      path: u.pathname + u.search,
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://www.bilibili.com',
+        'Origin': 'https://www.bilibili.com',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8'
+      },
+      timeout: 15000
+    };
+    const req = mod.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => resolve(data));
+    });
+    req.on('error', reject);
+    req.on('timeout', () => { req.destroy(); reject(new Error('timeout')); });
+    req.end();
+  });
+}
+
+// ===== API: 获取B站视频信息（cid等） =====
+// 请求示例: /api/bili/view?bvid=BV1YJ411B7Nq
+app.get('/api/bili/view', async (req, res) => {
+  const { bvid } = req.query;
+  if (!bvid) return res.status(400).json({ success: false, error: '缺少bvid参数' });
+  try {
+    const data = await biliFetch('https://api.bilibili.com/x/web-interface/view?bvid=' + bvid);
+    res.json(JSON.parse(data));
+  } catch(e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+// ===== API: 获取B站视频播放URL（破解防盗链核心！） =====
+// 请求示例: /api/bili/playurl?bvid=BV1YJ411B7Nq&cid=123456
+app.get('/api/bili/playurl', async (req, res) => {
+  const { bvid, cid } = req.query;
+  if (!bvid || !cid) return res.status(400).json({ success: false, error: '缺少参数' });
+  try {
+    // qn=80: 1080P, qn=64: 720P, qn=32: 480P, qn=16: 360P
+    const data = await biliFetch('https://api.bilibili.com/x/player/playurl?bvid=' + bvid + '&cid=' + cid + '&qn=80&platform=html5&high_quality=1&type=mp4');
+    res.json(JSON.parse(data));
+  } catch(e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+// ===== API: B站视频流代理 - 终极破解！ =====
+// 直接在服务器端代理视频流，彻底绕过防盗链
+// 请求示例: /api/bili/stream?url=https://upos-sz-mirrorcos.bilivideo.com/...
+app.get('/api/bili/stream', (req, res) => {
+  const { url } = req.query;
+  if (!url) return res.status(400).send('缺少url参数');
+  
+  try {
+    const decodedUrl = decodeURIComponent(url);
+    const u = new URL(decodedUrl);
+    const mod = u.protocol === 'https:' ? https : http;
+    
+    const options = {
+      hostname: u.hostname,
+      path: u.pathname + u.search,
+      method: req.method,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://www.bilibili.com',
+        'Origin': 'https://www.bilibili.com',
+        'Range': req.headers.range || '',
+        'Accept': '*/*'
+      }
+    };
+    
+    const proxyReq = mod.request(options, (proxyRes) => {
+      // 透传所有响应头（包括Content-Type, Content-Range等）
+      const headers = { ...proxyRes.headers };
+      // 移除会导致问题的头
+      delete headers['content-encoding'];
+      delete headers['transfer-encoding'];
+      delete headers['connection'];
+      res.writeHead(proxyRes.statusCode, headers);
+      proxyRes.pipe(res);
+    });
+    
+    proxyReq.on('error', (e) => {
+      res.status(500).send('代理错误: ' + e.message);
+    });
+    proxyReq.end();
+  } catch(e) {
+    res.status(500).send('代理错误: ' + e.message);
+  }
+});
+
+// ===== API: B站搜索 - 自动找福音视频 =====
+app.get('/api/bili/search', async (req, res) => {
+  const { keyword } = req.query;
+  if (!keyword) return res.status(400).json({ success: false, error: '缺少keyword参数' });
+  try {
+    const data = await biliFetch('https://api.bilibili.com/x/web-interface/search/type?search_type=video&keyword=' + encodeURIComponent(keyword + ' 福音'));
+    res.json(JSON.parse(data));
+  } catch(e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+// ===== API: 智能一键获取B站视频流（组合接口） =====
+// 一次调用自动获取cid和播放URL，前端无需分步请求
+app.get('/api/bili/auto', async (req, res) => {
+  const { bvid } = req.query;
+  if (!bvid) return res.status(400).json({ success: false, error: '缺少bvid参数' });
+  try {
+    // Step1: 获取视频信息 => 得到cid
+    const viewData = await biliFetch('https://api.bilibili.com/x/web-interface/view?bvid=' + bvid);
+    const view = JSON.parse(viewData);
+    if (!view.data || !view.data.cid) {
+      return res.json({ success: false, error: '无法获取视频信息', raw: view });
+    }
+    const cid = view.data.cid;
+    const title = view.data.title || '';
+    const pic = view.data.pic || '';
+    const author = view.data.owner ? view.data.owner.name : '';
+    
+    // Step2: 获取播放URL
+    const playData = await biliFetch('https://api.bilibili.com/x/player/playurl?bvid=' + bvid + '&cid=' + cid + '&qn=80&platform=html5&high_quality=1&type=mp4');
+    const play = JSON.parse(playData);
+    
+    // Step3: 提取可用视频流URL
+    let videoUrl = '';
+    if (play.data && play.data.durl && play.data.durl.length > 0) {
+      // 取最高画质的URL
+      videoUrl = play.data.durl[0].url || play.data.durl[0].backup_url || '';
+    }
+    
+    res.json({
+      success: !!videoUrl,
+      data: {
+        bvid, cid, title, pic, author,
+        videoUrl: videoUrl,
+        // 构造代理URL - 通过我们的服务器播放
+        proxyUrl: videoUrl ? ('/api/bili/stream?url=' + encodeURIComponent(videoUrl)) : ''
+      }
+    });
+  } catch(e) {
+    res.status(500).json({ success: false, error: e.message });
   }
 });
 
