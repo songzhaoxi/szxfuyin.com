@@ -4420,70 +4420,55 @@ function showPlayerPoster(movid){
       <span style="font-size:14px;color:rgba(255,255,255,0.8);text-shadow:0 2px 8px rgba(0,0,0,0.8);">✝️ 视频加载中 · 荣耀归主</span>
     </div>`;
   placeholder.style.display='flex';
-}
-// ===== 点击播放覆盖层处理（暴力破解版） =====
+// ===== 点击播放覆盖层处理（站内播放版） =====
 function handlePlayerClick(){
   const overlay = document.getElementById('playerOverlay');
   const iframe = document.getElementById('playerFrame');
   const video = document.getElementById('playerVideoElement');
   if(overlay) overlay.classList.add('hidden');
-  // ===== 🚀 暴力破解：同时尝试三种方案 =====
+  // ===== 🚀 暴力破解：同时尝试两种方案 =====
   // 方案1：原生video播放（服务器代理）
   if(video && video.style.display !== 'none' && video.src){
     video.play().catch(function(e){
       console.log('原生video播放失败:', e.message);
-      // 失败后直接打开B站独立播放器
-      if(currentPlayerId){
+      // 失败后使用iframe嵌入B站播放器
+      if(currentPlayerId && iframe){
         const bvid = BV_IDS[currentPlayerId];
         if(bvid){
           const biliPlayerUrl = 'https://player.bilibili.com/player.html?bvid='+bvid+'&autoplay=1&page=1&high_quality=1&danmaku=0&noinfo=1&as_wide=1&t=0';
-          window.open(biliPlayerUrl, '_blank');
-          showPlayerToast('📺 已打开B站播放器');
+          iframe.src = biliPlayerUrl;
+          iframe.style.display = 'block';
+          video.style.display = 'none';
+          currentPlayerSource = 'bilibili';
+          showPlayerToast('🎬 已切换B站站内播放');
         }
       }
     });
     return;
   }
-  // ===== 🚀 方案2（主力）：直接打开B站独立播放器（已验证完美播放） =====
-  // 福音TV就是这么做的！完美绕过防盗链！
-  if(currentPlayerId){
+  // ===== 🚀 方案2（主力）：iframe嵌入B站播放器，在站内播放 =====
+  if(currentPlayerId && iframe){
     const bvid = BV_IDS[currentPlayerId];
     if(bvid){
       const biliPlayerUrl = 'https://player.bilibili.com/player.html?bvid='+bvid+'&autoplay=1&page=1&high_quality=1&danmaku=0&noinfo=1&as_wide=1&t=0';
-      try {
-        const playerWin = window.open(biliPlayerUrl, '_blank');
-        if(playerWin){
-          console.log('🚀 已打开B站独立播放器:', bvid);
-          showPlayerToast('📺 视频已在B站播放器中打开');
-          const label = document.getElementById('sourceLabel');
-          if(label) label.textContent = '🎬 源: B站(独立窗口)';
-          // 更新占位区
-          const p = document.getElementById('playerPlaceholder');
-          if(p){
-            p.innerHTML = '<div style="text-align:center;padding:20px;">'
-              +'<div style="font-size:42px;margin-bottom:8px;">✅</div>'
-              +'<div style="font-size:16px;color:rgba(255,255,255,0.9);margin-bottom:4px;">📺 视频已在B站播放器中打开</div>'
-              +'<button onclick="window.open(\''+biliPlayerUrl+'\',\'_blank\')" '
-              +'style="padding:12px 32px;border-radius:24px;background:linear-gradient(135deg,#00A1D6,#00B5E5);color:#fff;border:none;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;">'
-              +'📺 再次打开B站播放器</button></div>';
-            p.style.display='flex';
-          }
-          return;
-        }
-      } catch(e){ console.log('B站独立窗口打开失败:', e.message); }
-      // popup被拦截 → 显示手动打开按钮
-      const plc = document.getElementById('playerPlaceholder');
-      if(plc){
-        plc.innerHTML = '<div style="text-align:center;padding:20px;">'
-          +'<div style="font-size:32px;margin-bottom:8px;">🎬</div>'
-          +'<div style="font-size:14px;color:rgba(255,255,255,0.8);margin-bottom:6px;">点击下方按钮在新窗口观看</div>'
-          +'<button onclick="window.open(\''+biliPlayerUrl+'\',\'_blank\')" '
-          +'style="padding:12px 32px;border-radius:24px;background:linear-gradient(135deg,#00A1D6,#00B5E5);color:#fff;border:none;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;">'
-          +'📺 在B站播放器中观看</button></div>';
-        plc.style.display='flex';
+      iframe.src = biliPlayerUrl;
+      iframe.style.display = 'block';
+      if(video) video.style.display = 'none';
+      currentPlayerSource = 'bilibili';
+      const label = document.getElementById('sourceLabel');
+      if(label) label.textContent = '🎬 源: B站(站内播放)';
+      showPlayerToast('🎬 正在站内播放');
+      const p = document.getElementById('playerPlaceholder');
+      if(p){
+        p.innerHTML = '<div style="text-align:center;padding:20px;">'
+          +'<div style="font-size:42px;margin-bottom:8px;">🎬</div>'
+          +'<div style="font-size:16px;color:rgba(255,255,255,0.9);margin-bottom:4px;">📺 正在站内播放</div>'
+          +'<div style="font-size:11px;color:rgba(200,151,58,0.4);">✝ szxfuyin.com · 福音传播爱</div></div>';
+        setTimeout(() => { p.style.display = 'none'; }, 2000);
       }
     }
   }
+ }
  }
 // ===== 视频播放器 - 全球多源支持 =====
 let currentPlayerSource = 'auto'; // auto | youtube | bilibili
@@ -4551,33 +4536,29 @@ function openPlayer(id,title,author){
   };
   
   if(hasBili && bvid){
-    showLoading('🚀 正在打开B站播放器...');
-    // ===== 🚀 方案A（默认）：直接在新标签页打开B站独立播放器 =====
-    // 福音TV也是这么做的！已验证独立页面完美播放！
+    showLoading('🚀 正在加载视频...');
+    // ===== 🚀 方案A（主力）：iframe嵌入B站播放器，在站内直接播放 =====
+    // 在szxfuyin.com弹窗内直接播放，不跳转外部网站！
     const biliPlayerUrl = 'https://player.bilibili.com/player.html?bvid='+bvid+'&autoplay=1&page=1&high_quality=1&danmaku=0&noinfo=1&as_wide=1&t=0';
-    setTimeout(() => {
-      try {
-        const win = window.open(biliPlayerUrl, '_blank');
-        if(win){
-          console.log('🚀 B站独立播放器已打开:', bvid);
-          const label = document.getElementById('sourceLabel');
-          if(label) label.textContent = '🎬 源: B站(独立窗口)';
-          // 在占位区显示成功信息和播放按钮
-          const p = document.getElementById('playerPlaceholder');
-          if(p){
-            p.innerHTML = '<div style="text-align:center;padding:20px;">'
-              +'<div style="font-size:42px;margin-bottom:8px;">✅</div>'
-              +'<div style="font-size:16px;color:rgba(255,255,255,0.9);margin-bottom:4px;">📺 视频已在B站播放器中打开</div>'
-              +'<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:12px;">「'+title+'」</div>'
-              +'<button onclick="window.open(\''+biliPlayerUrl+'\',\'_blank\')" '
-              +'style="padding:12px 32px;border-radius:24px;background:linear-gradient(135deg,#00A1D6,#00B5E5);color:#fff;border:none;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px;">'
-              +'📺 再次打开B站播放器</button>'
-              +'<div style="margin-top:10px;font-size:11px;color:rgba(255,255,255,0.3);">💡 B站新标签页已打开·视频正在播放</div></div>';
-            p.style.display='flex';
-          }
-        }
-      } catch(e){ console.log('打开B站窗口失败:', e.message); }
-    }, 300);
+    const iframe = document.getElementById('playerFrame');
+    const video = document.getElementById('playerVideoElement');
+    const placeholder = document.getElementById('playerPlaceholder');
+    if(iframe){
+      iframe.src = biliPlayerUrl;
+      iframe.style.display = 'block';
+      if(video) video.style.display = 'none';
+      currentPlayerSource = 'bilibili';
+      const label = document.getElementById('sourceLabel');
+      if(label) label.textContent = '🎬 源: B站(站内播放)';
+      if(placeholder){
+        placeholder.innerHTML = '<div style="text-align:center;padding:20px;">'
+          +'<div style="font-size:42px;margin-bottom:8px;">🎬</div>'
+          +'<div style="font-size:16px;color:rgba(255,255,255,0.9);margin-bottom:4px;">📺 正在站内播放</div>'
+          +'<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:12px;">「'+title+'」</div>'
+          +'<div style="font-size:11px;color:rgba(200,151,58,0.4);">✝ szxfuyin.com · 福音传播爱</div></div>';
+        setTimeout(() => { placeholder.style.display = 'none'; }, 2000);
+      }
+    }
     
     // ===== 方案B（后台尝试）：弹窗内尝试服务器代理播放 =====
     setTimeout(() => { tryPlayBilibili(id); }, 500);
