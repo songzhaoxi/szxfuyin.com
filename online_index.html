@@ -1198,13 +1198,12 @@ function openPlayer(movid,title,author){
     `<span class="player-tag">视频</span><span class="player-tag">ID: ${movid}</span>`;
   document.getElementById('playerModal').classList.add('show');
   document.body.style.overflow='hidden';
-  // 通过movid查找视频并加载福音TV播放器（新URL格式）
+  // 通过movid查找视频并加载福音TV播放器
   const v=V.find(x=>x.movid==movid);
   const f=document.getElementById('playerFrame');
   const pl=document.getElementById('playerPlaceholder');
-  if(v && v.movid && f){
-    // 福音TV新版播放器URL：https://www.fuyin.tv/content/view/movid/{movid}/index.html
-    f.src='https://www.fuyin.tv/content/view/movid/'+v.movid+'/index.html';
+  if(v && v.movid && v.urlid && f){
+    f.src='https://www.fuyin.tv/index.php/content/window/urlid/'+v.urlid+'/movid/'+v.movid+'/vom/v';
     f.style.display='block';
     if(pl)pl.style.display='none';
   } else {
@@ -1700,6 +1699,7 @@ function pv(id){
   }
   document.getElementById('playerModal').classList.add('show');
   document.body.style.overflow='hidden';
+}
 }
 function cp(){document.getElementById('playerModal').classList.remove('show');const f=document.getElementById('playerFrame');if(f){f.src='';f.style.display='none'}const pl2=document.getElementById('playerPlaceholder');if(pl2)pl2.style.display='block'}
 
