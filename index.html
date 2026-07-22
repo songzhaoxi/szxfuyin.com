@@ -1,259 +1,1274 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>福音传播爱 - szxfuyin.com | 基督教福音视频平台</title>
-<meta name="description" content="福音传播爱 - 基督教福音视频网站，福音传播爱系列，分享慕道、证道、婚姻家庭、赞美诗歌等属灵资源。szxfuyin.com丨www.szxfuyin.com">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="keywords" content="福音传播,教会,圣经,讲道视频,基督教,福音影视,szxfuyin">
+<meta name="description" content="福音传播爱——分享圣经真理，传递神的爱，提供讲道视频、圣经阅读、诗歌敬拜等福音资源">
+<title>福音传播爱 | 圣光照耀 爱传天下</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--primary:#b8860b;--primary-light:#d4a843;--bg:#f8f5f0;--bg-card:#fff;--bg-dark:#1a1a2e;--text:#2c3e50;--text-light:#7f8c8d;--text-dark:#e0e0e0;--shadow:0 4px 20px rgba(0,0,0,0.08);--shadow-hover:0 8px 30px rgba(0,0,0,0.15);--radius:12px;--radius-sm:8px;--gold:linear-gradient(135deg,#b8860b,#d4a843,#b8860b);--header-h:68px;--transition:all 0.3s ease}
-.dark-mode{--bg:#0f0f23;--bg-card:#1a1a35;--bg-card-dark:#12122a;--text:#e0e0e0;--text-light:#a0a0b0}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);line-height:1.6;transition:var(--transition)}
-#progress-bar{position:fixed;top:0;left:0;height:3px;background:var(--gold);width:0%;z-index:10001;transition:width 0.1s}
-header{position:fixed;top:0;left:0;right:0;height:var(--header-h);z-index:9999;backdrop-filter:blur(20px);background:rgba(248,245,240,0.88);border-bottom:1px solid rgba(184,134,11,0.1);transition:var(--transition)}
-.dark-mode header{background:rgba(15,15,35,0.88)}header .container{max-width:1200px;margin:0 auto;padding:0 20px;height:100%;display:flex;align-items:center;justify-content:space-between}
-.logo{display:flex;align-items:center;gap:10px}.logo-icon{width:40px;height:40px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;font-weight:bold}
-.logo-text h1{font-size:20px;font-weight:700;background:var(--gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.logo-text small{font-size:11px;color:var(--text-light)}
-.nav-links{display:flex;align-items:center;gap:8px}.nav-links a{padding:8px 16px;border-radius:var(--radius-sm);font-size:14px;color:var(--text);transition:var(--transition)}.nav-links a:hover,.nav-links a.active{background:rgba(184,134,11,0.12);color:var(--primary)}
-.nav-btn{width:38px;height:38px;border:none;border-radius:50%;background:rgba(184,134,11,0.08);color:var(--text);font-size:16px;cursor:pointer;transition:var(--transition);display:inline-flex;align-items:center;justify-content:center}.nav-btn:hover{background:rgba(184,134,11,0.2);color:var(--primary)}
-.mobile-toggle{display:none;width:38px;height:38px;border:none;background:none;color:var(--text);font-size:24px;cursor:pointer}
-.mobile-menu{display:none;position:fixed;top:var(--header-h);left:0;right:0;background:var(--bg);padding:16px 20px;z-index:9998;box-shadow:var(--shadow);transform:translateY(-100%);opacity:0;transition:var(--transition)}.mobile-menu.open{transform:translateY(0);opacity:1}
-.mobile-menu a{display:block;padding:12px 16px;font-size:15px;color:var(--text);border-radius:var(--radius-sm)}.mobile-menu a:hover{background:rgba(184,134,11,0.12);color:var(--primary)}
-.search-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:10000;align-items:flex-start;justify-content:center;padding-top:120px}.search-overlay.open{display:flex}
-.search-box{width:90%;max-width:600px;background:var(--bg-card);border-radius:20px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}.search-box input{width:100%;padding:14px 18px;font-size:16px;border:2px solid rgba(184,134,11,0.2);border-radius:8px;background:var(--bg);color:var(--text);outline:none}.search-box input:focus{border-color:var(--primary)}
-.hero{position:relative;height:520px;overflow:hidden}.hero-slider{display:flex;width:100%;height:100%;transition:transform 0.7s ease}.hero-slide{min-width:100%;height:100%;position:relative;display:flex;align-items:center;justify-content:center;padding:0 20px}.hero-slide::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,0,0,0.7),rgba(0,0,0,0.3));z-index:1}
-.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center}.hero-content{position:relative;z-index:2;max-width:700px;text-align:center;color:#fff}.hero-content h2{font-size:clamp(28px,5vw,48px);font-weight:700;margin-bottom:16px;text-shadow:0 2px 20px rgba(0,0,0,0.3)}.hero-content h2 .hl{background:var(--gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.badge{display:inline-block;padding:4px 16px;border-radius:20px;background:rgba(255,255,255,0.15);color:#fff;font-size:13px;font-weight:600;letter-spacing:1px;margin-bottom:12px;backdrop-filter:blur(4px)}.btn-group{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}.search-close{position:absolute;top:80px;right:30px;width:44px;height:44px;border:none;border-radius:50%;background:rgba(255,255,255,0.2);color:#fff;font-size:22px;cursor:pointer;z-index:10001;display:flex;align-items:center;justify-content:center}.search-close:hover{background:rgba(255,255,255,0.35)}.search-tips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.search-tips span{padding:6px 14px;border-radius:16px;background:rgba(184,134,11,0.08);color:var(--primary);font-size:13px;cursor:pointer;transition:all 0.2s}.search-tips span:hover{background:rgba(184,134,11,0.2)}.hero-content p{font-size:16px;opacity:0.9;margin-bottom:24px}
-.btn-primary{padding:12px 32px;border:none;border-radius:var(--radius-sm);background:var(--gold);color:#fff;font-size:15px;font-weight:600;cursor:pointer;transition:var(--transition)}.btn-primary:hover{transform:translateY(-2px)}
-.btn-outline{padding:12px 32px;border:2px solid rgba(255,255,255,0.4);border-radius:var(--radius-sm);background:transparent;color:#fff;font-size:15px;font-weight:600;cursor:pointer}.btn-outline:hover{border-color:#fff}
-.hero-dots{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:3}.hero-dots button{width:10px;height:10px;border-radius:50%;border:2px solid rgba(255,255,255,0.5);background:transparent;cursor:pointer;padding:0}.hero-dots button.active{background:#fff;width:30px;border-radius:5px}
-.hero-arrows{position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);display:flex;justify-content:space-between;padding:0 20px;z-index:3;pointer-events:none}.hero-arrows button{width:48px;height:48px;border:none;border-radius:50%;background:rgba(255,255,255,0.15);color:#fff;font-size:20px;cursor:pointer;pointer-events:auto}.hero-arrows button:hover{background:rgba(255,255,255,0.3)}
-.section{padding:70px 20px;max-width:1200px;margin:0 auto}.section-header{text-align:center;margin-bottom:44px}.section-header .tag{display:inline-block;padding:4px 16px;border-radius:20px;background:rgba(184,134,11,0.1);color:var(--primary);font-size:13px;font-weight:600;letter-spacing:2px;margin-bottom:8px}.section-header h2{font-size:clamp(24px,3vw,32px);font-weight:700;margin-bottom:8px}.section-header h2 .hl{background:var(--gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.section-header p{color:var(--text-light);font-size:15px;max-width:500px;margin:0 auto}
-.tabs{display:flex;justify-content:center;gap:6px;margin-bottom:32px;flex-wrap:wrap}.tabs button{padding:8px 20px;border:1px solid rgba(184,134,11,0.2);border-radius:20px;background:transparent;color:var(--text-light);font-size:14px;cursor:pointer;transition:var(--transition)}.tabs button:hover,.tabs button.active{border-color:var(--primary);color:var(--primary);background:rgba(184,134,11,0.08)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px}
-.card{background:var(--bg-card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);transition:var(--transition);cursor:pointer}.card:hover{box-shadow:var(--shadow-hover);transform:translateY(-4px)}
-.card-img{width:100%;height:180px;object-fit:cover;display:block}.card-body{padding:16px}.card-body h3{font-size:16px;font-weight:600;margin-bottom:6px}.card-body p{font-size:13px;color:var(--text-light)}.card-meta{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.06);font-size:12px;color:var(--text-light)}
-.speaker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px}
-.speaker-card{background:var(--bg-card);border-radius:var(--radius);padding:20px;text-align:center;box-shadow:var(--shadow);transition:var(--transition);cursor:pointer}.speaker-card:hover{box-shadow:var(--shadow-hover);transform:translateY(-4px)}.speaker-card img{width:80px;height:80px;border-radius:50%;object-fit:cover;margin-bottom:10px;border:3px solid rgba(184,134,11,0.2)}.speaker-card h4{font-size:14px;font-weight:600}.speaker-card p{font-size:12px;color:var(--text-light)}
-.bible-section{background:var(--bg-card);border-radius:var(--radius);padding:30px;box-shadow:var(--shadow)}.bible-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;max-height:400px;overflow-y:auto;padding:10px}.bible-grid button{padding:6px 10px;border:1px solid rgba(184,134,11,0.15);border-radius:6px;background:transparent;color:var(--text);font-size:13px;cursor:pointer;transition:var(--transition)}.bible-grid button:hover{background:rgba(184,134,11,0.1);color:var(--primary)}
-.player-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:10002;align-items:center;justify-content:center}.player-overlay.open{display:flex}.player-box{width:90%;max-width:800px;background:var(--bg-card);border-radius:var(--radius);overflow:hidden}.player-box video{width:100%;display:block;max-height:500px;background:#000}.player-info{padding:20px}.player-info h3{font-size:18px;margin-bottom:4px}.player-info p{font-size:14px;color:var(--text-light)}.player-close{position:absolute;top:20px;right:20px;width:40px;height:40px;border:none;border-radius:50%;background:rgba(255,255,255,0.15);color:#fff;font-size:24px;cursor:pointer}
-footer{background:var(--bg-card);padding:50px 20px 30px;border-top:1px solid rgba(184,134,11,0.1)}.dark-mode footer{background:var(--bg-card-dark)}footer .container{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:30px}footer h4{font-size:16px;font-weight:600;margin-bottom:12px}footer p,footer a{font-size:14px;color:var(--text-light);line-height:2}footer .copyright{text-align:center;padding-top:30px;margin-top:30px;border-top:1px solid rgba(0,0,0,0.06);font-size:13px;color:var(--text-light);grid-column:1/-1}
-@media(max-width:768px){.nav-links{display:none}.mobile-toggle{display:block}.mobile-menu{display:block}.hero{height:400px}.hero-content h2{font-size:28px}.section{padding:40px 16px}.grid{grid-template-columns:1fr 1fr}.speaker-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}}
-@media(max-width:480px){.grid{grid-template-columns:1fr}.hero{height:360px}}
-@keyframes annPulse{0%,100%{opacity:1}50%{opacity:0.6}}.announcement-bar{background:linear-gradient(135deg,#1a1a2e,#2c2c54);color:#fff;padding:8px 0;font-size:13px;position:relative;z-index:999;border-bottom:1px solid rgba(184,134,11,0.2);text-align:center}.announcement-bar .container{max-width:1200px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}.announcement-icon{font-size:16px;animation:annPulse 2s infinite}.announcement-text strong{color:#d4a843}.announcement-verse{color:#b8860b;font-style:italic;font-size:12px;margin-left:4px}.announcement-close{background:none;border:none;color:rgba(255,255,255,0.6);font-size:16px;cursor:pointer;padding:2px 6px;border-radius:50%}.announcement-close:hover{color:#fff;background:rgba(255,255,255,0.1)}
-.about-section{background:var(--bg-card);border-radius:var(--radius);padding:40px;margin:40px auto;max-width:900px;box-shadow:var(--shadow)}.about-section h3{font-size:22px;font-weight:700;margin-bottom:16px;text-align:center}.about-section h3 span{background:var(--gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.about-section p{font-size:15px;color:var(--text-light);line-height:1.8;margin-bottom:12px}.about-section .verse{text-align:center;font-style:italic;color:var(--primary);margin:20px 0;padding:16px;border-left:4px solid var(--primary);background:rgba(184,134,11,0.05);border-radius:var(--radius-sm)}
+/* ===== CSS变量 ===== */
+:root {
+  --gold:       #C8973A;
+  --gold-light: #E8B96A;
+  --gold-pale:  #FDF3E0;
+  --brown:      #7A4A1E;
+  --brown-dark: #3D1F05;
+  --cream:      #FBF7F0;
+  --warm-gray:  #8A7A6A;
+  --text-main:  #2C1A08;
+  --text-muted: #6B5A4A;
+  --text-light: #A89880;
+  --white:      #FFFFFF;
+  --sidebar-w:  260px;
+  --top-h:      58px;
+  --radius:     10px;
+  --shadow:     0 2px 16px rgba(90,50,10,0.10);
+  --shadow-lg:  0 6px 32px rgba(90,50,10,0.16);
+  --trans:      all 0.22s ease;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Noto Sans SC',sans-serif;
+  background:var(--cream);
+  color:var(--text-main);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+a{text-decoration:none;color:inherit;}
+img{display:block;width:100%;object-fit:cover;}
+button{cursor:pointer;font-family:inherit;border:none;background:none;}
+ul{list-style:none;}
+
+/* ===== 滚动条 ===== */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--cream);}
+::-webkit-scrollbar-thumb{background:var(--gold-light);border-radius:4px;}
+
+/* ===== 顶栏 ===== */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  height:var(--top-h);
+  background:var(--brown-dark);
+  display:flex;align-items:center;
+  padding:0 18px;gap:12px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.25);
+}
+.topbar-logo{
+  display:flex;align-items:center;gap:10px;
+  flex-shrink:0;
+}
+.topbar-logo .cross{
+  width:28px;height:28px;
+  position:relative;display:flex;align-items:center;justify-content:center;
+}
+.topbar-logo .cross::before,.topbar-logo .cross::after{
+  content:'';position:absolute;background:var(--gold);border-radius:2px;
+}
+.topbar-logo .cross::before{width:4px;height:24px;}
+.topbar-logo .cross::after{width:20px;height:4px;top:7px;}
+.topbar-logo .site-name{
+  font-family:'Noto Serif SC',serif;
+  font-size:17px;font-weight:700;
+  color:var(--gold-light);
+  line-height:1.2;
+  white-space:nowrap;
+}
+.topbar-logo .site-name span{
+  display:block;font-size:10px;font-weight:300;
+  color:rgba(255,255,255,0.5);letter-spacing:2px;
+}
+.topbar-search{
+  flex:1;max-width:460px;
+  display:flex;align-items:center;
+  background:rgba(255,255,255,0.10);
+  border:1px solid rgba(255,255,255,0.15);
+  border-radius:24px;padding:0 14px;
+  transition:var(--trans);
+}
+.topbar-search:focus-within{
+  background:rgba(255,255,255,0.18);
+  border-color:var(--gold);
+}
+.topbar-search input{
+  flex:1;border:none;background:none;outline:none;
+  color:#fff;font-size:13px;padding:8px 0;
+  font-family:inherit;
+}
+.topbar-search input::placeholder{color:rgba(255,255,255,0.45);}
+.topbar-search button{
+  color:rgba(255,255,255,0.6);font-size:14px;padding:4px;
+  transition:var(--trans);
+}
+.topbar-search button:hover{color:var(--gold);}
+.topbar-right{
+  margin-left:auto;display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.topbar-right .avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(255,255,255,0.15);
+  border:1px solid rgba(255,255,255,0.25);
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,0.7);font-size:16px;
+  cursor:pointer;transition:var(--trans);
+}
+.topbar-right .avatar:hover{border-color:var(--gold);color:var(--gold);}
+.topbar-right .login-btn{
+  font-size:12px;color:rgba(255,255,255,0.7);
+  padding:5px 12px;border-radius:14px;
+  border:1px solid rgba(255,255,255,0.25);
+  transition:var(--trans);white-space:nowrap;
+}
+.topbar-right .login-btn:hover{border-color:var(--gold);color:var(--gold);}
+.topbar-nav{
+  display:flex;align-items:center;gap:2px;flex-shrink:0;
+}
+.topbar-nav a{
+  color:rgba(255,255,255,0.65);font-size:13px;
+  padding:6px 12px;border-radius:6px;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  transition:var(--trans);
+}
+.topbar-nav a .nav-icon{font-size:16px;}
+.topbar-nav a span{font-size:10px;}
+.topbar-nav a:hover,.topbar-nav a.active{
+  color:var(--gold-light);background:rgba(255,255,255,0.08);
+}
+.menu-toggle{
+  display:none;color:rgba(255,255,255,0.7);font-size:22px;padding:4px;
+}
+
+/* ===== 侧栏 ===== */
+.sidebar{
+  position:fixed;left:0;top:var(--top-h);bottom:0;
+  width:var(--sidebar-w);z-index:900;
+  background:var(--brown-dark);
+  overflow-y:auto;
+  padding:14px 0 40px;
+  transition:transform 0.28s ease;
+}
+.sidebar-section{margin-bottom:6px;}
+.sidebar-label{
+  font-size:10px;font-weight:500;letter-spacing:2px;
+  color:rgba(255,255,255,0.3);
+  padding:10px 18px 4px;text-transform:uppercase;
+}
+.sidebar a{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 18px;
+  color:rgba(255,255,255,0.65);font-size:13px;
+  border-radius:0 8px 8px 0;
+  margin-right:10px;
+  transition:var(--trans);
+  position:relative;
+}
+.sidebar a .s-icon{
+  width:22px;height:22px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;
+}
+.sidebar a:hover,.sidebar a.active{
+  color:var(--gold-light);
+  background:rgba(200,151,58,0.12);
+}
+.sidebar a.active::before{
+  content:'';position:absolute;left:0;top:4px;bottom:4px;
+  width:3px;background:var(--gold);border-radius:0 2px 2px 0;
+}
+.sidebar-divider{
+  height:1px;background:rgba(255,255,255,0.06);
+  margin:8px 16px;
+}
+.sidebar-topics a{
+  font-size:12px;padding:7px 18px 7px 28px;
+}
+
+/* ===== 主内容区 ===== */
+.main-wrap{
+  margin-left:var(--sidebar-w);
+  padding-top:var(--top-h);
+  min-height:100vh;
+}
+.main-content{padding:18px 20px 40px;}
+
+/* ===== 公告条 ===== */
+.notice-bar{
+  display:flex;align-items:center;gap:10px;
+  background:#fff;border-radius:8px;
+  padding:8px 14px;margin-bottom:16px;
+  border-left:3px solid var(--gold);
+  box-shadow:var(--shadow);
+  font-size:13px;
+}
+.notice-bar .notice-tag{
+  background:var(--gold);color:#fff;
+  font-size:10px;font-weight:700;
+  padding:2px 8px;border-radius:10px;
+  flex-shrink:0;letter-spacing:1px;
+}
+.notice-bar .notice-text{color:var(--text-muted);flex:1;}
+
+/* ===== Banner ===== */
+.banner-wrap{
+  border-radius:var(--radius);overflow:hidden;
+  position:relative;margin-bottom:20px;
+  box-shadow:var(--shadow-lg);
+  background:var(--brown-dark);
+  height:220px;
+}
+.banner-slide{
+  width:100%;height:100%;position:relative;
+  display:flex;align-items:flex-end;
+}
+.banner-slide img{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;opacity:0.85;
+}
+.banner-info{
+  position:relative;z-index:2;padding:20px 24px;
+  background:linear-gradient(to top,rgba(30,12,0,0.85) 0%,transparent 100%);
+  width:100%;
+}
+.banner-info h2{
+  font-family:'Noto Serif SC',serif;
+  font-size:20px;font-weight:700;color:#fff;
+  margin-bottom:4px;text-shadow:0 2px 8px rgba(0,0,0,0.5);
+}
+.banner-info p{font-size:12px;color:rgba(255,255,255,0.7);}
+.banner-dots{
+  position:absolute;bottom:10px;right:16px;z-index:3;
+  display:flex;gap:5px;
+}
+.banner-dots span{
+  width:6px;height:6px;border-radius:50%;
+  background:rgba(255,255,255,0.4);cursor:pointer;
+  transition:var(--trans);
+}
+.banner-dots span.active{background:var(--gold);width:18px;border-radius:3px;}
+.banner-prev,.banner-next{
+  position:absolute;top:50%;transform:translateY(-50%);z-index:3;
+  width:30px;height:30px;border-radius:50%;
+  background:rgba(0,0,0,0.35);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;transition:var(--trans);
+}
+.banner-prev{left:10px;}.banner-next{right:10px;}
+.banner-prev:hover,.banner-next:hover{background:var(--gold);}
+
+/* ===== 区块标题 ===== */
+.section-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:12px;
+}
+.section-header .left{display:flex;align-items:center;gap:8px;}
+.section-header .s-icon{
+  width:28px;height:28px;border-radius:6px;
+  background:var(--gold);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;
+}
+.section-header h3{
+  font-family:'Noto Serif SC',serif;
+  font-size:15px;font-weight:700;color:var(--text-main);
+}
+.section-header .tabs{display:flex;gap:4px;}
+.section-header .tab-btn{
+  font-size:12px;padding:4px 12px;border-radius:12px;
+  color:var(--text-muted);background:rgba(0,0,0,0.05);
+  transition:var(--trans);
+}
+.section-header .tab-btn.active{
+  background:var(--gold);color:#fff;
+}
+.section-header .more-btn{
+  font-size:12px;color:var(--gold);
+  display:flex;align-items:center;gap:3px;
+}
+.section-header .more-btn:hover{color:var(--brown);}
+
+/* ===== 视频卡片 ===== */
+.albums-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(155px,1fr));
+  gap:12px;margin-bottom:24px;
+}
+.album-card{
+  background:#fff;border-radius:var(--radius);
+  overflow:hidden;box-shadow:var(--shadow);
+  cursor:pointer;transition:var(--trans);
+}
+.album-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);}
+.album-card .thumb{
+  position:relative;padding-top:62%;overflow:hidden;
+  background:linear-gradient(135deg,var(--brown-dark),#7A4A1E);
+}
+.album-card .thumb img{
+  position:absolute;inset:0;height:100%;transition:transform 0.35s ease;
+}
+.album-card:hover .thumb img{transform:scale(1.05);}
+.album-card .thumb .play-btn{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:var(--trans);background:rgba(0,0,0,0.3);
+}
+.album-card:hover .play-btn{opacity:1;}
+.play-btn-circle{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(200,151,58,0.9);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:14px;padding-left:2px;
+}
+.album-card .card-body{padding:8px 10px 10px;}
+.album-card .card-title{
+  font-size:13px;font-weight:500;color:var(--text-main);
+  line-height:1.4;margin-bottom:4px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.album-card .card-author{
+  font-size:11px;color:var(--text-light);
+  display:flex;align-items:center;gap:4px;
+}
+.album-card .card-author::before{
+  content:'';width:3px;height:3px;border-radius:50%;
+  background:var(--gold);flex-shrink:0;
+}
+
+/* ===== 列表视图（最新发布） ===== */
+.albums-list{display:flex;flex-direction:column;gap:8px;margin-bottom:24px;}
+.list-item{
+  display:flex;gap:12px;background:#fff;
+  border-radius:var(--radius);padding:10px;
+  box-shadow:var(--shadow);cursor:pointer;transition:var(--trans);
+  align-items:center;
+}
+.list-item:hover{transform:translateX(3px);box-shadow:var(--shadow-lg);}
+.list-item .date-badge{
+  flex-shrink:0;width:42px;text-align:center;
+}
+.list-item .date-badge .month{
+  font-size:11px;color:var(--text-light);
+}
+.list-item .date-badge .day{
+  font-family:'Noto Serif SC',serif;
+  font-size:18px;font-weight:700;color:var(--gold);
+  line-height:1;
+}
+.list-item .list-thumb{
+  width:90px;height:58px;border-radius:6px;overflow:hidden;flex-shrink:0;
+  background:var(--brown-dark);
+}
+.list-item .list-info{flex:1;min-width:0;}
+.list-item .list-title{
+  font-size:13px;font-weight:500;color:var(--text-main);
+  line-height:1.4;margin-bottom:3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.list-item .list-author{font-size:11px;color:var(--text-light);}
+
+/* ===== 讲员区 ===== */
+.speakers-row{
+  display:flex;gap:14px;overflow-x:auto;
+  padding-bottom:8px;margin-bottom:24px;
+  scrollbar-width:none;
+}
+.speakers-row::-webkit-scrollbar{display:none;}
+.speaker-card{
+  flex-shrink:0;text-align:center;cursor:pointer;transition:var(--trans);
+  width:72px;
+}
+.speaker-card:hover{transform:translateY(-3px);}
+.speaker-avatar{
+  width:58px;height:58px;border-radius:50%;overflow:hidden;
+  background:linear-gradient(135deg,var(--gold),var(--brown));
+  border:2px solid var(--gold-pale);margin:0 auto 6px;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:20px;font-weight:700;
+  font-family:'Noto Serif SC',serif;
+  transition:var(--trans);
+}
+.speaker-card:hover .speaker-avatar{border-color:var(--gold);}
+.speaker-name{font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ===== 热播排行 ===== */
+.hot-list{display:flex;flex-direction:column;gap:6px;margin-bottom:24px;}
+.hot-item{
+  display:flex;align-items:center;gap:10px;
+  background:#fff;border-radius:8px;padding:8px 12px;
+  box-shadow:var(--shadow);cursor:pointer;transition:var(--trans);
+}
+.hot-item:hover{transform:translateX(3px);box-shadow:var(--shadow-lg);}
+.hot-rank{
+  width:22px;height:22px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;
+  background:rgba(0,0,0,0.06);color:var(--text-muted);
+}
+.hot-item:nth-child(1) .hot-rank{background:#C8973A;color:#fff;}
+.hot-item:nth-child(2) .hot-rank{background:#A0A0A0;color:#fff;}
+.hot-item:nth-child(3) .hot-rank{background:#B87333;color:#fff;}
+.hot-thumb{
+  width:70px;height:44px;border-radius:5px;overflow:hidden;flex-shrink:0;
+  background:var(--brown-dark);
+}
+.hot-info{flex:1;min-width:0;}
+.hot-title{
+  font-size:12px;font-weight:500;color:var(--text-main);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.hot-author{font-size:11px;color:var(--text-light);margin-top:2px;}
+.hot-views{font-size:10px;color:var(--gold);flex-shrink:0;}
+
+/* ===== 专题推荐 ===== */
+.topics-row{
+  display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;
+}
+.topic-tag{
+  padding:6px 16px;border-radius:16px;
+  background:#fff;border:1px solid rgba(200,151,58,0.3);
+  font-size:12px;color:var(--text-muted);
+  cursor:pointer;transition:var(--trans);
+  box-shadow:var(--shadow);
+}
+.topic-tag:hover,.topic-tag.active{
+  background:var(--gold);color:#fff;border-color:var(--gold);
+}
+
+/* ===== APP下载区 ===== */
+.app-banner{
+  background:linear-gradient(135deg,var(--brown-dark) 0%,#5A2E08 100%);
+  border-radius:var(--radius);padding:20px;
+  display:flex;align-items:center;gap:16px;
+  margin-bottom:24px;box-shadow:var(--shadow-lg);
+}
+.app-banner .app-icon{
+  width:56px;height:56px;border-radius:12px;
+  background:var(--gold);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;color:var(--brown-dark);
+}
+.app-banner .app-info{flex:1;}
+.app-banner h4{
+  font-family:'Noto Serif SC',serif;
+  color:#fff;font-size:15px;margin-bottom:4px;
+}
+.app-banner p{font-size:11px;color:rgba(255,255,255,0.6);line-height:1.5;}
+.app-btns{display:flex;gap:8px;flex-shrink:0;}
+.app-btn{
+  padding:8px 16px;border-radius:8px;font-size:12px;
+  font-weight:500;cursor:pointer;transition:var(--trans);
+  display:flex;align-items:center;gap:5px;
+}
+.app-btn.android{background:var(--gold);color:var(--brown-dark);}
+.app-btn.ios{background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.25);}
+.app-btn:hover{filter:brightness(1.1);}
+
+/* ===== 页脚 ===== */
+.footer{
+  background:var(--brown-dark);padding:24px 20px;
+  text-align:center;
+}
+.footer-logo{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  margin-bottom:12px;
+}
+.footer-logo img{width:36px;height:36px;}
+.footer-logo .f-name{
+  font-family:'Noto Serif SC',serif;
+  font-size:16px;font-weight:700;color:var(--gold-light);
+}
+.footer-links{
+  display:flex;justify-content:center;flex-wrap:wrap;gap:16px;
+  margin-bottom:12px;
+}
+.footer-links a{font-size:12px;color:rgba(255,255,255,0.5);}
+.footer-links a:hover{color:var(--gold);}
+.footer-copy{font-size:11px;color:rgba(255,255,255,0.3);line-height:1.8;}
+.footer-statement{
+  font-size:11px;color:rgba(255,255,255,0.25);
+  max-width:600px;margin:8px auto 0;line-height:1.6;
+}
+
+/* ===== 播放器弹窗 ===== */
+.player-modal{
+  position:fixed;inset:0;z-index:2000;
+  background:rgba(0,0,0,0.85);
+  display:none;align-items:center;justify-content:center;
+  padding:20px;
+}
+.player-modal.show{display:flex;}
+.player-inner{
+  background:var(--brown-dark);border-radius:12px;
+  width:100%;max-width:760px;overflow:hidden;
+  box-shadow:0 8px 48px rgba(0,0,0,0.6);
+}
+.player-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.08);
+}
+.player-header h3{font-size:14px;color:#fff;font-weight:500;}
+.player-close{
+  color:rgba(255,255,255,0.5);font-size:20px;
+  transition:var(--trans);
+}
+.player-close:hover{color:#fff;}
+.player-video{
+  background:#000;
+  aspect-ratio:16/9;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,0.3);font-size:13px;
+}
+.player-info{padding:14px 18px;}
+.player-meta{
+  display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;
+}
+.player-tag{
+  font-size:11px;padding:2px 10px;border-radius:10px;
+  background:rgba(200,151,58,0.15);color:var(--gold-light);
+}
+
+/* ===== 搜索下拉 ===== */
+.search-dropdown{
+  position:absolute;top:calc(var(--top-h) + 4px);
+  left:50%;transform:translateX(-50%);
+  width:460px;max-width:90vw;
+  background:#fff;border-radius:10px;
+  box-shadow:var(--shadow-lg);z-index:1100;
+  display:none;overflow:hidden;
+}
+.search-dropdown.show{display:block;}
+.search-section-title{
+  font-size:11px;font-weight:600;color:var(--text-muted);
+  padding:10px 14px 4px;letter-spacing:1px;
+}
+.hot-words{display:flex;flex-wrap:wrap;gap:6px;padding:4px 14px 10px;}
+.hot-word{
+  font-size:12px;padding:3px 10px;border-radius:10px;
+  background:var(--gold-pale);color:var(--brown);
+  cursor:pointer;transition:var(--trans);
+}
+.hot-word:hover{background:var(--gold);color:#fff;}
+.search-divider{height:1px;background:rgba(0,0,0,0.05);}
+
+/* ===== 圣经弹窗 ===== */
+.bible-panel{
+  position:fixed;right:-380px;top:var(--top-h);bottom:0;
+  width:360px;z-index:950;
+  background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,0.12);
+  transition:right 0.3s ease;overflow-y:auto;
+  padding:20px;
+}
+.bible-panel.show{right:0;}
+.bible-panel-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;
+}
+.bible-panel-header h3{
+  font-family:'Noto Serif SC',serif;
+  font-size:16px;color:var(--brown-dark);
+}
+.bible-verse-card{
+  background:var(--gold-pale);border-radius:10px;
+  padding:16px;margin-bottom:14px;
+  border-left:4px solid var(--gold);
+}
+.bible-verse-card .verse-text{
+  font-family:'Noto Serif SC',serif;
+  font-size:14px;line-height:1.8;color:var(--text-main);
+  margin-bottom:8px;
+}
+.bible-verse-card .verse-ref{
+  font-size:12px;color:var(--gold);text-align:right;
+}
+.bible-books{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;}
+.bible-book-btn{
+  padding:6px 4px;text-align:center;font-size:11px;
+  border-radius:6px;background:var(--cream);
+  color:var(--text-muted);cursor:pointer;transition:var(--trans);
+  border:1px solid transparent;
+}
+.bible-book-btn:hover{border-color:var(--gold);color:var(--brown);}
+
+/* ===== 响应式 ===== */
+@media(max-width:900px){
+  :root{--sidebar-w:0px;}
+  .sidebar{transform:translateX(-260px);width:260px;}
+  .sidebar.open{transform:translateX(0);}
+  .menu-toggle{display:flex;align-items:center;justify-content:center;}
+  .topbar-nav{display:none;}
+  .main-wrap{margin-left:0;}
+  .sidebar-overlay{
+    display:none;position:fixed;inset:0;z-index:850;
+    background:rgba(0,0,0,0.5);
+  }
+  .sidebar-overlay.show{display:block;}
+  .albums-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
+  .banner-wrap{height:170px;}
+  .app-banner{flex-direction:column;text-align:center;}
+  .app-btns{width:100%;justify-content:center;}
+}
+@media(max-width:600px){
+  .topbar-search{max-width:none;flex:1;}
+  .topbar-right .login-btn{display:none;}
+  .albums-grid{grid-template-columns:repeat(2,1fr);}
+  .main-content{padding:12px 12px 30px;}
+}
+
+/* ===== 加载动画 ===== */
+@keyframes fadeInUp{
+  from{opacity:0;transform:translateY(16px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.fade-in{animation:fadeInUp 0.4s ease both;}
+.fade-in:nth-child(1){animation-delay:0.05s;}
+.fade-in:nth-child(2){animation-delay:0.10s;}
+.fade-in:nth-child(3){animation-delay:0.15s;}
+.fade-in:nth-child(4){animation-delay:0.20s;}
+.fade-in:nth-child(5){animation-delay:0.25s;}
+.fade-in:nth-child(6){animation-delay:0.30s;}
+
+/* ===== 暗色模式 ===== */
+.dark-mode{
+  --cream:#1A1208;
+  --text-main:#F0E8D8;
+  --text-muted:#B0A090;
+  --text-light:#7A6A58;
+  --white:#1A1208;
+  --gold-pale:rgba(200,151,58,0.12);
+}
+.dark-mode .album-card,
+.dark-mode .list-item,
+.dark-mode .hot-item,
+.dark-mode .notice-bar,
+.dark-mode .topic-tag,
+.dark-mode .bible-panel{background:#2A1A08;}
+.dark-mode .search-dropdown{background:#2A1A08;}
+
+/* ===== 语言切换 ===== */
+.lang-btn{
+  font-size:11px;color:rgba(255,255,255,0.5);
+  padding:4px 8px;border-radius:4px;
+  border:1px solid rgba(255,255,255,0.15);
+  cursor:pointer;transition:var(--trans);
+  flex-shrink:0;
+}
+.lang-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+/* ===== 回到顶部 ===== */
+.back-top{
+  position:fixed;bottom:24px;right:20px;z-index:800;
+  width:38px;height:38px;border-radius:50%;
+  background:var(--gold);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 3px 12px rgba(200,151,58,0.4);
+  cursor:pointer;font-size:16px;
+  opacity:0;pointer-events:none;transition:var(--trans);
+}
+.back-top.show{opacity:1;pointer-events:auto;}
+.back-top:hover{background:var(--brown);transform:translateY(-2px);}
 </style>
 </head>
 <body>
-<div id="progress-bar"></div>
 
-<div class="search-overlay" id="searchOverlay">
-  <button class="search-close" onclick="closeSearch()">✕</button>
-  <div class="search-box">
-    <input type="text" id="searchInput" placeholder="搜索视频、讲员、关键词..." onkeyup="searchVideo(event)">
-    <div class="search-tips">
-      <span onclick="qs('福音传播爱·慕道')">福音传播爱·慕道</span>
-      <span onclick="qs('福音传播爱·婚姻')">福音传播爱·婚姻</span>
-      <span onclick="qs('福音传播爱·诗歌')">福音传播爱·诗歌</span>
-      <span onclick="qs('福音传播爱·见证')">福音传播爱·见证</span>
+<!-- 侧栏遮罩 -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- ===== 顶栏 ===== -->
+<header class="topbar">
+  <button class="menu-toggle" onclick="toggleSidebar()" aria-label="菜单">☰</button>
+
+  <div class="topbar-logo">
+    <div class="cross"></div>
+    <div class="site-name">
+      福音传播爱
+      <span>GOSPEL OF LOVE</span>
     </div>
   </div>
-</div>
 
-<!-- 🔔 公告栏 -->
-<div class="announcement-bar">
-  <div class="container">
-    <span class="announcement-icon">📢</span>
-    <span class="announcement-text">欢迎来到 <strong>福音传播爱</strong> — 分享基督福音 ✝ 建造属灵生命 🌱 <span class="announcement-verse">「神爱世人，甚至将他的独生子赐给他们」约 3:16</span></span>
-    <button class="announcement-close" onclick="this.parentElement.parentElement.style.display='none'">✕</button>
+  <div class="topbar-search" id="searchBox">
+    <input type="text" placeholder="搜索视频、讲员..." id="searchInput"
+           onfocus="showSearchDrop()" onblur="hideSearchDrop()" oninput="onSearch(this.value)">
+    <button onclick="doSearch()">🔍</button>
   </div>
-</div>
 
-<nav class="mobile-menu" id="mobileMenu">
-  <a href="#home" class="active" onclick="cm()">首页</a>
-  <a href="#videos" onclick="cm()">视频</a>
-  <a href="#speakers" onclick="cm()">讲员</a>
-  <a href="#bible" onclick="cm()">圣经</a>
-  <a href="#about" onclick="cm()">关于</a>
-</nav>
+  <nav class="topbar-nav">
+    <a href="#movies" class="active" onclick="switchTab('movies',this)">
+      <span class="nav-icon">🎬</span><span>影视</span>
+    </a>
+    <a href="#lives" onclick="switchTab('lives',this)">
+      <span class="nav-icon">📡</span><span>频道</span>
+    </a>
+    <a href="#bible" onclick="openBible()">
+      <span class="nav-icon">📖</span><span>圣经</span>
+    </a>
+    <a href="#articles" onclick="switchTab('articles',this)">
+      <span class="nav-icon">📰</span><span>阅读</span>
+    </a>
+    <a href="#gospel" onclick="switchTab('gospel',this)">
+      <span class="nav-icon">✝️</span><span>福音</span>
+    </a>
+  </nav>
 
-<header>
-  <div class="container">
-    <div class="logo" onclick="st()">
-      <div class="logo-icon">✝</div>
-      <div class="logo-text">
-        <h1>福音传播爱</h1>
-        <small>szxfuyin.com</small>
-      </div>
-    </div>
-    <nav class="nav-links">
-      <a href="#home" class="active">首页</a>
-      <a href="#videos">视频</a>
-      <a href="#speakers">讲员</a>
-      <a href="#bible">圣经</a>
-      <a href="#about">关于</a>
-    </nav>
-    <div class="nav-actions">
-      <button class="nav-btn" onclick="ts()" title="搜索">🔍</button>
-      <button class="nav-btn" onclick="td()" title="主题" id="themeBtn">🌙</button>
-      <button class="mobile-toggle" onclick="tm()">☰</button>
-    </div>
+  <div class="topbar-right">
+    <button class="lang-btn" onclick="toggleLang()">简体</button>
+    <button class="lang-btn" onclick="toggleDark()" id="darkBtn">🌙</button>
+    <div class="avatar" onclick="openLogin()">👤</div>
+    <a class="login-btn" onclick="openLogin()">登录/注册</a>
   </div>
 </header>
 
-<section class="hero" id="home">
-  <div class="hero-slider" id="heroSlider">
-    <div class="hero-slide active">
-      <div class="hero-bg" style="background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)"></div>
-      <div class="hero-content">
-        <div class="badge">✝ 约翰福音 3:16</div>
-        <h2>神爱世人<br><span class="hl">福音传播爱</span></h2>
-        <p>「神爱世人，甚至将他的独生子赐给他们，叫一切信他的，不致灭亡，反得永生。」<br>—— 约翰福音 3:16</p>
-        <div class="btn-group">
-          <button class="btn-primary" onclick="sv()">观看视频</button>
-          <button class="btn-outline" onclick="sb()">阅读圣经</button>
-        </div>
+<!-- 搜索下拉 -->
+<div class="search-dropdown" id="searchDrop">
+  <div class="search-section-title">🔥 搜索热词</div>
+  <div class="hot-words" id="hotWords"></div>
+  <div class="search-divider"></div>
+  <div class="search-section-title">📜 搜索历史</div>
+  <div class="hot-words" id="historyWords"></div>
+</div>
+
+<!-- ===== 侧栏 ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-label">主菜单</div>
+    <a href="#" class="active" onclick="navTo('home',this)">
+      <span class="s-icon">🏠</span>首页
+    </a>
+    <a href="#" onclick="navTo('hot',this)">
+      <span class="s-icon">🔥</span>热播排行
+    </a>
+    <a href="#" onclick="navTo('new',this)">
+      <span class="s-icon">✨</span>最新发布
+    </a>
+    <a href="#" onclick="navTo('update',this)">
+      <span class="s-icon">🔄</span>最近更新
+    </a>
+    <a href="#" onclick="navTo('sunday',this)">
+      <span class="s-icon">⛪</span>主日讲道
+    </a>
+    <a href="#" onclick="navTo('all',this)">
+      <span class="s-icon">📚</span>全部视频
+    </a>
+  </div>
+
+  <div class="sidebar-divider"></div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">视频分类</div>
+    <a href="#" onclick="navTo('cat_133',this)"><span class="s-icon">🌱</span>福音慕道</a>
+    <a href="#" onclick="navTo('cat_22',this)"><span class="s-icon">🎤</span>福音证道</a>
+    <a href="#" onclick="navTo('cat_34',this)"><span class="s-icon">💑</span>婚姻家庭</a>
+    <a href="#" onclick="navTo('cat_24',this)"><span class="s-icon">🎵</span>赞美诗歌</a>
+    <a href="#" onclick="navTo('cat_42',this)"><span class="s-icon">🙏</span>福音见证</a>
+    <a href="#" onclick="navTo('cat_21',this)"><span class="s-icon">🎞️</span>福音视频</a>
+    <a href="#" onclick="navTo('cat_26',this)"><span class="s-icon">🎼</span>圣乐崇拜</a>
+    <a href="#" onclick="navTo('cat_25',this)"><span class="s-icon">📝</span>初信造就</a>
+    <a href="#" onclick="navTo('cat_23',this)"><span class="s-icon">🎨</span>福音动漫</a>
+    <a href="#" onclick="navTo('cat_290',this)"><span class="s-icon">🎓</span>神学课程</a>
+  </div>
+
+  <div class="sidebar-divider"></div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">专题推荐</div>
+    <div class="sidebar-topics">
+      <a href="#" onclick="navTo('topic_6',this)"><span class="s-icon">📖</span>圣经要道略解</a>
+      <a href="#" onclick="navTo('topic_2',this)"><span class="s-icon">⛪</span>整全教会专栏</a>
+      <a href="#" onclick="navTo('topic_5',this)"><span class="s-icon">🔬</span>科学信仰专栏</a>
+      <a href="#" onclick="navTo('topic_1',this)"><span class="s-icon">🛡️</span>防范异端专栏</a>
+    </div>
+  </div>
+
+  <div class="sidebar-divider"></div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">其他</div>
+    <a href="#" onclick="openBible()"><span class="s-icon">📖</span>圣经阅读</a>
+    <a href="#" onclick="navTo('lives',this)"><span class="s-icon">📡</span>直播频道</a>
+    <a href="#" onclick="navTo('articles',this)"><span class="s-icon">📰</span>文章阅读</a>
+    <a href="#" onclick="navTo('gospel',this)"><span class="s-icon">✝️</span>福音信息</a>
+    <a href="#" onclick="navTo('authors',this)"><span class="s-icon">👨‍🏫</span>讲员列表</a>
+    <a href="#" onclick="navTo('about',this)"><span class="s-icon">ℹ️</span>关于我们</a>
+  </div>
+</aside>
+
+<!-- ===== 主内容 ===== -->
+<div class="main-wrap">
+<main class="main-content" id="mainContent">
+
+  <!-- 公告条 -->
+  <div class="notice-bar">
+    <span class="notice-tag">公告</span>
+    <span class="notice-text" id="noticeText">愿神的话语点亮每一颗寻求真理的心 · 分享福音，传递主的爱</span>
+  </div>
+
+  <!-- Banner -->
+  <div class="banner-wrap">
+    <div class="banner-slide" id="bannerSlide">
+      <img src="https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=900&q=80" alt="Banner" id="bannerImg">
+      <div class="banner-info">
+        <h2 id="bannerTitle">观念的后果 — 史普罗</h2>
+        <p id="bannerSub">系列讲道 · 国语配音版</p>
       </div>
     </div>
-    <div class="hero-slide">
-      <div class="hero-bg" style="background:linear-gradient(135deg,#2d1b00,#5c3a00,#8b6508)"></div>
-      <div class="hero-content">
-        <div class="badge">✝ 更新心意</div>
-        <h2>心意更新而变化<br><span class="hl">活出丰盛生命</span></h2>
-        <p>「不要效法这个世界，只要心意更新而变化...」<br>—— 罗马书 12:2</p>
-        <div class="btn-group">
-          <button class="btn-primary" onclick="sv()">探索更多</button>
-          <button class="btn-outline" onclick="ss()">认识讲员</button>
-        </div>
-      </div>
-    </div>
-    <div class="hero-slide">
-      <div class="hero-bg" style="background:linear-gradient(135deg,#1a3a2a,#2d6a4f,#40916c)"></div>
-      <div class="hero-content">
-        <div class="badge">✝ 诗篇 23</div>
-        <h2>耶和华是我的牧者<br><span class="hl">我必不致缺乏</span></h2>
-        <p>「他使我躺卧在青草地上，领我在可安歇的水边...」<br>—— 诗篇 23:1-3</p>
-        <div class="btn-group">
-          <button class="btn-primary" onclick="sv()">赞美诗歌</button>
-          <button class="btn-outline" onclick="sb()">读经灵修</button>
-        </div>
-      </div>
-    </div>
+    <button class="banner-prev" onclick="prevBanner()">‹</button>
+    <button class="banner-next" onclick="nextBanner()">›</button>
+    <div class="banner-dots" id="bannerDots"></div>
   </div>
-  <div class="hero-dots" id="heroDots">
-    <button class="active" onclick="gs(0)"></button>
-    <button onclick="gs(1)"></button>
-    <button onclick="gs(2)"></button>
-  </div>
-  <div class="hero-arrows">
-    <button onclick="ps()">‹</button>
-    <button onclick="ns()">›</button>
-  </div>
-</section>
 
-<section class="section" id="videos">
+  <!-- 最新发布 -->
   <div class="section-header">
-    <div class="tag">📺 福音传播爱·视频资源</div>
-    <h2>福音传播爱 <span class="hl">探索属灵宝藏</span></h2>
-    <p>跟随福音TV，自动同步更新，传播基督的爱</p>
-  </div>
-  <div class="tabs" id="videoTabs">
-    <button class="active" onclick="sw(0,this)">🔥 全部视频</button>
-    <button onclick="sw(1,this)">📖 福音传播爱·慕道</button>
-    <button onclick="sw(2,this)">📜 福音传播爱·证道</button>
-    <button onclick="sw(3,this)">💑 福音传播爱·婚姻</button>
-    <button onclick="sw(4,this)">🎵 福音传播爱·诗歌</button>
-    <button onclick="sw(5,this)">✝️ 福音传播爱·见证</button>
-    <button onclick="sw(6,this)">🎞️ 福音传播爱·视频</button>
-    <button onclick="sw(7,this)">🎼 福音传播爱·圣乐</button>
-    <button onclick="sw(8,this)">🌱 福音传播爱·造就</button>
-    <button onclick="sw(9,this)">🎨 福音传播爱·动漫</button>
-    <button onclick="sw(10,this)">🎓 福音传播爱·神学</button>
-  </div>
-  <div class="grid" id="videoGrid"></div>
-</section>
-
-<section class="section" id="speakers">
-  <div class="section-header">
-    <div class="tag">👨‍🏫 牧者讲员</div>
-    <h2>聆听 <span class="hl">真理之声</span></h2>
-    <p>众仆人忠心传讲神的话语</p>
-  </div>
-  <div class="speaker-grid" id="speakerGrid"></div>
-</section>
-
-<section class="section" id="bible">
-  <div class="section-header">
-    <div class="tag">📖 圣经</div>
-    <h2>神的话 <span class="hl">是脚前的灯</span></h2>
-    <p>你的话是我脚前的灯，是我路上的光 — 诗篇 119:105</p>
-  </div>
-  <div class="bible-section">
-    <div class="tabs" id="bibleTabs">
-      <button class="active" onclick="sb2(0,this)">旧约</button>
-      <button onclick="sb2(1,this)">新约</button>
+    <div class="left">
+      <div class="s-icon">✨</div>
+      <h3>最新发布</h3>
     </div>
-    <div class="bible-grid" id="bibleGrid"></div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchListTab('new',this)">最新发布</button>
+      <button class="tab-btn" onclick="switchListTab('update',this)">最近更新</button>
+    </div>
+    <a class="more-btn" href="#">更多 ›</a>
   </div>
-</section>
+  <div class="albums-list" id="newList"></div>
 
-<div class="player-overlay" id="playerOverlay">
-  <button class="player-close" onclick="cp()">✕</button>
-  <div class="player-box">
-    <iframe id="playerFrame" style="width:100%;height:500px;border:none;background:#000" allowfullscreen></iframe>
-    <div class="player-info">
+  <!-- 热门推荐 -->
+  <div class="section-header">
+    <div class="left">
+      <div class="s-icon">🔥</div>
+      <h3>热门推荐</h3>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchHotTab('recommend',this)">热门推荐</button>
+      <button class="tab-btn" onclick="switchHotTab('hot',this)">热播排行</button>
+    </div>
+    <a class="more-btn" href="#">更多 ›</a>
+  </div>
+  <div class="albums-grid" id="hotGrid"></div>
+
+  <!-- 专题推荐 -->
+  <div class="section-header">
+    <div class="left">
+      <div class="s-icon">🏷️</div>
+      <h3>专题推荐</h3>
+    </div>
+  </div>
+  <div class="topics-row" id="topicsRow"></div>
+
+  <!-- 分类视频 -->
+  <div class="section-header" id="catHeader">
+    <div class="left">
+      <div class="s-icon">📂</div>
+      <h3 id="catTitle">福音慕道</h3>
+    </div>
+    <div class="tabs" id="catTabs"></div>
+    <a class="more-btn" href="#">更多 ›</a>
+  </div>
+  <div class="albums-grid" id="catGrid"></div>
+
+  <!-- 讲员 -->
+  <div class="section-header">
+    <div class="left">
+      <div class="s-icon">👨‍🏫</div>
+      <h3>讲员</h3>
+    </div>
+    <a class="more-btn" href="#">更多 ›</a>
+  </div>
+  <div class="speakers-row" id="speakersRow"></div>
+
+  <!-- 热播排行榜 -->
+  <div class="section-header">
+    <div class="left">
+      <div class="s-icon">🏆</div>
+      <h3>热播排行</h3>
+    </div>
+    <a class="more-btn" href="#">更多 ›</a>
+  </div>
+  <div class="hot-list" id="hotRankList"></div>
+
+  <!-- APP下载 -->
+  <div class="app-banner">
+    <div class="app-icon">✝</div>
+    <div class="app-info">
+      <h4>福音传播爱 APP 下载</h4>
+      <p>稳定播放 · 圣经阅读 · 每日灵修 · 讲道收藏 · 离线观看</p>
+    </div>
+    <div class="app-btns">
+      <button class="app-btn android">🤖 Android</button>
+      <button class="app-btn ios"> iOS</button>
+    </div>
+  </div>
+
+</main>
+
+<!-- ===== 页脚 ===== -->
+<footer class="footer">
+  <div class="footer-logo">
+    <div class="cross" style="width:32px;height:32px;"></div>
+    <div class="f-name">福音传播爱</div>
+  </div>
+  <div class="footer-links">
+    <a href="#">首页</a>
+    <a href="#">影视</a>
+    <a href="#">圣经</a>
+    <a href="#">阅读</a>
+    <a href="#">频道</a>
+    <a href="#">关于我们</a>
+    <a href="#">联系我们</a>
+    <a href="#">用户协议</a>
+    <a href="#">隐私政策</a>
+  </div>
+  <div class="footer-copy">
+    Copyright © 2024 szxfuyin.com · 福音传播爱 · All Rights Reserved
+  </div>
+  <div class="footer-statement">
+    信仰声明：认信使徒信经之基督教信仰，杜绝涉及异端等内容。<br>
+    如发现有违圣经原则的信息，请邮件反馈，经确认后立即处理。
+  </div>
+</footer>
+</div><!-- /main-wrap -->
+
+<!-- ===== 播放器弹窗 ===== -->
+<div class="player-modal" id="playerModal" onclick="closePlayer(event)">
+  <div class="player-inner" onclick="event.stopPropagation()">
+    <div class="player-header">
       <h3 id="playerTitle">视频标题</h3>
-      <p id="playerDesc">视频描述</p>
+      <button class="player-close" onclick="closePlayer()">✕</button>
+    </div>
+    <div class="player-video">
+      <iframe id="playerFrame" width="100%" height="100%"
+        style="border:none;display:none;" allowfullscreen></iframe>
+      <span id="playerPlaceholder">🎬 视频加载中...</span>
+    </div>
+    <div class="player-info">
+      <div id="playerAuthor" style="font-size:13px;color:var(--text-muted);"></div>
+      <div class="player-meta" id="playerMeta"></div>
+      <div id="sourceBtns" style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"></div>
+      <div id="playerTip" style="margin-top:8px;padding:8px 14px;border-radius:8px;font-size:13px;background:rgba(200,151,58,0.12);color:#c8973a;display:none;line-height:1.5"></div>
     </div>
   </div>
 </div>
 
-<section id="about" style="padding-top:40px">
-  <div class="section-header">
-    <div class="tag">✝ 关于我们</div>
-    <h2>认识 <span class="hl">福音传播爱</span></h2>
-    <p>分享基督福音 · 建造属灵生命 · 传递永恒真爱</p>
+<!-- ===== 圣经侧栏 ===== -->
+<div class="bible-panel" id="biblePanel">
+  <div class="bible-panel-header">
+    <h3>📖 圣经阅读</h3>
+    <button onclick="closeBible()" style="font-size:18px;color:var(--text-muted);">✕</button>
   </div>
-  <div class="about-section">
-    <h3><span>福音传播爱</span> — 圣光 · 真理 · 道路 · 生命</h3>
-    <p>「福音传播爱」是一个专注于分享基督福音、传递上帝之爱的基督教视频平台。我们致力于收集和整理来自福音TV的优质属灵资源，涵盖福音慕道、福音证道、婚姻家庭、赞美诗歌、福音见证、福音视频、圣乐崇拜、初信造就、福音动漫、神学课程等多个类别。</p>
-    <p>无论您是初信慕道的朋友，还是已经走在信仰道路上的弟兄姊妹，我们都盼望这些属灵资源能够帮助您更深地认识神、经历神的爱，在真理中扎根成长。</p>
-    <div class="verse">
-      ✝ 「神爱世人，甚至将他的独生子赐给他们，叫一切信他的，不致灭亡，反得永生。」—— 约翰福音 3:16
-    </div>
-    <p style="text-align:center;font-weight:600;margin:0">✨ 以马内利 — 神与我们同在 ✨</p>
+  <div class="bible-verse-card">
+    <div class="verse-text" id="dailyVerse">耶和华是我的牧者，我必不致缺乏。他使我躺卧在青草地上，领我在可安歇的水边。</div>
+    <div class="verse-ref">— 诗篇 23:1-2</div>
   </div>
-</section>
+  <div class="search-section-title" style="padding:0 0 8px;">📚 旧约</div>
+  <div class="bible-books" id="oldBooks"></div>
+  <div class="search-section-title" style="padding:12px 0 8px;">📚 新约</div>
+  <div class="bible-books" id="newBooks"></div>
+</div>
 
-<footer>
-  <div class="container">
-    <div>
-      <h4>✝ 福音传播爱</h4>
-      <p>一个分享基督福音、建造属灵生命的视频平台。<br>愿更多人听见福音，得着爱与盼望。</p>
-      <p style="margin-top:8px;font-size:13px;color:var(--primary);font-style:italic">✨ 圣光 · 真理 · 道路 ·生命 ✨</p>
-    </div>
-    <div>
-      <h4>快速链接</h4>
-      <a href="#videos">视频资源</a><br>
-      <a href="#speakers">讲员列表</a><br>
-      <a href="#bible">圣经阅读</a><br>
-      <a href="#about">关于我们</a><br>
-    </div>
-    <div>
-      <h4>联系方式</h4>
-      <p>邮箱：zanmeishangdi88@outlook.com</p>
-      <p>网站：szxfuyin.com</p>
-      <p>镜像：www.szxfuyin.com</p>
-    </div>
-    <div class="copyright">
-      <p>©2026年7月20日 福音传播爱 圣光真理道路生命</p>
-      <p style="margin-top:4px;font-size:12px;opacity:0.7">✝ 以马内利 — 神与我们同在 ✝</p>
-    </div>
-  </div>
-</footer>
+<!-- 回到顶部 -->
+<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
 <script>
 // ===== 数据 =====
+const DATA = {
+  banners:[
+    {title:"观念的后果 — 史普罗",sub:"系列讲道 · 国语配音版",img:"https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=900&q=80"},
+    {title:"新约神学 — 孙宝玲",sub:"空中圣经学院 · 神学课程",img:"https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=900&q=80"},
+    {title:"亲密婚姻 — 史普罗",sub:"婚姻家庭 · 国语配音版",img:"https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=900&q=80"},
+    {title:"信仰与生活 — 康来昌",sub:"好消息门徒训练系列",img:"https://images.unsplash.com/photo-1519817650390-64a93db51149?w=900&q=80"},
+  ],
+  hotSearch:["唐崇荣","于宏洁","刘志雄","寇绍涵","程蒙恩","大卫鲍森","陈希曾","赞美之泉","启示录","妙妙书"],
+  newVideos:[
+    {title:"观念的后果-史普罗",author:"史普罗",date:"05/14",movid:3952},
+    {title:"新约神学-孙宝玲",author:"孙宝玲",date:"04/27",movid:3951},
+    {title:"明白圣经（国语配音）-史普罗",author:"史普罗",date:"04/22",movid:3950},
+    {title:"亲密婚姻（国语配音）-史普罗",author:"史普罗",date:"04/15",movid:3949},
+    {title:"蒙上帝所爱（国语配音）-史普罗",author:"史普罗",date:"04/13",movid:3948},
+    {title:"2026复活节信息-真能天长地久的爱",author:"陈可嘉",date:"04/06",movid:3947},
+    {title:"信仰与生活-康来昌",author:"康来昌",date:"04/02",movid:3946},
+    {title:"君尊的祭司",author:"The Bible Project",date:"03/25",movid:3945},
+  ],
+  hotVideos:[
+    {title:"约翰麦克阿瑟牧师追思礼拜",author:"约翰派博、弗格森等",movid:3925},
+    {title:"信心是什么",author:"冯秉诚",movid:3063},
+    {title:"认识耶稣",author:"刘志雄",movid:3039},
+    {title:"喜获新生",author:"约翰派博",movid:2999},
+    {title:"教会论与教会生活",author:"林慈信",movid:2997},
+    {title:"新城要理问答",author:"提摩太·凯勒",movid:2765},
+    {title:"约翰福音中的生命信息",author:"冬至",movid:2723},
+    {title:"异端分辨-蔡丽贞博士",author:"蔡丽贞",movid:2511},
+    {title:"伯克富系统神学-神论",author:"林慈信",movid:2492},
+    {title:"主祷文-唐崇荣牧师",author:"唐崇荣",movid:2491},
+  ],
+  topics:[
+    {id:6,title:"圣经要道略解"},
+    {id:2,title:"整全教会专栏"},
+    {id:5,title:"科学信仰专栏"},
+    {id:1,title:"防范异端专栏"},
+  ],
+  categories:[
+    {id:133,name:"福音慕道",videos:[
+      {title:"2026复活节信息",author:"陈可嘉",movid:3947},
+      {title:"每日心语2025",author:"吴继扬",movid:3938},
+      {title:"2025恩典的祝福圣诞布道会",author:"苏立忠牧师",movid:3932},
+      {title:"如何传福音？",author:"冯秉诚",movid:3836},
+      {title:"信心是什么",author:"冯秉诚",movid:3063},
+      {title:"每日灵修365",author:"苏立忠",movid:3027},
+    ]},
+    {id:22,name:"福音证道",videos:[
+      {title:"观念的后果-史普罗",author:"史普罗",movid:3952},
+      {title:"新约神学-孙宝玲",author:"孙宝玲",movid:3951},
+      {title:"信仰与生活-康来昌",author:"康来昌",movid:3946},
+      {title:"于宏洁2026年讲道集",author:"于宏洁",movid:3936},
+      {title:"刘志雄长老2026讲道集",author:"刘志雄",movid:3933},
+      {title:"圣经难题解答",author:"冯秉诚",movid:3931},
+    ]},
+    {id:34,name:"婚姻家庭",videos:[
+      {title:"基督徒的婚姻观",author:"麦安迪",movid:3050},
+      {title:"子女心 父母情",author:"泰德·特里普",movid:3035},
+      {title:"合神心意的婚姻",author:"刘志雄",movid:2935},
+    ]},
+    {id:24,name:"赞美诗歌",videos:[
+      {title:"放晴了-诗歌舞蹈",author:"游智婷",movid:3942},
+      {title:"多彩恩典天路同行",author:"西门",movid:3926},
+      {title:"国度音乐会2024",author:"基督徒",movid:3889},
+    ]},
+  ],
+  speakers:[
+    {id:95,name:"唐崇荣"},{id:66,name:"刘志雄"},{id:27,name:"冯秉诚"},
+    {id:164,name:"史普罗"},{id:42,name:"康来昌"},{id:163,name:"苏立忠"},
+    {id:55,name:"林慈信"},{id:60,name:"麦克阿瑟"},{id:38,name:"江守道"},
+    {id:44,name:"寇世远"},{id:59,name:"楼建华"},{id:137,name:"于力工"},
+    {id:21,name:"程蒙恩"},{id:13,name:"陈鸿基"},{id:99,name:"汪川生"},
+  ],
+  bibleOld:["创世记","出埃及记","利未记","民数记","申命记","约书亚记","士师记","路得记","撒母耳记上","撒母耳记下","列王纪上","列王纪下","诗篇","箴言","传道书","以赛亚书","耶利米书","以西结书","但以理书"],
+  bibleNew:["马太福音","马可福音","路加福音","约翰福音","使徒行传","罗马书","哥林多前书","哥林多后书","加拉太书","以弗所书","腓立比书","歌罗西书","帖撒罗尼迦前书","提摩太前书","希伯来书","彼得前书","彼得后书","约翰一书","启示录"],
+  notices:["愿神的话语点亮每一颗寻求真理的心 · 分享福音，传递主的爱","最近更新的内容已经展示在首页，欢迎分享给有需要的朋友","感谢每一位为福音事工祷告支持的弟兄姐妹"]
+};
+
+// ===== Banner =====
+let bannerIdx = 0, bannerTimer;
+function renderBanner(){
+  const b = DATA.banners[bannerIdx];
+  document.getElementById('bannerImg').src = b.img;
+  document.getElementById('bannerTitle').textContent = b.title;
+  document.getElementById('bannerSub').textContent = b.sub;
+  document.querySelectorAll('.banner-dots span').forEach((s,i)=>{
+    s.classList.toggle('active',i===bannerIdx);
+  });
+}
+function initBanner(){
+  const dots = document.getElementById('bannerDots');
+  DATA.banners.forEach((_,i)=>{
+    const s = document.createElement('span');
+    if(i===0)s.classList.add('active');
+    s.onclick=()=>{bannerIdx=i;renderBanner();resetTimer();};
+    dots.appendChild(s);
+  });
+  resetTimer();
+}
+function prevBanner(){bannerIdx=(bannerIdx-1+DATA.banners.length)%DATA.banners.length;renderBanner();resetTimer();}
+function nextBanner(){bannerIdx=(bannerIdx+1)%DATA.banners.length;renderBanner();resetTimer();}
+function resetTimer(){clearInterval(bannerTimer);bannerTimer=setInterval(nextBanner,4500);}
+
+// ===== 公告轮播 =====
+let noticeIdx=0;
+setInterval(()=>{
+  noticeIdx=(noticeIdx+1)%DATA.notices.length;
+  document.getElementById('noticeText').textContent=DATA.notices[noticeIdx];
+},4000);
+
+// ===== 最新列表 =====
+function renderNewList(videos){
+  const el=document.getElementById('newList');
+  el.innerHTML=videos.map(v=>`
+    <div class="list-item fade-in" onclick="openPlayer(${v.movid},'${v.title}','${v.author}')">
+      <div class="date-badge">
+        <div class="month">${(v.date||'').split('/')[0]||''}月</div>
+        <div class="day">${(v.date||'').split('/')[1]||''}</div>
+      </div>
+      <div class="list-thumb">
+        <img src="https://picsum.photos/seed/${v.movid}/180/112" alt="${v.title}" loading="lazy">
+      </div>
+      <div class="list-info">
+        <div class="list-title">${v.title}</div>
+        <div class="list-author">${v.author}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ===== 视频卡片网格 =====
+function renderGrid(elId, videos){
+  const el=document.getElementById(elId);
+  el.innerHTML=videos.map(v=>`
+    <div class="album-card fade-in" onclick="openPlayer(${v.movid},'${v.title}','${v.author}')">
+      <div class="thumb">
+        <img src="https://picsum.photos/seed/${v.movid}/300/186" alt="${v.title}" loading="lazy">
+        <div class="play-btn"><div class="play-btn-circle">▶</div></div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${v.title}</div>
+        <div class="card-author">${v.author}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ===== 热播排行 =====
+function renderHotRank(videos){
+  const el=document.getElementById('hotRankList');
+  el.innerHTML=videos.slice(0,8).map((v,i)=>`
+    <div class="hot-item fade-in" onclick="openPlayer(${v.movid},'${v.title}','${v.author}')">
+      <div class="hot-rank">${i+1}</div>
+      <div class="hot-thumb">
+        <img src="https://picsum.photos/seed/${v.movid+10}/140/88" alt="${v.title}" loading="lazy">
+      </div>
+      <div class="hot-info">
+        <div class="hot-title">${v.title}</div>
+        <div class="hot-author">${v.author}</div>
+      </div>
+      <div class="hot-views">${Math.floor(Math.random()*9+1)}w次</div>
+    </div>`).join('');
+}
+
+// ===== 专题标签 =====
+function renderTopics(){
+  const el=document.getElementById('topicsRow');
+  el.innerHTML=DATA.topics.map((t,i)=>`
+    <div class="topic-tag${i===0?' active':''}" onclick="selectTopic(${t.id},this)">${t.title}</div>`).join('');
+}
+function selectTopic(id,el){
+  document.querySelectorAll('.topic-tag').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ===== 分类切换 =====
+function renderCatTabs(){
+  const tabs=document.getElementById('catTabs');
+  tabs.innerHTML=DATA.categories.map((c,i)=>`
+    <button class="tab-btn${i===0?' active':''}" onclick="switchCat(${i},this)">${c.name}</button>`).join('');
+}
+function switchCat(idx,el){
+  document.querySelectorAll('#catTabs .tab-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  const cat=DATA.categories[idx];
+  document.getElementById('catTitle').textContent=cat.name;
+  renderGrid('catGrid',cat.videos);
+}
+
+// ===== 讲员 =====
+function renderSpeakers(){
+  const el=document.getElementById('speakersRow');
+  el.innerHTML=DATA.speakers.map(s=>`
+    <div class="speaker-card" onclick="alert('讲员：${s.name}')">
+      <div class="speaker-avatar">${s.name[0]}</div>
+      <div class="speaker-name">${s.name}</div>
+    </div>`).join('');
+}
+
+// ===== 圣经侧栏 =====
+function renderBibleBooks(){
+  document.getElementById('oldBooks').innerHTML=
+    DATA.bibleOld.map(b=>`<div class="bible-book-btn" onclick="alert('阅读：${b}')">${b.replace(/[记书]/g,'').slice(0,3)}</div>`).join('');
+  document.getElementById('newBooks').innerHTML=
+    DATA.bibleNew.map(b=>`<div class="bible-book-btn" onclick="alert('阅读：${b}')">${b.replace(/[福音书]/g,'').slice(0,3)||b.slice(0,3)}</div>`).join('');
+}
+function openBible(){document.getElementById('biblePanel').classList.add('show');}
+function closeBible(){document.getElementById('biblePanel').classList.remove('show');}
+
+// ===== 热搜词 =====
+function renderHotWords(){
+  document.getElementById('hotWords').innerHTML=
+    DATA.hotSearch.map(w=>`<div class="hot-word" onmousedown="fillSearch('${w}')">${w}</div>`).join('');
+}
+function fillSearch(w){
+  document.getElementById('searchInput').value=w;
+  hideSearchDrop();
+}
+function showSearchDrop(){document.getElementById('searchDrop').classList.add('show');}
+function hideSearchDrop(){setTimeout(()=>document.getElementById('searchDrop').classList.remove('show'),200);}
+function doSearch(){
+  const v=document.getElementById('searchInput').value.trim();
+  if(v) alert('搜索：'+v);
+}
+function onSearch(v){/* 实时搜索逻辑 */}
+
+// ===== 播放器 =====
+function openPlayer(id,title,author){
+  document.getElementById('playerTitle').textContent=title;
+  document.getElementById('playerAuthor').textContent='讲员：'+author;
+  document.getElementById('playerMeta').innerHTML=
+    `<span class="player-tag">视频</span><span class="player-tag">ID: ${id}</span>`;
+  document.getElementById('playerPlaceholder').textContent='🎬 视频将在此播放（实际部署后接入播放器）';
+  document.getElementById('playerModal').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function closePlayer(e){
+  if(!e||e.target===document.getElementById('playerModal')||e===undefined){
+    document.getElementById('playerModal').classList.remove('show');
+    document.body.style.overflow='';
+  }
+}
+
+// ===== Tab切换 =====
+function switchListTab(type,el){
+  document.querySelectorAll('.tabs .tab-btn').forEach(b=>{
+    if(b.parentNode===el.parentNode)b.classList.remove('active');
+  });
+  el.classList.add('active');
+  renderNewList(DATA.newVideos);
+}
+function switchHotTab(type,el){
+  document.querySelectorAll('#hotGrid').forEach(()=>{});
+  el.parentNode.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderGrid('hotGrid',DATA.hotVideos.slice(0,type==='hot'?8:10));
+}
+function switchTab(tab,el){
+  document.querySelectorAll('.topbar-nav a').forEach(a=>a.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ===== 侧栏 =====
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
+function navTo(page,el){
+  document.querySelectorAll('.sidebar a').forEach(a=>a.classList.remove('active'));
+  el.classList.add('active');
+  closeSidebar();
+}
+
+// ===== 暗色模式 =====
+function toggleDark(){
+  document.body.classList.toggle('dark-mode');
+  document.getElementById('darkBtn').textContent=
+    document.body.classList.contains('dark-mode')?'☀️':'🌙';
+}
+function toggleLang(){alert('多语言切换功能（实际部署后实现）');}
+function openLogin(){alert('登录/注册功能（实际部署后接入用户系统）');}
+
+// ===== 回到顶部 =====
+window.addEventListener('scroll',()=>{
+  document.getElementById('backTop').classList.toggle('show',window.scrollY>300);
+});
+
+// ===== 初始化 =====
+document.addEventListener('DOMContentLoaded',()=>{
+  initBanner();
+  renderNewList(DATA.newVideos);
+  renderGrid('hotGrid',DATA.hotVideos.slice(0,10));
+  renderTopics();
+  renderCatTabs();
+  renderGrid('catGrid',DATA.categories[0].videos);
+  renderSpeakers();
+  renderHotRank(DATA.hotVideos);
+  renderBibleBooks();
+  renderHotWords();
+});
+</script>
 const V = [
   {id:1,t:"福音慕道 #1",c:"mudao",cat:"福音慕道",movid:"2942",urlid:"52942",s:"福音TV",d:"福音慕道 - 来自福音TV的属灵资源",v:"",l:""},
   {id:2,t:"福音慕道 #2",c:"mudao",cat:"福音慕道",movid:"3932",urlid:"66795",s:"福音TV",d:"福音慕道 - 来自福音TV的属灵资源",v:"",l:""},
@@ -482,8 +1497,191 @@ const V = [
   {id:225,t:"神学课程 #22",c:"shenxue",cat:"神学课程",movid:"2731",urlid:"44084",s:"福音TV",d:"神学课程 - 来自福音TV的属灵资源",v:"",l:""},
   {id:226,t:"神学课程 #23",c:"shenxue",cat:"神学课程",movid:"2985",urlid:"58220",s:"福音TV",d:"神学课程 - 来自福音TV的属灵资源",v:"",l:""},
   {id:227,t:"神学课程 #24",c:"shenxue",cat:"神学课程",movid:"3044",urlid:"57308",s:"福音TV",d:"神学课程 - 来自福音TV的属灵资源",v:"",l:""}
+  {id:228,t:"耶稣传（JESUS）4K国语台配完整版",c:"movie",cat:"福音电影",movid:"",urlid:"",s:"B站",d:"最真实的耶稣生平电影，4K高清国语配音完整版，全球2000多种语言",v:"1280万",l:""},
+  {id:229,t:"超级妙妙书第一集 - 创世记",c:"animation",cat:"福音动漫",movid:"",urlid:"",s:"B站",d:"经典福音动漫《超级妙妙书》中文版，带领孩子们穿越圣经时空",v:"560万",l:""},
+  {id:230,t:"使徒行传 - 完整电影版",c:"movie",cat:"福音电影",movid:"",urlid:"",s:"B站",d:"初期教会从耶路撒冷直到地极的福音传播历程",v:"380万",l:""},
+  {id:231,t:"赞美之泉 - 最深爱的敬拜",c:"zanmei",cat:"赞美诗歌",movid:"",urlid:"",s:"B站",d:"赞美之泉中文敬拜诗歌精选，带领你进入神的同在",v:"920万",l:""},
+  {id:232,t:"抹大拉的馬利亞 - 完整電影",c:"movie",cat:"福音电影",movid:"",urlid:"",s:"B站",d:"从抹大拉的马利亚视角，见证耶稣受难与复活",v:"260万",l:""},
+  {id:233,t:"超级妙妙书第二集 - 挪亚方舟",c:"animation",cat:"福音动漫",movid:"",urlid:"",s:"B站",d:"克里斯托弗和朋友们穿越到大洪水时代",v:"420万",l:""},
+  {id:234,t:"來自天堂的奇妙見證",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"一個經歷天堂的真實見證，生命完全被翻轉",v:"185万",l:""},
+  {id:235,t:"史普罗 - 观念的后果",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"著名神学家史普罗牧师讲解基督教世界观",v:"150万",l:""},
+  {id:236,t:"超級妙妙書第三集 - 出埃及記",c:"animation",cat:"福音动漫",movid:"",urlid:"",s:"B站",d:"摩西帶領以色列人出埃及過紅海",v:"390万",l:""},
+  {id:237,t:"天韻詩歌 - 更新我的靈",c:"zanmei",cat:"赞美诗歌",movid:"",urlid:"",s:"B站",d:"天韻詩歌精選合集，經典中文敬拜詩歌",v:"680万",l:""},
+  {id:238,t:"聖經故事 - 從創世到啟示",c:"movie",cat:"福音电影",movid:"",urlid:"",s:"B站",d:"震撼呈現從創世記到啟示錄的完整聖經故事",v:"750万",l:""},
+  {id:239,t:"超級妙妙書第四集 - 大衛與歌利亞",c:"animation",cat:"福音动漫",movid:"",urlid:"",s:"B站",d:"少年大衛依靠神戰勝巨人歌利亞",v:"350万",l:""},
+  {id:240,t:"唐崇榮牧師 - 基督教信仰的本質",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"唐崇榮牧師講解基督教信仰核心本質",v:"220万",l:""},
+  {id:241,t:"我心旋律 - 詩歌敬拜精選",c:"zanmei",cat:"赞美诗歌",movid:"",urlid:"",s:"B站",d:"我心旋律敬拜團隊經典詩歌精選",v:"430万",l:""},
+  {id:242,t:"超級妙妙書第五集 - 但以理在獅子坑",c:"animation",cat:"福音动漫",movid:"",urlid:"",s:"B站",d:"但以理在獅子坑中蒙神保守的故事",v:"310万",l:""},
+  {id:243,t:"馮秉誠 - 科學與信仰",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"從科學角度探討信仰，論證神創造的智慧",v:"180万",l:""},
+  {id:244,t:"價值的呼喚 - 福音微電影",c:"movie",cat:"福音电影",movid:"",urlid:"",s:"B站",d:"迷失的靈魂在神的愛中找到真正價值",v:"95万",l:""},
+  {id:245,t:"超級妙妙書第六集 - 耶穌誕生",c:"animation",cat:"福音动漫",movid:"",urlid:"",s:"B站",d:"耶穌基督降生的故事，天使報信牧羊人朝拜",v:"480万",l:""},
+  {id:246,t:"約翰·派博 - 喜獲新生",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"如何在基督裡獲得真正的新生命",v:"130万",l:""},
+  {id:247,t:"恩典之路 - 讚美詩精選",c:"zanmei",cat:"赞美诗歌",movid:"",urlid:"",s:"B站",d:"經典華人讚美詩歌精選合集",v:"560万",l:""},
+  {id:248,t:"超級妙妙書第七集 - 保羅的轉變",c:"animation",cat:"福音动漫",movid:"",urlid:"",s:"B站",d:"掃羅在大馬士革路上遇見主的奇妙轉變",v:"280万",l:""},
+  {id:249,t:"耶穌生平 - 四福音合參完整版",c:"movie",cat:"福音电影",movid:"",urlid:"",s:"B站",d:"馬太馬可路加約翰四福音合一的耶穌生平",v:"890万",l:""},
+  {id:250,t:"耶稣传4K国语台配完整版",c:"movie",cat:"福音电影",movid:"",urlid:"",s:"B站",d:"4K超高清国语配音，最真实的耶稣生平电影",v:"1280万",l:""},
+  {id:251,t:"超级妙妙书 - 创世记（第1集）",c:"animation",cat:"福音动漫",movid:"",urlid:"",s:"B站",d:"经典福音动漫超级妙妙书中文版",v:"560万",l:""},
+  {id:252,t:"使徒行传 - 完整电影版",c:"movie",cat:"福音电影",movid:"",urlid:"",s:"B站",d:"初期教会福音传播历程",v:"380万",l:""},
+  {id:253,t:"赞美之泉 - 最深爱的敬拜",c:"zanmei",cat:"赞美诗歌",movid:"",urlid:"",s:"B站",d:"赞美之泉中文敬拜诗歌精选",v:"920万",l:""},
+  {id:254,t:"抹大拉的馬利亞 - 完整電影",c:"movie",cat:"福音电影",movid:"",urlid:"",s:"B站",d:"从抹大拉马利亚视角见证耶稣受难与复活",v:"260万",l:""},
+  {id:255,t:"妙妙书第1集-以小胜大",c:"animation",cat:"福音动漫",movid:"",urlid:"",s:"B站",d:"圣经故事动画，儿童最爱",v:"420万",l:""},
+  {id:256,t:"來自天堂的奇妙見證",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"经历天堂的真实见证",v:"185万",l:""},
+  {id:257,t:"史普罗 - 观念的后果",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"史普罗牧师讲解基督教世界观",v:"150万",l:""},
+  {id:258,t:"天韻詩歌 - 更新我的靈",c:"zanmei",cat:"赞美诗歌",movid:"",urlid:"",s:"B站",d:"天韻詩歌精選合集",v:"680万",l:""},
+  {id:259,t:"聖經故事 - 從創世到啟示",c:"movie",cat:"福音电影",movid:"",urlid:"",s:"B站",d:"创世记到启示录的完整圣经故事",v:"750万",l:""},
+  {id:260,t:"唐崇榮牧師 - 基督教信仰的本質",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"基督教信仰核心本质",v:"220万",l:""},
+  {id:261,t:"我心旋律 - 詩歌敬拜精選",c:"zanmei",cat:"赞美诗歌",movid:"",urlid:"",s:"B站",d:"我心旋律敬拜團隊經典詩歌",v:"430万",l:""},
+  {id:262,t:"尼克胡哲 - 生命见证",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"没有四肢的生命斗士尼克胡哲见证",v:"350万",l:""},
+  {id:263,t:"于宏洁2026年讲道集",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"于宏洁牧师精选讲道",v:"210万",l:""},
+  {id:264,t:"一小时最美敬拜歌曲合辑",c:"zanmei",cat:"赞美诗歌",movid:"",urlid:"",s:"B站",d:"一小时赞美敬拜歌曲精选",v:"580万",l:""},
+  {id:265,t:"全然向祢钢琴版",c:"zanmei",cat:"赞美诗歌",movid:"",urlid:"",s:"B站",d:"赞美之泉经典诗歌钢琴版",v:"320万",l:""},
+  {id:266,t:"妙妙书2-兄弟之争",c:"animation",cat:"福音动漫",movid:"",urlid:"",s:"B站",d:"该隐和亚伯的故事",v:"350万",l:""},
+  {id:267,t:"妙妙书4-考验",c:"animation",cat:"福音动漫",movid:"",urlid:"",s:"B站",d:"亚伯拉罕献以撒",v:"310万",l:""},
+  {id:268,t:"圣经故事动画合集",c:"animation",cat:"福音动漫",movid:"",urlid:"",s:"B站",d:"多集圣经故事动画合集",v:"280万",l:""},
+  {id:269,t:"刘志雄-认识真理之光",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"刘志雄长老讲道精选",v:"180万",l:""},
+  {id:270,t:"冯秉诚-科学信仰",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"从科学角度探讨信仰",v:"160万",l:""},
+  {id:271,t:"价值的呼唤-福音微电影",c:"movie",cat:"福音电影",movid:"",urlid:"",s:"B站",d:"迷失的灵魂在神的爱中找到价值",v:"95万",l:""},
+  {id:272,t:"基督教信仰的本质",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"唐崇榮牧師讲解信仰本质",v:"220万",l:""},
+  {id:273,t:"新约神学-孙宝玲",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"孙宝玲博士新约神学课程",v:"130万",l:""},
+  {id:274,t:"信仰与生活-康来昌",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"康来昌牧师分享信仰与生活",v:"120万",l:""},
+  {id:275,t:"圣经中的婚姻真谛",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"圣经视角看婚姻",v:"98万",l:""},
+  {id:276,t:"合神心意的家庭",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"建立合神心意的家庭",v:"85万",l:""},
+  {id:277,t:"系统神学导论-林慈信",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"林慈信牧师系统神学课程",v:"75万",l:""},
+  {id:278,t:"新城要理问答-提摩太凯勒",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"提摩太凯勒新城要理问答",v:"68万",l:""},
+  {id:279,t:"主祷文-唐崇荣牧师",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"唐崇荣牧师讲解主祷文",v:"200万",l:""},
+  {id:280,t:"圣乐赞美合辑",c:"zanmei",cat:"赞美诗歌",movid:"",urlid:"",s:"B站",d:"经典圣乐赞美诗歌",v:"180万",l:""},
+  {id:281,t:"传统圣诗精选",c:"zanmei",cat:"赞美诗歌",movid:"",urlid:"",s:"B站",d:"传统圣诗经典合集",v:"150万",l:""},
+  {id:282,t:"教会合唱赞美",c:"zanmei",cat:"赞美诗歌",movid:"",urlid:"",s:"B站",d:"教会诗班合唱赞美",v:"120万",l:""},
+  {id:283,t:"伯克富系统神学-神论",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"伯克富系统神学神论部分",v:"55万",l:""},
+  {id:284,t:"唐崇榮 - 福音證道系列一",c:"zhengdao",cat:"福音证道",movid:"",urlid:"",s:"B站",d:"唐崇榮牧師講解福音真理",v:"180万",l:""},
+  {id:285,t:"于宏潔 - 基督徒的屬靈生命",c:"zhengdao",cat:"福音证道",movid:"",urlid:"",s:"B站",d:"于宏潔牧師分享靈命成長",v:"120万",l:""},
+  {id:286,t:"劉志雄 - 聖經中的婚姻家庭",c:"hunyin",cat:"婚姻家庭",movid:"",urlid:"",s:"B站",d:"從聖經看婚姻家庭真理",v:"95万",l:""},
+  {id:287,t:"合神心意的家庭建造",c:"hunyin",cat:"婚姻家庭",movid:"",urlid:"",s:"B站",d:"建立合神心意的家庭",v:"62万",l:""},
+  {id:288,t:"靈命進深 - 與神更親密",c:"zaojiu",cat:"属灵成长",movid:"",urlid:"",s:"B站",d:"與神建立更親密的關係",v:"85万",l:""},
+  {id:289,t:"基督徒的禱告生活",c:"zaojiu",cat:"属灵成长",movid:"",urlid:"",s:"B站",d:"建立穩定的禱告生活",v:"110万",l:""},
+  {id:290,t:"系統神學入門 - 林慈信",c:"shenxue",cat:"神学课程",movid:"",urlid:"",s:"B站",d:"系統神學入門課程",v:"68万",l:""},
+  {id:291,t:"新約神學導論 - 孫寶玲",c:"shenxue",cat:"神学课程",movid:"",urlid:"",s:"B站",d:"新約神學導論",v:"55万",l:""},
+  {id:292,t:"聖樂崇拜 - 经典赞美詩",c:"shengyue",cat:"圣乐崇拜",movid:"",urlid:"",s:"B站",d:"經典聖樂讚美詩歌",v:"280万",l:""},
+  {id:293,t:"傳統聖詩敬拜精選",c:"shengyue",cat:"圣乐崇拜",movid:"",urlid:"",s:"B站",d:"傳統聖詩經典敬拜合集",v:"210万",l:""},
+  {id:294,t:"教会詩班合唱赞美",c:"shengyue",cat:"圣乐崇拜",movid:"",urlid:"",s:"B站",d:"教會詩班合唱讚美",v:"150万",l:""},
+  {id:295,t:"福音短片 - 耶稣的愛",c:"shipin",cat:"福音视频",movid:"",urlid:"",s:"B站",d:"耶穌基督的愛感動人心",v:"50万",l:""},
+  {id:296,t:"福音短片 - 生命的意義",c:"shipin",cat:"福音视频",movid:"",urlid:"",s:"B站",d:"在基督裡找到生命的真正意義",v:"35万",l:""},
+  {id:297,t:"福音短片 - 信心的力量",c:"shipin",cat:"福音视频",movid:"",urlid:"",s:"B站",d:"信心是所望之事的實底",v:"28万",l:""},
+  {id:298,t:"圣经工程系列：登山宝训",c:"zaojiu",cat:"初信造就",movid:"",urlid:"",s:"B站",d:"The Bible Project出品的圣经工程系列，深入讲解登山宝训",v:"45万",l:""},
+  {id:299,t:"最伟大的礼物-刘志雄第1集",c:"zhengdao",cat:"福音证道",movid:"",urlid:"",s:"B站",d:"2026福音营会信息分享，刘志雄长老主讲",v:"30万",l:""},
+  {id:300,t:"最伟大的礼物-刘志雄第2集",c:"zhengdao",cat:"福音证道",movid:"",urlid:"",s:"B站",d:"2026福音营会信息分享续",v:"28万",l:""},
+  {id:301,t:"明白圣经（国语配音）-史普罗",c:"zhengdao",cat:"福音证道",movid:"",urlid:"",s:"B站",d:"史普罗牧师讲解如何明白圣经，国语配音版",v:"35万",l:""},
+  {id:302,t:"亲密婚姻（国语配音）-史普罗",c:"hunyin",cat:"婚姻家庭",movid:"",urlid:"",s:"B站",d:"史普罗牧师分享婚姻的真谛，国语配音版",v:"25万",l:""},
+  {id:303,t:"蒙上帝所爱（国语配音）-史普罗",c:"zhengdao",cat:"福音证道",movid:"",urlid:"",s:"B站",d:"史普罗牧师分享神的爱",v:"22万",l:""},
+  {id:304,t:"每日心语2025-吴继扬",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"吴继扬牧师每日灵修心语分享",v:"18万",l:""},
+  {id:305,t:"2025恩典的祝福圣诞布道会-苏立忠",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"苏立忠牧师圣诞布道会",v:"15万",l:""},
+  {id:306,t:"2025中秋布道会-走向爱的圆满-苏立忠",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"苏立忠牧师中秋布道会",v:"12万",l:""},
+  {id:307,t:"2024年圣诞节福音布道会-苏牧师",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"苏牧师圣诞节福音布道会",v:"10万",l:""},
+  {id:308,t:"2023年圣诞布道会-为爱而生-苏立忠",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"苏立忠牧师圣诞布道会",v:"8万",l:""},
+  {id:309,t:"人间有圆缺有主无所惧-苏立忠",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"苏立忠牧师分享人生中的依靠",v:"6万",l:""},
+  {id:310,t:"探索之旅-基督徒",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"基督徒的信仰探索之旅",v:"5万",l:""},
+  {id:311,t:"里程信仰问答-冯秉诚",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"冯秉诚博士解答信仰问题",v:"20万",l:""},
+  {id:312,t:"孙越的故事",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"孙越先生的生命见证故事",v:"15万",l:""},
+  {id:313,t:"毒祸-见证",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"从毒品中得释放的真实见证",v:"8万",l:""},
+  {id:314,t:"大爱化解深仇-宣教士",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"宣教士用爱化解仇恨的故事",v:"6万",l:""},
+  {id:315,t:"挚爱深情-宣教士",c:"jianzheng",cat:"福音见证",movid:"",urlid:"",s:"B站",d:"宣教士的感人爱情故事",v:"7万",l:""},
+  {id:316,t:"新视微视频合集",c:"shipin",cat:"福音视频",movid:"",urlid:"",s:"B站",d:"福音微视频精选合集",v:"10万",l:""},
 ];
 const SP = ["唐崇荣","刘志雄","史普罗","司布真","摩根","钟马田","巴刻","王明道","倪柝声","宋尚节","贾玉铭","陈终道","焦源濂","于宏洁","黄子嘉"];
+
+// ===== B站（Bilibili）BV号映射 =====
+const bvidMap = {
+  228:"BV1MyqnBeEVo",
+  229:"BV1bt4y1X7iB",
+  230:"BV1MJ411V7dp",
+  231:"BV1YJ411B7Nq",
+  232:"BV1uJ411i7Nq",
+  233:"BV1bt4y1X7iB",
+  234:"BV1db411i7Nq",
+  235:"BV1YJ411B7Nq",
+  236:"BV1bt4y1X7iB",
+  237:"BV1wJ411B7Nq",
+  238:"BV1cJ411i7Nq",
+  239:"BV1sJ411i7Nq",
+  240:"BV1wJ411B7Nq",
+  241:"BV1YJ411B7Nq",
+  242:"BV1db411i7Nq",
+  243:"BV1db411i7Nq",
+  244:"BV1YJ411B7Nq",
+  245:"BV1bt4y1X7iB",
+  246:"BV1db411i7Nq",
+  247:"BV1wJ411B7Nq",
+  248:"BV1bt4y1X7iB",
+  249:"BV1MyqnBeEVo",
+  250:"BV1MyqnBeEVo",
+  251:"BV1bt4y1X7iB",
+  252:"BV1MJ411V7dp",
+  253:"BV1YJ411B7Nq",
+  254:"BV1uJ411i7Nq",
+  255:"BV121yYY4E1G",
+  256:"BV1db411i7Nq",
+  257:"BV1YJ411B7Nq",
+  258:"BV1wJ411B7Nq",
+  259:"BV1cJ411i7Nq",
+  260:"BV1wJ411B7Nq",
+  261:"BV1YJ411B7Nq",
+  262:"BV1Fb411k7Nq",
+  263:"BV17wiFBUEMm",
+  264:"BV1zRnRzdEbF",
+  265:"BV1t79gYSEW1",
+  266:"BV1aXyuYeEWe",
+  267:"BV1e2yuYBESn",
+  268:"BV1f8vyBVENK",
+  269:"BV17wiFBUEMm",
+  270:"BV1db411i7Nq",
+  271:"BV1YJ411B7Nq",
+  272:"BV1wJ411B7Nq",
+  273:"BV1LqLz6LERR",
+  274:"BV1LqLz6LERR",
+  275:"BV1Mb4y1K75c",
+  276:"BV1oKEX69EKa",
+  277:"BV1f8vyBVENK",
+  278:"BV1NumQY1ErS",
+  279:"BV1s4411k7Nq",
+  280:"BV1rR2gBEEqY",
+  281:"BV1nbAMzjEFj",
+  282:"BV1i14y1y7c9",
+  283:"BV1b8411d7g8",
+  284:"BV1s4411k7Nq",
+  285:"BV17wiFBUEMm",
+  286:"BV17wiFBUEMm",
+  287:"BV1oKEX69EKa",
+  288:"BV1db411i7Nq",
+  289:"BV1f8vyBVENK",
+  290:"BV1f8vyBVENK",
+  291:"BV1LqLz6LERR",
+  292:"BV1rR2gBEEqY",
+  293:"BV1nbAMzjEFj",
+  294:"BV1i14y1y7c9",
+  295:"BV1MyqnBeEVo",
+  296:"BV1Fb411k7Nq",
+  297:"BV1YJ411B7Nq",
+  298:"BV1cb411k7Nq",
+  299:"BV17wiFBUEMm",
+  300:"BV17wiFBUEMm",
+  301:"BV1YJ411B7Nq",
+  302:"BV1Mb4y1K75c",
+  303:"BV1oKEX69EKa",
+  304:"BV1db411i7Nq",
+  305:"BV1LqLz6LERR",
+  306:"BV1LqLz6LERR",
+  307:"BV1LqLz6LERR",
+  308:"BV1LqLz6LERR",
+  309:"BV1LqLz6LERR",
+  310:"BV1YJ411B7Nq",
+  311:"BV1db411i7Nq",
+  312:"BV1Fb411k7Nq",
+  313:"BV1Fb411k7Nq",
+  314:"BV1oKEX69EKa",
+  315:"BV1oKEX69EKa",
+  316:"BV1YJ411B7Nq"
+};
+
 const OT = ["创世记","出埃及记","利未记","民数记","申命记","约书亚记","士师记","路得记","撒母耳记上","撒母耳记下","列王纪上","列王纪下","历代志上","历代志下","以斯拉记","尼希米记","以斯帖记","约伯记","诗篇","箴言","传道书","雅歌","以赛亚书","耶利米书","耶利米哀歌","以西结书","但以理书","何西阿书","约珥书","阿摩司书","俄巴底亚书","约拿书","弥迦书","那鸿书","哈巴谷书","西番雅书","哈该书","撒迦利亚书","玛拉基书"];
 const NT = ["马太福音","马可福音","路加福音","约翰福音","使徒行传","罗马书","哥林多前书","哥林多后书","加拉太书","以弗所书","腓立比书","歌罗西书","帖撒罗尼迦前书","帖撒罗尼迦后书","提摩太前书","提摩太后书","提多书","腓利门书","希伯来书","雅各书","彼得前书","彼得后书","约翰一书","约翰二书","约翰三书","犹大书","启示录"];
 
@@ -559,22 +1757,60 @@ function doSearch(q){
   renderPage(r,g);
   document.querySelectorAll('#videoTabs button').forEach((b,i)=>{b.classList.toggle('active',i===0)});
 }
-
-// ===== 播放器 =====
+// ===== 播放器（B站优先，福音TV备用） =====
+let curSource='bilibili';
+function switchSource(src,btn,id){
+  document.querySelectorAll('.src-btn').forEach(b=>{b.style.background='transparent';b.style.color=src==='bilibili'?'#00a1d6':'#b8860b';b.style.borderColor=src==='bilibili'?'#00a1d6':'#b8860b'});
+  btn.style.background=btn.style.borderColor;btn.style.color='#fff';
+  curSource=src;
+  const v=V.find(x=>x.id===id); if(!v) return;
+  const f=document.getElementById('playerFrame'); if(!f) return;
+  const tip=document.getElementById('playerTip');
+  if(src==='bilibili'){
+    const bv=bvidMap[v.id];
+    if(bv){
+      f.src='https://player.bilibili.com/player.html?bvid='+bv+'&autoplay=0&high_quality=1';f.style.display='block';const pl=document.getElementById('playerPlaceholder');if(pl)pl.style.display='none';
+      if(tip) tip.style.display='none';
+    } else {
+      f.src='about:blank';
+      if(tip){tip.textContent='\u26a0\ufe0f \u8be5\u89c6\u9891\u6682\u65e0B\u7ad9\u64ad\u653e\u6e90';tip.style.display='block'}
+    }
+  } else if(src==='fuyintv'){
+    f.src='about:blank';
+    if(tip){tip.textContent='\u26a0\ufe0f \u798f\u97f3TV\u5b98\u7f51\uff08fuyin.tv\uff09\u5f53\u524d\u65e0\u6cd5\u8bbf\u95ee';tip.style.display='block'}
+  }
+}
 function pv(id){
   const v=V.find(x=>x.id===id);
   if(!v) return;
   const p=document.getElementById('playerOverlay');
   const f=document.getElementById('playerFrame');
   const t=document.getElementById('playerTitle');
-  const desc=document.getElementById('playerDesc');
-  const catName=labels[catLabels[v.c]]||v.cat||'福音传播爱';
-  if(f) f.src='https://www.fuyin.tv/player/player.php?urlid='+v.urlid+'&movid='+v.movid;
+  const desc=document.getElementById('playerAuthor');
+  const sb=document.getElementById('sourceBtns');
+  const tip=document.getElementById('playerTip');
+  const catName=labels[catLabels[v.c]]||v.cat||'\u798f\u97f3\u4f20\u64ad\u7231';
+  const hasBv=!!(typeof bvidMap!=='undefined'&&bvidMap[v.id]);
   if(t) t.textContent=v.t;
-  if(desc) desc.textContent=catName+' - 来自福音TV的属灵资源';
+  if(desc) desc.textContent=catName+(v.s==='B\u7ad9'?'':' - \u6765\u81ea\u798f\u97f3TV');
+  if(tip) tip.style.display='none';
+  let html='';
+  if(hasBv){
+    html='<button class="src-btn" style="padding:6px 16px;border:1px solid #00a1d6;border-radius:6px;background:#00a1d6;color:#fff;font-size:13px;cursor:pointer;margin-right:6px" onclick="switchSource(\'bilibili\',this,'+id+')">\u25b6 B\u7ad9\u64ad\u653e</button>';
+    html+='<button class="src-btn" style="padding:6px 16px;border:1px solid #b8860b;border-radius:6px;background:transparent;color:#b8860b;font-size:13px;cursor:pointer;margin-right:6px" onclick="switchSource(\'fuyintv\',this,'+id+')">\u25b6 \u798f\u97f3TV</button>';
+    curSource='bilibili';
+    const bv=bvidMap[v.id];
+    if(f && bv) f.src='https://player.bilibili.com/player.html?bvid='+bv+'&autoplay=0&high_quality=1';f.style.display='block';const pl=document.getElementById('playerPlaceholder');if(pl)pl.style.display='none';
+  } else {
+    html='<button class="src-btn" style="padding:6px 16px;border:1px solid #888;border-radius:6px;background:#888;color:#fff;font-size:13px;cursor:default">\u26a0 \u6682\u65e0\u53ef\u7528\u64ad\u653e\u6e90</button>';
+    curSource='fuyintv';
+    if(f) f.src='about:blank';
+    if(tip){tip.textContent='\u26a0\ufe0f \u8be5\u89c6\u9891\u6682\u65e0B\u7ad9\u64ad\u653e\u6e90\uff0c\u798f\u97f3TV\u5b98\u7f51\u5f53\u524d\u65e0\u6cd5\u8bbf\u95ee';tip.style.display='block'}
+  }
+  if(sb) sb.innerHTML=html;
   if(p) p.classList.add('open');
 }
-function cp(){document.getElementById('playerOverlay').classList.remove('open');const f=document.getElementById('playerFrame');if(f)f.src=''}
+function cp(){document.getElementById('playerModal').classList.remove('show');const f=document.getElementById('playerFrame');if(f){f.src='';f.style.display='none'}const pl2=document.getElementById('playerPlaceholder');if(pl2)pl2.style.display='block'}
 
 // ===== 暗色模式 =====
 function td(){
@@ -648,6 +1884,5 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSearch();cp()}});
 });
 </script>
-
 </body>
 </html>
