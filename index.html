@@ -1230,56 +1230,82 @@ function doSearch(){
 }
 function onSearch(v){/* 实时搜索逻辑 */}
 
-// ===== 播放器（福音传播爱 - HLS直连播放） =====
-let _curVideoUrl=''; // 当前播放的视频地址（供下载用）
-let _curVideoTitle=''; // 当前播放的视频标题（供下载用）
+// ===== 播放器（福音传播爱 - HLS直连播放，增强错误处理） =====
+let _curVideoUrl='';
+let _curVideoTitle='';
 function openPlayer(movid,title,author){
-  document.getElementById('playerTitle').textContent=title;
-  document.getElementById('playerAuthor').textContent='讲员：'+author;
-  document.getElementById('playerMeta').innerHTML=
-    `<span class="player-tag">视频</span><span class="player-tag">ID: ${movid}</span>`;
-  document.getElementById('playerModal').classList.add('show');
-  document.body.style.overflow='hidden';
-  
-  const v=V.find(x=>x.movid==movid);
-  const videoEl=document.getElementById('playerVideo');
-  const pl=document.getElementById('playerPlaceholder');
-  const db=document.getElementById('downloadBtn');
-  
-  // 隐藏视频、显示加载
-  if(videoEl){videoEl.style.display='none';}
-  if(pl){pl.textContent='🎬 正在获取视频地址...';pl.style.display='block';}
-  if(db)db.style.display='none';
-  
-  if(v && v.v){
-    // 直接从V数组获取视频地址（直链HLS流）
-    const videoUrl=v.v;
-    _curVideoUrl=videoUrl;
-    _curVideoTitle=title;
+  try {
+    document.getElementById('playerTitle').textContent=title||'视频';
+    document.getElementById('playerAuthor').textContent='讲员：'+(author||'未知');
+    document.getElementById('playerMeta').innerHTML=
+      `<span class="player-tag">视频</span><span class="player-tag">ID: ${movid}</span>`;
+    document.getElementById('playerModal').classList.add('show');
+    document.body.style.overflow='hidden';
     
-    // 销毁旧HLS实例
+    const v=V.find(x=>x.movid==movid);
+    const videoEl=document.getElementById('playerVideo');
+    const pl=document.getElementById('playerPlaceholder');
+    const db=document.getElementById('downloadBtn');
+    
+    // 重置状态
+    if(videoEl){videoEl.style.display='none';videoEl.pause();videoEl.src='';videoEl.load();}
     if(window._hls){window._hls.destroy();window._hls=null;}
+    if(pl){pl.textContent='🎬 正在获取视频地址...';pl.style.display='block';}
+    if(db)db.style.display='none';
     
-    // 检查浏览器原生HLS支持 (Safari)
-    if(videoEl.canPlayType('application/vnd.apple.mpegurl')){
-      videoEl.src=videoUrl;
-    } else if (Hls.isSupported()) {
-      // 使用HLS.js
-      const hls=new Hls({xhrSetup:function(x,u){x.withCredentials=false;}});
-      hls.loadSource(videoUrl);
-      hls.attachMedia(videoEl);
-      window._hls=hls;
-      hls.on(Hls.Events.MANIFEST_PARSED,function(){videoEl.play();});
+    if(v && v.v){
+      const videoUrl=v.v;
+      _curVideoUrl=videoUrl;
+      _curVideoTitle=title||'';
+      
+      const doPlay = function(){
+        if(pl)pl.style.display='none';
+        if(videoEl){
+          videoEl.style.display='block';
+          videoEl.play().catch(function(e){
+            console.warn('自动播放被阻止:',e);
+            if(pl){pl.textContent='▶️ 点击播放按钮开始观看';pl.style.display='block';}
+          });
+        }
+        if(db)db.style.display='inline-block';
+      };
+      
+      // Safari/iOS: 原生HLS
+      if(videoEl && videoEl.canPlayType && videoEl.canPlayType('application/vnd.apple.mpegurl')){
+        videoEl.src=videoUrl;
+        videoEl.addEventListener('loadedmetadata',doPlay,{once:true});
+        return;
+      }
+      
+      // HLS.js
+      if(typeof Hls !== 'undefined' && Hls.isSupported()){
+        const hls=new Hls({xhrSetup:function(x,u){x.withCredentials=false;}});
+        hls.loadSource(videoUrl);
+        hls.attachMedia(videoEl);
+        window._hls=hls;
+        hls.on(Hls.Events.MANIFEST_PARSED,function(){
+          doPlay();
+        });
+        hls.on(Hls.Events.ERROR,function(e,data){
+          if(data.fatal){
+            console.error('HLS.js致命错误:',data);
+            if(pl){pl.textContent='❌ 视频加载失败，请检查网络或换源';pl.style.display='block';}
+            if(videoEl)videoEl.style.display='none';
+          }
+        });
+        return;
+      }
+      
+      // 都不支持
+      if(pl){pl.textContent='❌ 浏览器不支持此视频格式，请使用Chrome/Safari';}
     } else {
-      if(pl){pl.textContent='❌ 您的浏览器不支持HLS视频播放';return;}
+      if(pl){pl.textContent='⚠️ 该视频暂无播放源';}
+      if(videoEl){videoEl.style.display='none';}
     }
-    
-    if(pl)pl.style.display='none';
-    if(videoEl){videoEl.style.display='block';videoEl.play();}
-    if(db)db.style.display='inline-block';
-  } else {
-    if(pl){pl.textContent='⚠️ 该视频暂无播放源';}
-    if(videoEl){videoEl.style.display='none';}
+  } catch(e){
+    console.error('播放器出错:',e);
+    var pl2=document.getElementById('playerPlaceholder');
+    if(pl2){pl2.textContent='❌ 播放出错: '+(e.message||'未知错误');pl2.style.display='block';}
   }
 }
 function downloadVideo(){
