@@ -1324,10 +1324,10 @@ function openPlayer(movid,title,author){
         }
       },{once:true});
       
-    } else if(v && v.urlid && v.movid) {
-      // 方案B: 使用福音TV iframe播放器（urlid + movid）
+    } else if(v && v.movid) {
+      // 方案B: 使用福音TV内嵌播放页面（阿里播放器支持）
       pl.textContent='🎬 正在加载福音TV播放器...';
-      const fuyinUrl = 'https://www.fuyin.tv/player/player.php?urlid=' + encodeURIComponent(v.urlid) + '&movid=' + encodeURIComponent(v.movid);
+      const fuyinUrl = 'https://www.fuyin.tv/content/view/movid/' + encodeURIComponent(v.movid) + '/index.html';
       frameEl.src = fuyinUrl;
       frameEl.style.display = 'block';
       pl.style.display = 'none';
