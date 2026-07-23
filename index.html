@@ -1103,8 +1103,33 @@ setInterval(()=>{
 },4000);
 
 // ===== 最新列表 =====
+// ===== 视频卡片网格（兼容V数组字段 t/s 和 DATA字段 title/author） =====
+function renderGrid(elId, videos){
+  const el=document.getElementById(elId);
+  if(!el) return;
+  el.innerHTML=videos.map(v=>{
+    const title=(v.title||v.t||'');
+    const author=(v.author||v.s||'');
+    const safeT=title.replace(/'/g,"\\'");
+    const safeA=author.replace(/'/g,"\\'");
+    return `
+    <div class="album-card fade-in" onclick="openPlayer('${v.movid}','${safeT}','${safeA}')">
+      <div class="thumb">
+        <img src="https://picsum.photos/seed/${v.movid}/300/186" alt="${title}" loading="lazy">
+        <div class="play-btn"><div class="play-btn-circle">▶</div></div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${title}</div>
+        <div class="card-author">${author}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== 最新发布列表 =====
 function renderNewList(videos){
   const el=document.getElementById('newList');
+  if(!el) return;
   el.innerHTML=videos.map(v=>`
     <div class="list-item fade-in" onclick="openPlayer(${v.movid},'${v.title}','${v.author}')">
       <div class="date-badge">
@@ -1117,22 +1142,6 @@ function renderNewList(videos){
       <div class="list-info">
         <div class="list-title">${v.title}</div>
         <div class="list-author">${v.author}</div>
-      </div>
-    </div>`).join('');
-}
-
-// ===== 视频卡片网格 =====
-function renderGrid(elId, videos){
-  const el=document.getElementById(elId);
-  el.innerHTML=videos.map(v=>`
-    <div class="album-card fade-in" onclick="openPlayer(${v.movid},'${v.title}','${v.author}')">
-      <div class="thumb">
-        <img src="https://picsum.photos/seed/${v.movid}/300/186" alt="${v.title}" loading="lazy">
-        <div class="play-btn"><div class="play-btn-circle">▶</div></div>
-      </div>
-      <div class="card-body">
-        <div class="card-title">${v.title}</div>
-        <div class="card-author">${v.author}</div>
       </div>
     </div>`).join('');
 }
