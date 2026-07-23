@@ -959,6 +959,9 @@ ul{list-style:none;}
         style="display:none;object-fit:contain;" 
         referrerpolicy="no-referrer"
         controls autoplay playsinline></video>
+      <iframe id="playerFrame" width="100%" height="100%"
+        style="display:none;border:none;"
+        allowfullscreen allow="autoplay;encrypted-media"></iframe>
       <span id="playerPlaceholder">🎬 视频加载中...</span>
     <div class="player-info">
       <div id="playerAuthor" style="font-size:13px;color:var(--text-muted);"></div>
@@ -1244,23 +1247,23 @@ function openPlayer(movid,title,author){
     
     const v=V.find(x=>x.movid==movid);
     const videoEl=document.getElementById('playerVideo');
+    const frameEl=document.getElementById('playerFrame');
     const pl=document.getElementById('playerPlaceholder');
     const db=document.getElementById('downloadBtn');
     
-    // 重置状态
+    // 重置状态：隐藏所有播放元素
     if(videoEl){videoEl.style.display='none';videoEl.pause();videoEl.src='';videoEl.load();}
+    if(frameEl){frameEl.style.display='none';frameEl.src='';}
     if(window._hls){window._hls.destroy();window._hls=null;}
-    if(pl){pl.textContent='🎬 正在获取视频地址...';pl.style.display='block';}
+    if(pl){pl.style.display='block';}
     if(db)db.style.display='none';
     
     if(v && v.v){
+      // 方案A: v.v 有直链视频地址 → 原生+HLS.js播放
       const videoUrl=v.v;
       _curVideoUrl=videoUrl;
       _curVideoTitle=title||'';
-      
-      // 移除crossorigin，避免CORS拦截视频加载
       videoEl.removeAttribute('crossorigin');
-      
       const doPlay = function(){
         if(pl)pl.style.display='none';
         if(videoEl){
@@ -1272,15 +1275,9 @@ function openPlayer(movid,title,author){
         }
         if(db)db.style.display='inline-block';
       };
-      
-      // 方案A: 直接原生播放（去掉crossorigin后浏览器以no-cors模式请求）
-      // Safari/iOS + Android WebView + 部分Chrome支持原生HLS
       videoEl.src=videoUrl;
-      
-      // 设置播放超时（5秒），如果无法加载再用HLS.js
       var timeoutId = setTimeout(function(){
         if(videoEl && videoEl.readyState===0 && pl){
-          // 原生播放未加载，尝试HLS.js
           if(typeof Hls !== 'undefined' && Hls.isSupported()){
             videoEl.style.display='none';
             videoEl.pause();videoEl.src='';videoEl.load();
@@ -1301,15 +1298,12 @@ function openPlayer(movid,title,author){
           }
         }
       }, 5000);
-      
-      // 原生播放成功时清除超时
       videoEl.addEventListener('loadedmetadata',function(){
         clearTimeout(timeoutId);
         doPlay();
       },{once:true});
       videoEl.addEventListener('error',function(){
         clearTimeout(timeoutId);
-        // 出错后自动尝试HLS.js
         if(typeof Hls !== 'undefined' && Hls.isSupported()){
           videoEl.style.display='none';
           videoEl.pause();videoEl.src='';videoEl.load();
@@ -1330,9 +1324,21 @@ function openPlayer(movid,title,author){
         }
       },{once:true});
       
+    } else if(v && v.urlid && v.movid) {
+      // 方案B: 使用福音TV iframe播放器（urlid + movid）
+      pl.textContent='🎬 正在加载福音TV播放器...';
+      const fuyinUrl = 'https://www.fuyin.tv/player/player.php?urlid=' + encodeURIComponent(v.urlid) + '&movid=' + encodeURIComponent(v.movid);
+      frameEl.src = fuyinUrl;
+      frameEl.style.display = 'block';
+      pl.style.display = 'none';
+      _curVideoUrl = fuyinUrl;
+      _curVideoTitle = title||'';
+      if(db)db.style.display='inline-block';
+      
     } else {
       if(pl){pl.textContent='⚠️ 该视频暂无播放源';}
       if(videoEl){videoEl.style.display='none';}
+      if(frameEl){frameEl.style.display='none';}
     }
   } catch(e){
     console.error('播放器出错:',e);
@@ -1355,6 +1361,8 @@ function closePlayer(e){
     // 停止播放
     const videoEl=document.getElementById('playerVideo');
     if(videoEl){videoEl.pause();videoEl.style.display='none';videoEl.src='';videoEl.load();}
+    const frameEl=document.getElementById('playerFrame');
+    if(frameEl){frameEl.style.display='none';frameEl.src='';}
     if(window._hls){window._hls.destroy();window._hls=null;}
   }
 }
