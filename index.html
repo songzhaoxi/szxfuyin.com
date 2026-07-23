@@ -1233,13 +1233,12 @@ function doSearch(){
 }
 function onSearch(v){/* 实时搜索逻辑 */}
 
-// ===== 播放器（福音传播爱 - 无CORS优先直连播放，HLS.js后备） =====
+// ===== 播放器 =====
+// HLS.js主播放 + 福音TV新窗口备选
 let _curVideoUrl='';
 let _curVideoTitle='';
 function openPlayer(movid,title,author){
   try {
-    // 清理之前的故障转移定时器
-    if(window._playerFallback){clearTimeout(window._playerFallback);window._playerFallback=null;}
     if(window._hls){window._hls.destroy();window._hls=null;}
     document.getElementById('playerTitle').textContent=title||'视频';
     document.getElementById('playerAuthor').textContent='讲员：'+(author||'未知');
@@ -1253,47 +1252,36 @@ function openPlayer(movid,title,author){
     const frameEl=document.getElementById('playerFrame');
     const pl=document.getElementById('playerPlaceholder');
     const db=document.getElementById('downloadBtn');
+    var sb=document.getElementById('sourceBtns');
     
-    // 重置状态：隐藏所有播放元素
-    if(videoEl){videoEl.style.display='none';videoEl.pause();videoEl.src='';videoEl.load();}
-    if(frameEl){frameEl.style.display='none';frameEl.src='';}
-    if(pl){pl.style.display='block';pl.innerHTML='🎬 正在加载...';}
+    // 重置状态
+    frameEl.style.display='none';frameEl.src='';
+    videoEl.style.display='none';videoEl.pause();videoEl.src='';videoEl.load();
+    pl.style.display='block';pl.innerHTML='🎬 正在加载...';
     if(db)db.style.display='none';
     
-    if(v && v.movid){
-      const fuyinUrl = 'https://www.fuyin.tv/content/view/movid/' + encodeURIComponent(v.movid) + '/index.html';
-      var sb = document.getElementById('sourceBtns');
-      
-      // 【方案A】优先iframe嵌入福音TV播放器（稳定可靠）
-      pl.innerHTML = '📡 正在加载福音TV播放器...';
-      if(frameEl){
-        frameEl.src = fuyinUrl;
-        frameEl.style.display = 'block';
-      }
-      if(pl){setTimeout(function(){pl.style.display='none';}, 1500);}
-      _curVideoUrl = fuyinUrl;
-      _curVideoTitle = title||'';
-      
-      // 【方案B】同时后台尝试HLS直链播放，提供切换按钮
-      if(v.v){
-        var hlsBtnHtml = '<button onclick="switchToHls(\''+v.v+'\',\''+title.replace(/'/g,"\\'")+'\')" style="padding:6px 14px;background:rgba(200,151,58,0.2);color:var(--gold-light);border:1px solid var(--gold);border-radius:6px;font-size:12px;cursor:pointer;">🎬 HLS直链播放</button>';
-        var fyBtnHtml = ' <button onclick="window.open(\''+fuyinUrl+'\',\'_blank\')" style="padding:6px 14px;background:var(--gold);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">📺 新窗口打开</button>';
-        if(sb) sb.innerHTML = hlsBtnHtml + ' | 观看中：福音TV' + fyBtnHtml;
-      } else {
-        if(sb) sb.innerHTML = '📺 观看中：福音TV';
-      }
-    } else if(v && v.v) {
-      // 【方案C】有HLS地址但没有movid，直接HLS播放
-      tryHlsPlay(v.v, videoEl, pl, db, title);
+    const fuyinUrl = v && v.movid ? 'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html' : '';
+    
+    if(v && v.v){
+      // 【主方案】HLS.js直链播放 + 福音TV备选按钮
       _curVideoUrl = v.v;
       _curVideoTitle = title||'';
-      var sb=document.getElementById('sourceBtns');
-      if(sb) sb.innerHTML = '🎬 HLS直链播放中';
+      tryHlsPlay(v.v, videoEl, pl, db, title);
+      if(sb){
+        var fyBtn = fuyinUrl ? ' <button onclick="window.open(\''+fuyinUrl+'\',\'_blank\')" style="padding:6px 14px;background:var(--gold);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">📺 福音TV打开</button>' : '';
+        sb.innerHTML = '🎬 HLS直链播放中'+fyBtn;
+      }
       if(db)db.style.display='inline-block';
+    } else if(v && v.movid && fuyinUrl){
+      // 【备选】无HLS地址但有movid → 福音TV新窗口
+      _curVideoUrl = fuyinUrl;
+      _curVideoTitle = title||'';
+      pl.innerHTML = '📺 该视频无直链地址，正在跳转福音TV...';
+      setTimeout(function(){window.open(fuyinUrl,'_blank');}, 800);
+      if(sb) sb.innerHTML = '📺 福音TV播放（新窗口）';
     } else {
-      if(pl){pl.innerHTML='⚠️ 该视频暂无播放源';}
-      if(videoEl){videoEl.style.display='none';}
-      if(frameEl){frameEl.style.display='none';}
+      pl.innerHTML='⚠️ 该视频暂无播放源';
+      videoEl.style.display='none';
     }
   } catch(e){
     console.error('播放器出错:',e);
@@ -1302,24 +1290,16 @@ function openPlayer(movid,title,author){
   }
 }
 
-/** 切换到HLS直链播放（用户手动点击切换时调用） */
-function switchToHls(videoUrl,title){
+/** 重试HLS播放（用户点击重试按钮时调用） */
+function retryHls(videoUrl,title){
   var videoEl=document.getElementById('playerVideo');
-  var frameEl=document.getElementById('playerFrame');
   var pl=document.getElementById('playerPlaceholder');
   var db=document.getElementById('downloadBtn');
   if(!videoEl||!videoUrl) return;
-  // 隐藏iframe，显示video
-  if(frameEl){frameEl.style.display='none';frameEl.src='';}
-  if(pl){pl.style.display='block';pl.innerHTML='🎬 切换到HLS播放...';}
   if(window._hls){window._hls.destroy();window._hls=null;}
   _curVideoUrl = videoUrl;
   _curVideoTitle = title||'';
   tryHlsPlay(videoUrl, videoEl, pl, db, title);
-  var sb=document.getElementById('sourceBtns');
-  if(sb){
-    sb.innerHTML = '🎬 HLS直链播放中 <button onclick="location.reload()" style="padding:4px 10px;background:rgba(200,151,58,0.2);color:var(--gold-light);border:1px solid var(--gold);border-radius:6px;font-size:11px;cursor:pointer;">🔄 切回福音TV</button>';
-  }
 }
 
 /** HLS直链播放 (原生video + HLS.js fallback) */
@@ -1367,7 +1347,6 @@ function tryHlsPlay(videoUrl,videoEl,pl,db,title){
   }, 3000);
   
   videoEl.addEventListener('loadedmetadata',function(){
-    if(window._playerFallback){clearTimeout(window._playerFallback);window._playerFallback=null;}
     clearTimeout(timeoutId);
     pl.style.display='none';
     videoEl.play().catch(function(e){
@@ -1419,7 +1398,6 @@ function downloadVideo(){
 }
 function closePlayer(e){
   if(!e||e.target===document.getElementById('playerModal')||e===undefined){
-    if(window._playerFallback){clearTimeout(window._playerFallback);window._playerFallback=null;}
     document.getElementById('playerModal').classList.remove('show');
     document.body.style.overflow='';
     // 停止播放
