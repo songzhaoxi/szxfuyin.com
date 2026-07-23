@@ -458,6 +458,104 @@ app.get('/api/bili/auto', async (req, res) => {
   }
 });
 
+// ============================================================
+// ===== 🚀 福音TV(Fuyin.tv)视频代理 - 绕过GFW+防盗链 =====
+// ============================================================
+// 原理：服务器端代发请求到www.fuyin.tv获取视频地址，
+// 让国内用户无需VPN即可观看福音TV视频
+// ============================================================
+
+// 福音TV API通用请求函数 - 带Referer伪装
+function fuyinFetch(url) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const mod = u.protocol === 'https:' ? https : http;
+    const options = {
+      hostname: u.hostname,
+      path: u.pathname + u.search,
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://www.fuyin.tv/',
+        'Origin': 'https://www.fuyin.tv',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8'
+      },
+      timeout: 15000
+    };
+    const req = mod.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => resolve(data));
+    });
+    req.on('error', reject);
+    req.on('timeout', () => { req.destroy(); reject(new Error('timeout')); });
+    req.end();
+  });
+}
+
+// ===== API: 获取福音TV视频播放地址 =====
+// 请求示例: /api/fuyin/url?movid=3932&urlid=66795
+app.get('/api/fuyin/url', async (req, res) => {
+  const { movid, urlid } = req.query;
+  if (!movid || !urlid) return res.status(400).json({ success: false, error: '缺少movid或urlid参数' });
+  try {
+    const apiUrl = `https://www.fuyin.tv/api/api/tv.movie/url?movid=${movid}&urlid=${urlid}&type=1&lang=zh`;
+    const data = await fuyinFetch(apiUrl);
+    const parsed = JSON.parse(data);
+    if (parsed.code === 1 && parsed.data && parsed.data.url) {
+      res.json({ success: true, data: { url: parsed.data.url, title: parsed.data.movie_title } });
+    } else {
+      res.json({ success: false, error: '获取视频地址失败', raw: parsed });
+    }
+  } catch(e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+// ===== API: 福音TV视频流代理 - 解决防盗链 =====
+// 直接在服务器端代理视频流，绕过防盗链
+// 请求示例: /api/fuyin/stream?url=https://vod-hls-pc.sanmanuela.com/...
+app.get('/api/fuyin/stream', (req, res) => {
+  const { url } = req.query;
+  if (!url) return res.status(400).send('缺少url参数');
+  
+  try {
+    const decodedUrl = decodeURIComponent(url);
+    const u = new URL(decodedUrl);
+    const mod = u.protocol === 'https:' ? https : http;
+    
+    const options = {
+      hostname: u.hostname,
+      path: u.pathname + u.search,
+      method: req.method,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://www.fuyin.tv/',
+        'Origin': 'https://www.fuyin.tv',
+        'Range': req.headers.range || '',
+        'Accept': '*/*'
+      }
+    };
+    
+    const proxyReq = mod.request(options, (proxyRes) => {
+      const headers = { ...proxyRes.headers };
+      delete headers['content-encoding'];
+      delete headers['transfer-encoding'];
+      delete headers['connection'];
+      res.writeHead(proxyRes.statusCode, headers);
+      proxyRes.pipe(res);
+    });
+    
+    proxyReq.on('error', (e) => {
+      res.status(500).send('代理错误: ' + e.message);
+    });
+    proxyReq.end();
+  } catch(e) {
+    res.status(500).send('代理错误: ' + e.message);
+  }
+});
+
 // ===== 首页路由 =====
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'index.html'));
