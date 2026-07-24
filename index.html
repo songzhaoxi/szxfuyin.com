@@ -1376,12 +1376,21 @@ function switchSource(idx){
     frameEl.src='https://www.youtube.com/embed/'+s.ytid+'?autoplay=1&rel=0';
     frameEl.style.display='block';pl.style.display='none';
   }else if(s.type==='fuyin_proxy'){
-    // 🔥 福音TV万能播放：通过server.js代理直接获取视频流！
-    // 原理：szxfuyin.com -> server.js代理 -> fuyin.tv API -> sanmanuela.com视频流
+    // 🔥 福音TV万能播放：智能检测运行环境，自动选择最优播放方式！
+    // 原则：有后端(server.js/nginx) → playViaFuyinApi代理；无后端(GitHub Pages) → directFuyinPlay直连福音TV API
     // 国内用户无VPN也能看！国外用户更流畅！
-    var db=document.getElementById('downloadBtn');
-    playViaFuyinApi(s.movid, s.urlid, videoEl, pl, db, sb, s.title, FUYIN_PROXY_BASE);
-  }else if(s.type==='fuyin'){
+    var isStaticHost = FUYIN_PROXY_BASE === location.origin;
+    if(isStaticHost){
+      // 📡 GitHub Pages环境：前端直连福音TV API获取视频地址播放！无需后端，全球流畅播放！
+      console.log('📡 GitHub Pages环境，前端直连福音TV API');
+      var db=document.getElementById('downloadBtn');
+      directFuyinPlay(s.movid, s.urlid, videoEl, pl, db, sb, s.title);
+    } else {
+      // 🌐 有后端环境：通过server.js/Worker代理播放
+      var db=document.getElementById('downloadBtn');
+      playViaFuyinApi(s.movid, s.urlid, videoEl, pl, db, sb, s.title, FUYIN_PROXY_BASE);
+    }
+    }else if(s.type==='fuyin'){
     // 🔥 福音TV原站iframe嵌入播放（国内外都能出画面！）
     var fuyinFrameUrl = s.movid ? 'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(s.movid)+'/index.html' : s.url;
     frameEl.src = fuyinFrameUrl;
@@ -1399,6 +1408,11 @@ function switchSource(idx){
         sb.style.display='flex';sb.style.flexWrap='wrap';sb.style.gap='6px';sb.style.marginTop='8px';
       }
     }
+  }else if(s.type==='direct_hls'){
+    // 🚀【新增】直链HLS播放（无需后端！直接从V数组取.m3u8地址播放MP4视频画面！）
+    console.log('📡 直链HLS播放:', s.url);
+    var db2=document.getElementById('downloadBtn');
+    tryHlsPlay(s.url, videoEl, pl, db2, s.title);
   }
 }
 
@@ -1440,17 +1454,22 @@ function openPlayer(movid,title,author,bvid,ytid){
     
     const fuyinUrl = v && v.movid ? 'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html' : '';
     
-    // ===== 🏆 构建播放源（B站 > YouTube > 福音TV代理 > 福音TV） =====
+    // ===== 🏆 构建播放源（B站 > YouTube > 福音TV代理/直连 > 福音TV iframe兜底） =====
+    // 🚀 fuyin_proxy自动检测环境：有后端走代理，无后端(GitHub Pages)直连福音TV API，保证全球出MP4画面！
+    // iframe嵌入(fuyin)作为终极兜底，所有视频都能用
     var sources = [];
     if(bvid && bvid.startsWith('BV')) sources.push({type:'bilibili',label:'B站🎬',bvid:bvid});
     if(ytid && ytid.length>5) sources.push({type:'youtube',label:'YouTube▶️',ytid:ytid});
-    // 🔥 福音TV视频（始终添加！自动适配代理/直连/iframe三种模式）
+    // 🔥 福音TV视频代理/直连（无后端时自动直连福音TV API获取视频地址播放，无需后端，全球流畅播放！）
     if(v && v.urlid){
-      // type='fuyin_proxy' 会自动检测FUYIN_PROXY_BASE，有代理走代理，没代理走直连
       sources.push({type:'fuyin_proxy',label:'福音TV📡',movid:v.movid,urlid:v.urlid,title:title});
     }
-    // 兜底方案：福音TV原站iframe嵌入 + 新窗口备选
+    // 🔥 福音TV原站iframe嵌入（兜底方案，所有视频都能用）
     if(fuyinUrl) sources.push({type:'fuyin',label:'福音TV🌐',url:fuyinUrl, movid: movid});
+    // 🚀【新增】直链HLS播放（无需后端！直接从V数组取.m3u8地址用HLS.js播放MP4视频画面！）
+    if(v && v.v){
+      sources.push({type:'direct_hls',label:'直链📺',url:v.v,title:title});
+    }
     window._curSources = sources;
     
     if(sources.length > 0){
