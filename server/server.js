@@ -12,6 +12,8 @@ const { URL } = require('url');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+// ===== 全局变量：记录当前使用的端口（供动态检测用） =====
+const SERVER_PORT = PORT;
 
 // ===== 中间件 =====
 app.use(cors());
@@ -474,6 +476,10 @@ function fuyinFetch(url) {
       hostname: u.hostname,
       path: u.pathname + u.search,
       method: 'GET',
+      servername: u.hostname,
+      rejectUnauthorized: false,
+      ciphers: 'ALL',
+      secureOptions: require('constants').SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION || 0,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Referer': 'https://www.fuyin.tv/',
@@ -529,6 +535,10 @@ app.get('/api/fuyin/stream', (req, res) => {
       hostname: u.hostname,
       path: u.pathname + u.search,
       method: req.method,
+      servername: u.hostname,
+      rejectUnauthorized: false,
+      ciphers: 'ALL',
+      secureOptions: require('constants').SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION || 0,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Referer': 'https://www.fuyin.tv/',
@@ -554,6 +564,11 @@ app.get('/api/fuyin/stream', (req, res) => {
   } catch(e) {
     res.status(500).send('代理错误: ' + e.message);
   }
+});
+
+// ===== API: 健康检查（前端自动检测代理是否可用） =====
+app.get('/api/health', (req, res) => {
+  res.json({ success: true, message: '福音传播爱代理服务器运行正常 ✝', time: new Date().toISOString() });
 });
 
 // ===== 首页路由 =====

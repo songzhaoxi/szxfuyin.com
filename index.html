@@ -1308,18 +1308,52 @@ const FUYIN_PROXY_BASE = (function(){
   // 通过 /api/health 接口检测代理是否可用，避免手动配置
   // 检测是异步的，不影响立即返回
   if(host !== 'localhost' && host !== '127.0.0.1'){
-    // 异步检测：不影响当前加载，如果检测到可用的代理地址就存入localStorage供下次使用
-    fetch(location.origin + '/api/health').then(function(r){return r.json();}).then(function(j){
-      if(j && j.success){
-        console.log('📡 自动检测到当前域名已部署代理:', location.origin);
-        try{localStorage.setItem('fuyin_proxy_base', location.origin);}catch(e){}
+    // 同步检测当前页面是否由 server.js 提供（包含 /api/ 路由）
+    // 如果没有，则主动尝试带 :3000 端口的地址
+    var tryUrls = [
+      location.origin + '/api/health',                                              // 1. 同域（nginx反代）
+      location.protocol + '//' + host + ':3000/api/health'                          // 2. server.js直连:3000
+    ];
+    // 标记异步检测结果
+    var detectedBase = null;
+    function checkHealth(idx){
+      if(idx >= tryUrls.length){
+        if(detectedBase){
+          console.log('📡 检测到可用代理:', detectedBase);
+          try{localStorage.setItem('fuyin_proxy_base', detectedBase);}catch(e){}
+        } else {
+          console.log('ℹ️ 未检测到可用代理服务，使用兜底播放');
+        }
+        return;
       }
-    }).catch(function(e){console.log('ℹ️ 当前域名未检测到代理服务，使用兜底播放');});
+      fetch(tryUrls[idx], {mode:'cors'}).then(function(r){return r.json();}).then(function(j){
+        if(j && j.success){
+          detectedBase = tryUrls[idx].replace('/api/health','');
+          console.log('📡 自动检测到可用代理:', detectedBase);
+          try{localStorage.setItem('fuyin_proxy_base', detectedBase);}catch(e){}
+        } else {
+          checkHealth(idx+1);
+        }
+      }).catch(function(e){checkHealth(idx+1);});
+    }
+    checkHealth(0);
   }
-  // ===== 默认：未配置代理 → 回退到新窗口播放（100%可用） =====
-  console.log('🌐 线上模式：福音TV视频打开源站播放（100%出画面！）');
-  console.log('💡 部署代理后，在网址后加 ?proxy=https://你的workers.workers.dev 即可站内播放');
-  return '';
+  // ===== 默认：线上模式 → 同时尝试同域+带:3000端口 =====
+  // 策略：如果当前页面是由 server.js 提供的（同域），用 location.origin
+  //       否则返回带 :3000 的完整 URL（协议自动匹配）
+  var productionBase = location.origin;
+  // 检查是否是标准端口（443/80），如果是则可能是 nginx 反代，需要一并尝试 :3000
+  if(location.port === '' || location.port === '443' || location.port === '80'){
+    // 对于标准端口，FUYIN_PROXY_BASE 先返回同域（期望 nginx 反代了 /api/ 到 :3000）
+    // playViaFuyinApi 中的备选 URL 会用带 :3000 的路径做 fallback
+    console.log('🌐 线上模式（标准端口）：福音TV代理指向', productionBase);
+    console.log('💡 备选路径:', location.protocol + '//' + host + ':3000');
+  } else {
+    // 非标准端口（如 :3000），直接用当前 origin
+    console.log('🌐 server.js 模式：福音TV代理指向', productionBase);
+  }
+  console.log('💡 如果尚未部署server.js，访问 ?proxy=https://你的workers.workers.dev 配置Workers代理');
+  return productionBase;
 })();
 
 /** 切换视频源 */
@@ -1342,10 +1376,11 @@ function switchSource(idx){
     frameEl.src='https://www.youtube.com/embed/'+s.ytid+'?autoplay=1&rel=0';
     frameEl.style.display='block';pl.style.display='none';
   }else if(s.type==='fuyin_proxy'){
-    pl.innerHTML='🎬 正在通过福音TV代理获取播放地址...';
-    pl.style.display='block';
-    // 通过playViaFuyinApi异步代理播放（绕过防盗链）
-    playViaFuyinApi(s.movid, s.urlid, videoEl, pl, document.getElementById('downloadBtn'), sb, s.title, FUYIN_PROXY_BASE);
+    // 🔥 福音TV万能播放：通过server.js代理直接获取视频流！
+    // 原理：szxfuyin.com -> server.js代理 -> fuyin.tv API -> sanmanuela.com视频流
+    // 国内用户无VPN也能看！国外用户更流畅！
+    var db=document.getElementById('downloadBtn');
+    playViaFuyinApi(s.movid, s.urlid, videoEl, pl, db, sb, s.title, FUYIN_PROXY_BASE);
   }else if(s.type==='fuyin'){
     // 🔥 福音TV原站iframe嵌入播放（国内外都能出画面！）
     var fuyinFrameUrl = s.movid ? 'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(s.movid)+'/index.html' : s.url;
@@ -1580,29 +1615,48 @@ function playViaFuyinApi(movid, urlid, videoEl, pl, db, sb, title, API_BASE){
     
     var apiUrl = API_BASE + '/api/fuyin/url?movid=' + encodeURIComponent(movid) + '&urlid=' + encodeURIComponent(urlid);
     console.log('📡 请求福音TV代理:', apiUrl);
+    // ===== 📡 代理地址列表（自动轮询，直到有一个成功！） =====
+    var proxyUrls = [
+      apiUrl,                                                                  // 1. 默认路径（当前域名）
+      location.protocol + '//' + location.hostname + ':3000/api/fuyin/url?movid=' + encodeURIComponent(movid) + '&urlid=' + encodeURIComponent(urlid),  // 2. 备选: 带:3000端口（协议自适应）
+      location.protocol + '//' + location.hostname + '/api/fuyin/url?movid=' + encodeURIComponent(movid) + '&urlid=' + encodeURIComponent(urlid)       // 3. 备选: 同域（nginx反代）
+    ];
     
-    fetch(apiUrl)
-      .then(function(r){ return r.json(); })
-      .then(function(json){
-        if(json && json.success && json.data && json.data.url){
-          var realUrl = json.data.url;
-          console.log('✅ 福音TV代理返回地址:', realUrl);
-          pl.innerHTML = '🎬 播放地址已获取，正在加载视频流...';
-          var proxyUrl = API_BASE + '/api/fuyin/stream?url=' + encodeURIComponent(realUrl);
-          console.log('📡 代理播放地址:', proxyUrl);
-          tryHlsPlay(proxyUrl, videoEl, pl, db, title);
-          addFuyinDirectBtn(sb, movid);
-        } else {
-          console.warn('⚠️ 福音TV代理获取失败', json);
-          // 代理失败，降级到直连
-          directFuyinPlay(movid, urlid, videoEl, pl, db, sb, title);
-        }
-      })
-      .catch(function(err){
-        console.warn('⚠️ 福音TV代理请求失败:', err);
-        // 代理不通，降级到直连
+    tryProxyUrl(0);
+    
+    function tryProxyUrl(idx){
+      if(idx >= proxyUrls.length){
+        console.warn('⚠️ 所有代理路径均失败，降级到直连');
         directFuyinPlay(movid, urlid, videoEl, pl, db, sb, title);
-      });
+        return;
+      }
+      var tryUrl = proxyUrls[idx];
+      console.log('📡 尝试代理路径[' + (idx+1) + '/' + proxyUrls.length + ']:', tryUrl);
+      pl.innerHTML = '🎬 正在尝试代理路径 ' + (idx+1) + '/' + proxyUrls.length + '...';
+      
+      fetch(tryUrl)
+        .then(function(r){ return r.json(); })
+        .then(function(json){
+          if(json && json.success && json.data && json.data.url){
+            var realUrl = json.data.url;
+            console.log('✅ 福音TV代理返回地址:', realUrl);
+            pl.innerHTML = '🎬 播放地址已获取，正在加载视频流...';
+            // 对应的 stream 代理路径
+            var streamBase = tryUrl.substring(0, tryUrl.indexOf('/api/fuyin/url'));
+            var proxyUrl = streamBase + '/api/fuyin/stream?url=' + encodeURIComponent(realUrl);
+            console.log('📡 代理播放地址:', proxyUrl);
+            tryHlsPlay(proxyUrl, videoEl, pl, db, title);
+            addFuyinDirectBtn(sb, movid);
+          } else {
+            console.warn('⚠️ 福音TV代理获取失败', json, '尝试下一个代理路径');
+            tryProxyUrl(idx+1);
+          }
+        })
+        .catch(function(err){
+          console.warn('⚠️ 福音TV代理请求失败:', err, '尝试下一个代理路径');
+          tryProxyUrl(idx+1);
+        });
+    }
     return;
   }
   
