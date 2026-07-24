@@ -1454,19 +1454,21 @@ function openPlayer(movid,title,author,bvid,ytid){
     
     const fuyinUrl = v && v.movid ? 'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html' : '';
     
-    // ===== 🏆 构建播放源（B站 > YouTube > 福音TV代理/直连 > 福音TV iframe兜底） =====
-    // 🚀 fuyin_proxy自动检测环境：有后端走代理，无后端(GitHub Pages)直连福音TV API，保证全球出MP4画面！
-    // iframe嵌入(fuyin)作为终极兜底，所有视频都能用
+    // ===== 🏆 构建播放源（B站 > YouTube > 福音TV iframe嵌入 > 福音TV代理/直连 > 直链HLS） =====
+    // 🚀 全球最优播放策略：
+    //   [0] fuyin iframe → 福音TV原站嵌入播放，国内外100%出画面！无需后端、无需代理！
+    //   [1] fuyin_proxy → API代理/直连（CORS代理轮询，适合有后端或有科学上网环境）
+    //   [2] direct_hls → V数组直链.m3u8播放（需服务器允许跨域且auth_key未过期）
     var sources = [];
     if(bvid && bvid.startsWith('BV')) sources.push({type:'bilibili',label:'B站🎬',bvid:bvid});
     if(ytid && ytid.length>5) sources.push({type:'youtube',label:'YouTube▶️',ytid:ytid});
-    // 🔥 福音TV视频代理/直连（无后端时自动直连福音TV API获取视频地址播放，无需后端，全球流畅播放！）
-    if(v && v.urlid){
-      sources.push({type:'fuyin_proxy',label:'福音TV📡',movid:v.movid,urlid:v.urlid,title:title});
-    }
-    // 🔥 福音TV原站iframe嵌入（兜底方案，所有视频都能用）
+    // 🔥【🏆 首选】福音TV原站iframe嵌入——全球100%播放！无需代理、无需后端、无需CORS！
     if(fuyinUrl) sources.push({type:'fuyin',label:'福音TV🌐',url:fuyinUrl, movid: movid});
-    // 🚀【新增】直链HLS播放（无需后端！直接从V数组取.m3u8地址用HLS.js播放MP4视频画面！）
+    // 🚀 福音TV视频代理/直连（无后端时自动直连福音TV API，全球流畅播放！备选方案）
+    if(v && v.urlid){
+      sources.push({type:'fuyin_proxy',label:'API代理📡',movid:v.movid,urlid:v.urlid,title:title});
+    }
+    // 🚀 直链HLS播放（直接从V数组取.m3u8地址播放，需auth_key有效）
     if(v && v.v){
       sources.push({type:'direct_hls',label:'直链📺',url:v.v,title:title});
     }
@@ -1700,27 +1702,73 @@ function directFuyinPlay(movid, urlid, videoEl, pl, db, sb, title){
   var directUrl = 'https://www.fuyin.tv/api/api/tv.movie/url?movid=' + encodeURIComponent(movid) + '&urlid=' + encodeURIComponent(urlid) + '&type=1&lang=zh';
   console.log('📡 直连福音TV API:', directUrl);
   
-  // ===== 🌐 CORS代理列表（自动轮询，保证全球任何网络都能出画面！） =====
-  // 🚀 已实测：allorigins.win ✅ 可用 | corsproxy.io 需付费 ❌ | codetabs.com 超时 ❌
-  var proxyList = [
-    { label: '直连', url: directUrl },
+  // ===== 🌐 代理列表（优先级从高到低，自动轮询保证全球播放！） =====
+  // 🥇 检测是否已配置Worker代理（URL参数 ?proxy= 或 localStorage）
+  var workerBase = null;
+  try{
+    var urlParams = new URLSearchParams(location.search);
+    var urlProxy = urlParams.get('proxy');
+    if(urlProxy && urlProxy.startsWith('http') && urlProxy !== location.origin) workerBase = urlProxy;
+    if(!workerBase){
+      var saved = localStorage.getItem('fuyin_proxy_base');
+      if(saved && saved.startsWith('http') && saved !== location.origin) workerBase = saved;
+    }
+  }catch(e){}
+  
+  // ===== 构建代理列表（国内用户优先！被墙的CORS代理放最后） =====
+  var proxyList = [];
+  var vItem = null;
+  try{
+    vItem = V.find(function(x){ return x.movid == movid; });
+  }catch(e){}
+  // 1️⃣ 🥇 V数组缓存直链（最快！无需联网请求福音TV API，直接播放.m3u8视频，国内秒开！）
+  if(vItem && vItem.v){
+    if(workerBase){
+      proxyList.push({ label: '🎯Worker直链', url: workerBase + '/api/fuyin/stream?url=' + encodeURIComponent(vItem.v), isVideoUrl: true });
+    }
+    proxyList.push({ label: '🎯缓存直链', url: vItem.v, isVideoUrl: true });
+  }
+  // 2️⃣ 优先使用自建Worker代理（需自行部署Cloudflare Workers，国内可用）
+  if(workerBase){
+    proxyList.push({ label: '🚀Worker代理', url: workerBase + '/api/fuyin/url?movid=' + encodeURIComponent(movid) + '&urlid=' + encodeURIComponent(urlid) });
+  }
+  // 3️⃣ 直连福音TV API（部分网络可能直接通）
+  proxyList.push({ label: '直连', url: directUrl });
+  // 4️⃣ 第三方CORS代理（国内大部分被墙，放最后兜底）
+  proxyList.push(
     { label: 'allorigins', url: 'https://api.allorigins.win/raw?url=' + encodeURIComponent(directUrl) },
-    { label: 'allorigins2', url: 'https://api.allorigins.win/get?url=' + encodeURIComponent(directUrl) },
-    { label: 'corsproxy2', url: 'https://corsproxy.org/?' + encodeURIComponent(directUrl) },
-    { label: 'corsproxy3', url: 'https://proxy.corsfix.com/?' + encodeURIComponent(directUrl) }
-  ];
+    { label: 'corsproxy.cc', url: 'https://corsproxy.cc/?' + encodeURIComponent(directUrl) },
+    { label: 'corsproxy.io', url: 'https://corsproxy.io/?' + encodeURIComponent(directUrl) },
+    { label: 'corsproxy.org', url: 'https://corsproxy.org/?' + encodeURIComponent(directUrl) },
+    { label: 'proxy.corsfix.com', url: 'https://proxy.corsfix.com/?' + encodeURIComponent(directUrl) }
+  );
   
   tryProxy(0);
   
   function tryProxy(idx){
     if(idx >= proxyList.length){
       console.warn('⚠️ 所有方式均失败，降级到iframe嵌入');
+      // 最后尝试：直接用V数组的v.v地址试播（可能绕过防盗链）
+      if(vItem && vItem.v){
+        console.log('📡 终极备选：尝试直接播放V数组缓存地址');
+        tryHlsPlay(vItem.v, videoEl, pl, db, title);
+        addFuyinDirectBtn(sb, movid);
+        return;
+      }
       showFuyinIframe(movid, pl, sb, title);
       return;
     }
     var proxy = proxyList[idx];
     console.log('📡 尝试[' + proxy.label + ']:', proxy.url);
     pl.innerHTML = '🎬 正在尝试获取播放地址 (' + proxy.label + ')...';
+    
+    // 如果是直接视频地址（isVideoUrl=true），直接播放
+    if(proxy.isVideoUrl){
+      console.log('✅ [' + proxy.label + '] 直接播放视频地址');
+      tryHlsPlay(proxy.url, videoEl, pl, db, title);
+      addFuyinDirectBtn(sb, movid);
+      return;
+    }
     
     fetch(proxy.url)
       .then(function(r){ 
@@ -1734,7 +1782,7 @@ function directFuyinPlay(movid, urlid, videoEl, pl, db, sb, title){
         if(json && json.code === 1 && json.data && json.data.url){
           videoUrl = json.data.url;
         }
-        // 格式2: server.js代理 → {success:true, data:{url:"..."}}
+        // 格式2: server.js/Worker代理 → {success:true, data:{url:"..."}}
         else if(json && json.success && json.data && json.data.url){
           videoUrl = json.data.url;
         }
@@ -1754,8 +1802,14 @@ function directFuyinPlay(movid, urlid, videoEl, pl, db, sb, title){
         if(videoUrl){
           console.log('✅ [' + proxy.label + '] 获取视频地址成功!', videoUrl);
           pl.innerHTML = '🎬 视频地址已获取，正在加载...';
-          // 自动识别并播放（mp4直接播放，m3u8走HLS.js）
-          tryHlsPlay(videoUrl, videoEl, pl, db, title);
+          // 如果配置了Worker，用Worker stream代理播放（绕防盗链）
+          if(workerBase && videoUrl.includes('.m3u8')){
+            var proxiedUrl = workerBase + '/api/fuyin/stream?url=' + encodeURIComponent(videoUrl);
+            console.log('📡 通过Worker代理视频流:', proxiedUrl);
+            tryHlsPlay(proxiedUrl, videoEl, pl, db, title);
+          } else {
+            tryHlsPlay(videoUrl, videoEl, pl, db, title);
+          }
           addFuyinDirectBtn(sb, movid);
         } else {
           console.warn('⚠️ [' + proxy.label + '] 返回异常', json);
