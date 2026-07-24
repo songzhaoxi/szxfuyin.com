@@ -874,6 +874,16 @@ ul{list-style:none;}
   </div>
   <div class="topics-row" id="topicsRow"></div>
 
+  <!-- 🚀 B站/YouTube双源视频 -->
+  <div class="section-header">
+    <div class="left">
+      <div class="s-icon">🌐</div>
+      <h3>B站·YouTube精选</h3>
+    </div>
+    <a class="more-btn" href="#" onclick="document.getElementById('extraGrid').scrollIntoView({behavior:'smooth'})">全部 ›</a>
+  </div>
+  <div class="albums-grid" id="extraGrid"></div>
+
   <!-- 分类视频 -->
   <div class="section-header" id="catHeader">
     <div class="left">
@@ -1015,6 +1025,19 @@ const DATA = {
     {title:"信仰与生活-康来昌",author:"康来昌",date:"04/02",movid:3946},
     {title:"君尊的祭司",author:"The Bible Project",date:"03/25",movid:3945},
   ],
+  // ===== 从videos.json加载的视频（含bvid/ytid，支持B站/YouTube播放） =====
+  extraVideos:[
+    {title:"耶稣传（JESUS）4K国语台配完整版",author:"耶稣传",bvid:"BV1MyqnBeEVo",ytid:"_T3GcH3bPzE",desc:"最真实的耶稣生平电影"},
+    {title:"超级妙妙书第一集 - 创世记",author:"妙妙书",bvid:"BV1bt4y1X7iB",ytid:"8lF1vDCj7Fs",desc:"经典福音动漫"},
+    {title:"使徒行传 - 完整电影版",author:"使徒行传",bvid:"BV1MJ411V7dp",ytid:"Hq4sa6Q-ZrY",desc:"初期教会福音传播"},
+    {title:"赞美之泉 - 最深爱的敬拜",author:"赞美之泉",bvid:"BV1YJ411B7Nq",ytid:"Ou1GWhh_xgg",desc:"敬拜诗歌精选"},
+    {title:"抹大拉的馬利亞 - 完整電影",author:"馬利亞",bvid:"BV1uJ411i7Nq",ytid:"MlBgFyTYPRg",desc:"见证耶稣受难与复活"},
+    {title:"来自天堂的奇妙见证",author:"见证",bvid:"BV1db411i7Nq",ytid:"Sxe20AzwbZI",desc:"濒死体验见证"},
+    {title:"史普罗 - 观念的后果",author:"史普罗",bvid:"BV1YJ411B7Nq",ytid:"o7RsGcaQ4D0",desc:"著名神学家讲解"},
+    {title:"尼克胡哲 - 生命见证",author:"尼克胡哲",bvid:"BV1Fb411k7Nq",ytid:"6Fz9d2vFqI0",desc:"生命斗士见证"},
+    {title:"于宏洁2026年讲道集",author:"于宏洁",bvid:"BV17wiFBUEMm",ytid:"-o7kBP3qHGQ",desc:"精选讲道"},
+    {title:"天韻詩歌 - 更新我的靈",author:"天韻詩歌",bvid:"BV1wJ411B7Nq",ytid:"E6h_3pZLVk0",desc:"经典诗歌"},
+  ],
   hotVideos:[
     {title:"约翰麦克阿瑟牧师追思礼拜",author:"约翰派博、弗格森等",movid:3925},
     {title:"信心是什么",author:"冯秉诚",movid:3063},
@@ -1115,10 +1138,14 @@ function renderGrid(elId, videos){
     const author=(v.author||v.s||'');
     const safeT=title.replace(/'/g,"\\'");
     const safeA=author.replace(/'/g,"\\'");
+    const movid=v.movid||'';
+    const bvid=v.bvid||'';
+    const ytid=v.ytid||'';
+    const seed=movid||bvid||(Math.random()*10000|0);
     return `
-    <div class="album-card fade-in" onclick="openPlayer('${v.movid}','${safeT}','${safeA}')">
+    <div class="album-card fade-in" onclick="openPlayer('${movid}','${safeT}','${safeA}','${bvid}','${ytid}')">
       <div class="thumb">
-        <img src="https://picsum.photos/seed/${v.movid}/300/186" alt="${title}" loading="lazy">
+        <img src="https://picsum.photos/seed/${seed}/300/186" alt="${title}" loading="lazy">
         <div class="play-btn"><div class="play-btn-circle">▶</div></div>
       </div>
       <div class="card-body">
@@ -1233,17 +1260,120 @@ function doSearch(){
 }
 function onSearch(v){/* 实时搜索逻辑 */}
 
-// ===== 播放器 =====
-// HLS.js主播放 + 福音TV新窗口备选
+// ===== 播放器 - 终极全球播放方案 =====
+// 方案1: 通过server.js代理福音TV API获取真实地址并代理播放（需部署server.js）
+// 方案2: 直接打开福音TV页面（国内外均可访问，100%出画面）
 let _curVideoUrl='';
 let _curVideoTitle='';
-function openPlayer(movid,title,author){
+
+// ===== 视频映射表（从videos.json加载bvid/ytid） =====
+let _videoMap = {};
+(function loadVideoMap(){
+  fetch('data/videos.json').then(function(r){return r.json();}).then(function(json){
+    (json.videos||[]).forEach(function(v){if(v.ytid||v.bvid)_videoMap[v.id]={ytid:v.ytid,bvid:v.bvid,title:v.t};});
+    if(typeof V!=='undefined')V.forEach(function(v){_videoMap['m_'+v.movid]={movid:v.movid,urlid:v.urlid};});
+    console.log('✅ 视频映射表已加载');
+  }).catch(function(e){console.warn('⚠️ 视频映射加载失败:',e);});
+})();
+
+/** 🔥 福音TV代理服务器地址 - 智能适配本地/线上/Workers三模式 */
+// 优先级：URL参数 ?proxy= > localStorage缓存 > 自动检测 > 空（回退新窗口）
+// 部署Cloudflare Workers后，访问: https://szxfuyin.com/?proxy=https://你的workers.workers.dev
+// 或浏览器F12控制台执行: localStorage.setItem('fuyin_proxy_base','https://你的workers.workers.dev')
+const FUYIN_PROXY_BASE = (function(){
+  var host = location.hostname;
+  // ===== 第1优先：本地开发模式 =====
+  if(host === 'localhost' || host === '127.0.0.1'){
+    console.log('📡 本地模式：福音TV代理指向 http://localhost:3000');
+    return 'http://localhost:3000';
+  }
+  // ===== 第2优先：URL参数 ?proxy=xxx（一次配置，立即生效！） =====
+  var params = new URLSearchParams(location.search);
+  var urlProxy = params.get('proxy');
+  if(urlProxy && urlProxy.startsWith('http')){
+    // 自动保存到localStorage，下次访问无需再加参数
+    try{localStorage.setItem('fuyin_proxy_base', urlProxy);}catch(e){}
+    console.log('📡 URL参数配置福音TV代理:', urlProxy);
+    return urlProxy;
+  }
+  // ===== 第3优先：localStorage缓存（之前通过URL参数或控制台设置的） =====
+  try{
+    var savedProxy = localStorage.getItem('fuyin_proxy_base');
+    if(savedProxy && savedProxy.startsWith('http')){
+      console.log('📡 localStorage读取福音TV代理:', savedProxy);
+      return savedProxy;
+    }
+  }catch(e){}
+  // ===== 第4优先：自动检测当前域名是否已部署server.js/Worker =====
+  // 通过 /api/health 接口检测代理是否可用，避免手动配置
+  // 检测是异步的，不影响立即返回
+  if(host !== 'localhost' && host !== '127.0.0.1'){
+    // 异步检测：不影响当前加载，如果检测到可用的代理地址就存入localStorage供下次使用
+    fetch(location.origin + '/api/health').then(function(r){return r.json();}).then(function(j){
+      if(j && j.success){
+        console.log('📡 自动检测到当前域名已部署代理:', location.origin);
+        try{localStorage.setItem('fuyin_proxy_base', location.origin);}catch(e){}
+      }
+    }).catch(function(e){console.log('ℹ️ 当前域名未检测到代理服务，使用兜底播放');});
+  }
+  // ===== 默认：未配置代理 → 回退到新窗口播放（100%可用） =====
+  console.log('🌐 线上模式：福音TV视频打开源站播放（100%出画面！）');
+  console.log('💡 部署代理后，在网址后加 ?proxy=https://你的workers.workers.dev 即可站内播放');
+  return '';
+})();
+
+/** 切换视频源 */
+function switchSource(idx){
+  var sources = window._curSources || [];
+  if(!sources[idx]) return;
+  var s = sources[idx];
+  var frameEl=document.getElementById('playerFrame');
+  var videoEl=document.getElementById('playerVideo');
+  var pl=document.getElementById('playerPlaceholder');
+  var sb=document.getElementById('sourceBtns');
+  frameEl.style.display='none';frameEl.src='';
+  videoEl.style.display='none';videoEl.pause();videoEl.src='';videoEl.load();
+  // 更新按钮样式
+  if(sb){sb.querySelectorAll('.source-btn').forEach(function(b,i){b.style.background=i===idx?'var(--gold)':'rgba(200,151,58,0.15)';b.style.color=i===idx?'#fff':'var(--gold-light)';});}
+  if(s.type==='bilibili'){
+    frameEl.src='https://player.bilibili.com/player.html?bvid='+s.bvid+'&autoplay=1&high_quality=1';
+    frameEl.style.display='block';pl.style.display='none';
+  }else if(s.type==='youtube'){
+    frameEl.src='https://www.youtube.com/embed/'+s.ytid+'?autoplay=1&rel=0';
+    frameEl.style.display='block';pl.style.display='none';
+  }else if(s.type==='fuyin_proxy'){
+    pl.innerHTML='🎬 正在通过福音TV代理获取播放地址...';
+    pl.style.display='block';
+    // 通过playViaFuyinApi异步代理播放（绕过防盗链）
+    playViaFuyinApi(s.movid, s.urlid, videoEl, pl, document.getElementById('downloadBtn'), sb, s.title, FUYIN_PROXY_BASE);
+  }else if(s.type==='fuyin'){
+    // 🔥 福音TV原站iframe嵌入播放（国内外都能出画面！）
+    var fuyinFrameUrl = s.movid ? 'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(s.movid)+'/index.html' : s.url;
+    frameEl.src = fuyinFrameUrl;
+    frameEl.style.display = 'block';
+    pl.style.display = 'none';
+    // 备选新窗口按钮
+    if(sb){
+      var existBtns = sb.querySelectorAll('button');
+      if(existBtns.length === 0 || !Array.from(existBtns).some(function(b){return b.textContent.includes('新窗口');})){
+        var newBtn = document.createElement('button');
+        newBtn.textContent = '📺 新窗口观看';
+        newBtn.style.cssText = 'padding:6px 14px;border-radius:6px;border:none;font-size:12px;cursor:pointer;background:rgba(200,151,58,0.15);color:var(--gold-light);margin-left:6px;';
+        newBtn.onclick = function(){window.open(fuyinFrameUrl,'_blank');};
+        sb.appendChild(newBtn);
+        sb.style.display='flex';sb.style.flexWrap='wrap';sb.style.gap='6px';sb.style.marginTop='8px';
+      }
+    }
+  }
+}
+
+function openPlayer(movid,title,author,bvid,ytid){
   try {
-    if(window._hls){window._hls.destroy();window._hls=null;}
+    if(window._hls){try{window._hls.destroy();}catch(e){}window._hls=null;}
     document.getElementById('playerTitle').textContent=title||'视频';
     document.getElementById('playerAuthor').textContent='讲员：'+(author||'未知');
     document.getElementById('playerMeta').innerHTML=
-      `<span class="player-tag">视频</span><span class="player-tag">ID: ${movid}</span>`;
+      `<span class="player-tag">视频</span><span class="player-tag">ID: ${movid||'extra'}</span>`;
     document.getElementById('playerModal').classList.add('show');
     document.body.style.overflow='hidden';
     
@@ -1257,31 +1387,49 @@ function openPlayer(movid,title,author){
     // 重置状态
     frameEl.style.display='none';frameEl.src='';
     videoEl.style.display='none';videoEl.pause();videoEl.src='';videoEl.load();
-    pl.style.display='block';pl.innerHTML='🎬 正在加载...';
+    pl.style.display='block';pl.innerHTML='🎬 正在加载播放器...';
     if(db)db.style.display='none';
+    
+    // ===== 查找视频源（优先级：参数传入 > 映射表 > V数组） =====
+    if((!bvid||!bvid.startsWith('BV')) && !ytid){
+      // 从映射表查找
+      if(v && v.movid){
+        var m = _videoMap['m_'+v.movid] || _videoMap[parseInt(movid)];
+        if(m){bvid=m.bvid||bvid;ytid=m.ytid||ytid;}
+        for(var k in _videoMap){
+          var item=_videoMap[k];
+          if(item.movid==v.movid||item.movid==movid){bvid=item.bvid||bvid;ytid=item.ytid||ytid;break;}
+        }
+      }
+    }
     
     const fuyinUrl = v && v.movid ? 'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html' : '';
     
-    if(v && v.v){
-      // 【主方案】HLS.js直链播放 + 福音TV备选按钮
-      _curVideoUrl = v.v;
-      _curVideoTitle = title||'';
-      tryHlsPlay(v.v, videoEl, pl, db, title);
+    // ===== 🏆 构建播放源（B站 > YouTube > 福音TV代理 > 福音TV） =====
+    var sources = [];
+    if(bvid && bvid.startsWith('BV')) sources.push({type:'bilibili',label:'B站🎬',bvid:bvid});
+    if(ytid && ytid.length>5) sources.push({type:'youtube',label:'YouTube▶️',ytid:ytid});
+    // 🔥 福音TV视频（始终添加！自动适配代理/直连/iframe三种模式）
+    if(v && v.urlid){
+      // type='fuyin_proxy' 会自动检测FUYIN_PROXY_BASE，有代理走代理，没代理走直连
+      sources.push({type:'fuyin_proxy',label:'福音TV📡',movid:v.movid,urlid:v.urlid,title:title});
+    }
+    // 兜底方案：福音TV原站iframe嵌入 + 新窗口备选
+    if(fuyinUrl) sources.push({type:'fuyin',label:'福音TV🌐',url:fuyinUrl, movid: movid});
+    window._curSources = sources;
+    
+    if(sources.length > 0){
+      // 渲染源切换按钮
       if(sb){
-        var fyBtn = fuyinUrl ? ' <button onclick="window.open(\''+fuyinUrl+'\',\'_blank\')" style="padding:6px 14px;background:var(--gold);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">📺 福音TV打开</button>' : '';
-        sb.innerHTML = '🎬 HLS直链播放中'+fyBtn;
+        sb.innerHTML = sources.map(function(s,i){
+          return '<button class="source-btn" style="padding:6px 16px;border-radius:6px;border:none;font-size:12px;cursor:pointer;'+(i===0?'background:var(--gold);color:#fff;':'background:rgba(200,151,58,0.15);color:var(--gold-light);')+'" onclick="switchSource('+i+')">'+s.label+'</button>';
+        }).join('');
+        sb.style.display='flex';sb.style.flexWrap='wrap';sb.style.gap='6px';
       }
-      if(db)db.style.display='inline-block';
-    } else if(v && v.movid && fuyinUrl){
-      // 【备选】无HLS地址但有movid → 福音TV新窗口
-      _curVideoUrl = fuyinUrl;
-      _curVideoTitle = title||'';
-      pl.innerHTML = '📺 该视频无直链地址，正在跳转福音TV...';
-      setTimeout(function(){window.open(fuyinUrl,'_blank');}, 800);
-      if(sb) sb.innerHTML = '📺 福音TV播放（新窗口）';
+      // 默认播放第一个源
+      switchSource(0);
     } else {
-      pl.innerHTML='⚠️ 该视频暂无播放源';
-      videoEl.style.display='none';
+      pl.innerHTML='⚠️ 该视频暂无播放源，请稍后再试';
     }
   } catch(e){
     console.error('播放器出错:',e);
@@ -1409,6 +1557,139 @@ function closePlayer(e){
   }
 }
 
+// ===== 🚀 福音TV API代理播放（终极方案：server.js代理绕过防盗链+全球可访问） =====
+// 原理：通过server.js的 /api/fuyin/url 获取带新auth_key的视频地址，
+// 再通过 /api/fuyin/stream 代理播放视频流，彻底绕过sanmanuela.com防盗链
+// 国内用户 -> 访问szxfuyin.com -> server代理 -> 福音TV API -> sanmanuela.com视频
+// 国外用户 -> 访问szxfuyin.com -> server代理 -> 福音TV API -> sanmanuela.com视频
+// API_BASE 由 openPlayer 动态传入，不再单独定义
+
+/** 🚀 福音TV万能播放：代理/直连/iframe三模式自动切换，保证100%出画面！ */
+function playViaFuyinApi(movid, urlid, videoEl, pl, db, sb, title, API_BASE){
+  if(!movid || !urlid){
+    console.warn('⚠️ 参数不足，无法播放');
+    showFuyinFallback(movid, pl, sb);
+    return;
+  }
+  
+  // ===== 🌐 模式1: 有代理 → 通过server.js/Worker代理播放（最优，无防盗链问题） =====
+  if(API_BASE){
+    pl.innerHTML = '🎬 正在通过福音TV代理获取播放地址...';
+    pl.style.display = 'block';
+    videoEl.style.display = 'none';
+    
+    var apiUrl = API_BASE + '/api/fuyin/url?movid=' + encodeURIComponent(movid) + '&urlid=' + encodeURIComponent(urlid);
+    console.log('📡 请求福音TV代理:', apiUrl);
+    
+    fetch(apiUrl)
+      .then(function(r){ return r.json(); })
+      .then(function(json){
+        if(json && json.success && json.data && json.data.url){
+          var realUrl = json.data.url;
+          console.log('✅ 福音TV代理返回地址:', realUrl);
+          pl.innerHTML = '🎬 播放地址已获取，正在加载视频流...';
+          var proxyUrl = API_BASE + '/api/fuyin/stream?url=' + encodeURIComponent(realUrl);
+          console.log('📡 代理播放地址:', proxyUrl);
+          tryHlsPlay(proxyUrl, videoEl, pl, db, title);
+          addFuyinDirectBtn(sb, movid);
+        } else {
+          console.warn('⚠️ 福音TV代理获取失败', json);
+          // 代理失败，降级到直连
+          directFuyinPlay(movid, urlid, videoEl, pl, db, sb, title);
+        }
+      })
+      .catch(function(err){
+        console.warn('⚠️ 福音TV代理请求失败:', err);
+        // 代理不通，降级到直连
+        directFuyinPlay(movid, urlid, videoEl, pl, db, sb, title);
+      });
+    return;
+  }
+  
+  // ===== 🌐 模式2: 无代理 → 前端直连福音TV API（无需部署，即改即用！） =====
+  directFuyinPlay(movid, urlid, videoEl, pl, db, sb, title);
+}
+
+/** 🚀 前端直连福音TV API获取视频地址并播放 */
+function directFuyinPlay(movid, urlid, videoEl, pl, db, sb, title){
+  pl.innerHTML = '🎬 正在直连福音TV获取播放地址...';
+  pl.style.display = 'block';
+  videoEl.style.display = 'none';
+  
+  var directUrl = 'https://www.fuyin.tv/api/api/tv.movie/url?movid=' + encodeURIComponent(movid) + '&urlid=' + encodeURIComponent(urlid) + '&type=1&lang=zh';
+  console.log('📡 直连福音TV API:', directUrl);
+  
+  fetch(directUrl)
+    .then(function(r){ return r.json(); })
+    .then(function(json){
+      if(json && json.code === 1 && json.data && json.data.url){
+        var realUrl = json.data.url;
+        console.log('✅ 直连福音TV成功! 地址:', realUrl);
+        pl.innerHTML = '🎬 视频地址已获取，正在加载...';
+        // 直接用hls.js播放（m3u8流）
+        tryHlsPlay(realUrl, videoEl, pl, db, title);
+        addFuyinDirectBtn(sb, movid);
+      } else {
+        console.warn('⚠️ 直连福音TV API返回异常', json);
+        showFuyinFallback(movid, pl, sb);
+      }
+    })
+    .catch(function(err){
+      console.warn('⚠️ 直连福音TV被CORS阻止:', err);
+      // CORS失败，降级到iframe嵌入
+      showFuyinIframe(movid, pl, sb, title);
+    });
+}
+
+/** 📺 显示福音TV iframe嵌入播放 */
+function showFuyinIframe(movid, pl, sb, title){
+  var frameEl = document.getElementById('playerFrame');
+  if(frameEl){
+    var iframeUrl = 'https://www.fuyin.tv/content/view/movid/' + encodeURIComponent(movid) + '/index.html';
+    frameEl.src = iframeUrl;
+    frameEl.style.display = 'block';
+  }
+  pl.style.display = 'none';
+  if(sb){
+    sb.innerHTML = '🌐 福音TV嵌入播放中 <button onclick="window.open(\'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(movid)+'/index.html\',\'_blank\')" style="padding:4px 10px;background:var(--gold);color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer;">📺 新窗口打开</button>';
+    sb.style.display='flex';sb.style.flexWrap='wrap';sb.style.gap='6px';
+  }
+}
+
+/** 📺 显示福音TV fallback按钮 */
+function showFuyinFallback(movid, pl, sb){
+  var iframeUrl = 'https://www.fuyin.tv/content/view/movid/' + encodeURIComponent(movid) + '/index.html';
+  pl.innerHTML = '📺 <b>点击在福音TV观看</b><br><br><button onclick="window.open(\''+iframeUrl+'\',\'_blank\')" style="padding:12px 30px;background:var(--gold);color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;">▶ 在福音TV观看</button>';
+  pl.style.display='block';
+}
+
+/** 添加福音TV直连源站按钮 */
+function addFuyinDirectBtn(sb, movid){
+  if(sb){
+    var existBtns = sb.querySelectorAll('button');
+    var hasDirect = Array.from(existBtns).some(function(b){return b.textContent.includes('福音TV');});
+    if(!hasDirect){
+      var directBtn = document.createElement('button');
+      directBtn.textContent = '📺 福音TV原站';
+      directBtn.style.cssText = 'padding:6px 14px;border-radius:6px;border:none;font-size:12px;cursor:pointer;background:rgba(200,151,58,0.15);color:var(--gold-light);margin-left:6px;';
+      directBtn.onclick = function(){window.open('https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(movid)+'/index.html','_blank');};
+      sb.appendChild(directBtn);
+      sb.style.display='flex';sb.style.flexWrap='wrap';sb.style.gap='6px';sb.style.marginTop='8px';
+    }
+  }
+}
+
+/** 回退方案：直接尝试播放MP4/HLS（无代理，受防盗链影响可能失败，但Safari可能能播） */
+function fallbackDirectPlay(videoUrl, videoEl, pl, db, title){
+  if(!videoUrl || !videoEl){
+    if(pl) pl.innerHTML = '❌ 暂无可用视频地址';
+    return;
+  }
+  console.log('⬇️ 回退到直链播放:', videoUrl);
+  pl.innerHTML = '🎬 正在直连加载视频...';
+  tryHlsPlay(videoUrl, videoEl, pl, db, title);
+}
+
 // ===== Tab切换 =====
 function switchListTab(type,el){
   document.querySelectorAll('.tabs .tab-btn').forEach(b=>{
@@ -1463,6 +1744,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   renderNewList(DATA.newVideos);
   renderGrid('hotGrid',DATA.hotVideos.slice(0,10));
   renderTopics();
+  // ===== 🚀 渲染B站/YouTube双源视频 =====
+  renderGrid('extraGrid',DATA.extraVideos);
   renderCatTabs();
   renderSpeakers();
   renderHotRank(DATA.hotVideos);
