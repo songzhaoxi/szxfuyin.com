@@ -1701,11 +1701,13 @@ function directFuyinPlay(movid, urlid, videoEl, pl, db, sb, title){
   console.log('📡 直连福音TV API:', directUrl);
   
   // ===== 🌐 CORS代理列表（自动轮询，保证全球任何网络都能出画面！） =====
+  // 🚀 已实测：allorigins.win ✅ 可用 | corsproxy.io 需付费 ❌ | codetabs.com 超时 ❌
   var proxyList = [
     { label: '直连', url: directUrl },
     { label: 'allorigins', url: 'https://api.allorigins.win/raw?url=' + encodeURIComponent(directUrl) },
-    { label: 'corsproxy', url: 'https://corsproxy.io/?' + encodeURIComponent(directUrl) },
-    { label: 'codetabs', url: 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(directUrl) }
+    { label: 'allorigins2', url: 'https://api.allorigins.win/get?url=' + encodeURIComponent(directUrl) },
+    { label: 'corsproxy2', url: 'https://corsproxy.org/?' + encodeURIComponent(directUrl) },
+    { label: 'corsproxy3', url: 'https://proxy.corsfix.com/?' + encodeURIComponent(directUrl) }
   ];
   
   tryProxy(0);
