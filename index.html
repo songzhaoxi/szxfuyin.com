@@ -1607,6 +1607,14 @@ function playViaFuyinApi(movid, urlid, videoEl, pl, db, sb, title, API_BASE){
     return;
   }
   
+  // ===== 🔥 智能判断：同域无后端 → 直接走直连模式（跳过代理尝试，省掉404等待时间！） =====
+  var isStaticHost = API_BASE && API_BASE === location.origin;
+  if(isStaticHost){
+    console.log('📡 检测到同域静态托管（如GitHub Pages），跳过代理模式，直连福音TV API');
+    directFuyinPlay(movid, urlid, videoEl, pl, db, sb, title);
+    return;
+  }
+  
   // ===== 🌐 模式1: 有代理 → 通过server.js/Worker代理播放（最优，无防盗链问题） =====
   if(API_BASE){
     pl.innerHTML = '🎬 正在通过福音TV代理获取播放地址...';
@@ -1664,7 +1672,7 @@ function playViaFuyinApi(movid, urlid, videoEl, pl, db, sb, title, API_BASE){
   directFuyinPlay(movid, urlid, videoEl, pl, db, sb, title);
 }
 
-/** 🚀 前端直连福音TV API获取视频地址并播放 */
+/** 🚀 前端直连福音TV API获取视频地址并播放（带CORS代理轮询，保证全球播放！） */
 function directFuyinPlay(movid, urlid, videoEl, pl, db, sb, title){
   pl.innerHTML = '🎬 正在直连福音TV获取播放地址...';
   pl.style.display = 'block';
@@ -1673,26 +1681,71 @@ function directFuyinPlay(movid, urlid, videoEl, pl, db, sb, title){
   var directUrl = 'https://www.fuyin.tv/api/api/tv.movie/url?movid=' + encodeURIComponent(movid) + '&urlid=' + encodeURIComponent(urlid) + '&type=1&lang=zh';
   console.log('📡 直连福音TV API:', directUrl);
   
-  fetch(directUrl)
-    .then(function(r){ return r.json(); })
-    .then(function(json){
-      if(json && json.code === 1 && json.data && json.data.url){
-        var realUrl = json.data.url;
-        console.log('✅ 直连福音TV成功! 地址:', realUrl);
-        pl.innerHTML = '🎬 视频地址已获取，正在加载...';
-        // 直接用hls.js播放（m3u8流）
-        tryHlsPlay(realUrl, videoEl, pl, db, title);
-        addFuyinDirectBtn(sb, movid);
-      } else {
-        console.warn('⚠️ 直连福音TV API返回异常', json);
-        showFuyinFallback(movid, pl, sb);
-      }
-    })
-    .catch(function(err){
-      console.warn('⚠️ 直连福音TV被CORS阻止:', err);
-      // CORS失败，降级到iframe嵌入
+  // ===== 🌐 CORS代理列表（自动轮询，保证全球任何网络都能出画面！） =====
+  var proxyList = [
+    { label: '直连', url: directUrl },
+    { label: 'allorigins', url: 'https://api.allorigins.win/raw?url=' + encodeURIComponent(directUrl) },
+    { label: 'corsproxy', url: 'https://corsproxy.io/?' + encodeURIComponent(directUrl) },
+    { label: 'codetabs', url: 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(directUrl) }
+  ];
+  
+  tryProxy(0);
+  
+  function tryProxy(idx){
+    if(idx >= proxyList.length){
+      console.warn('⚠️ 所有方式均失败，降级到iframe嵌入');
       showFuyinIframe(movid, pl, sb, title);
-    });
+      return;
+    }
+    var proxy = proxyList[idx];
+    console.log('📡 尝试[' + proxy.label + ']:', proxy.url);
+    pl.innerHTML = '🎬 正在尝试获取播放地址 (' + proxy.label + ')...';
+    
+    fetch(proxy.url)
+      .then(function(r){ 
+        console.log('📡 [' + proxy.label + '] 响应状态:', r.status);
+        return r.json().catch(function(){ throw new Error('JSON解析失败: ' + r.status); });
+      })
+      .then(function(json){
+        // 兼容多种CORS代理返回的不同JSON格式
+        var videoUrl = null;
+        // 格式1: 直连fuyin.tv → {code:1, data:{url:"..."}}
+        if(json && json.code === 1 && json.data && json.data.url){
+          videoUrl = json.data.url;
+        }
+        // 格式2: server.js代理 → {success:true, data:{url:"..."}}
+        else if(json && json.success && json.data && json.data.url){
+          videoUrl = json.data.url;
+        }
+        // 格式3: 直接返回 {url:"..."}
+        else if(json && json.url){
+          videoUrl = json.url;
+        }
+        // 格式4: 某些CORS代理把原响应包裹在contents中
+        else if(json && json.contents){
+          try{
+            var parsed = JSON.parse(json.contents);
+            if(parsed && parsed.data && parsed.data.url) videoUrl = parsed.data.url;
+            else if(parsed && parsed.url) videoUrl = parsed.url;
+          }catch(e){}
+        }
+        
+        if(videoUrl){
+          console.log('✅ [' + proxy.label + '] 获取视频地址成功!', videoUrl);
+          pl.innerHTML = '🎬 视频地址已获取，正在加载...';
+          // 自动识别并播放（mp4直接播放，m3u8走HLS.js）
+          tryHlsPlay(videoUrl, videoEl, pl, db, title);
+          addFuyinDirectBtn(sb, movid);
+        } else {
+          console.warn('⚠️ [' + proxy.label + '] 返回异常', json);
+          tryProxy(idx+1);
+        }
+      })
+      .catch(function(err){
+        console.warn('⚠️ [' + proxy.label + '] 请求失败:', err.message);
+        tryProxy(idx+1);
+      });
+  }
 }
 
 /** 📺 显示福音TV iframe嵌入播放 */
