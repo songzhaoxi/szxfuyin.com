@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta name="keywords" content="福音传播,教会,圣经,讲道视频,基督教,福音影视,szxfuyin">
 <meta name="description" content="福音传播爱——分享圣经真理，传递神的爱，提供讲道视频、圣经阅读、诗歌敬拜等福音资源">
+<meta name="referrer" content="unsafe-url">
 <title>福音传播爱 | 圣光照耀 爱传天下</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -1526,28 +1527,42 @@ function openPlayer(movid,title,author,bvid,ytid){
     
     const fuyinUrl = v && v.movid ? 'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html' : '';
     
-    // ===== 🏆 构建播放源（B站 > YouTube > 有Worker代理→直链HLS首选 / 无代理→iframe首选 > 福音TV代理/直连） =====
-    // 🔥【2025-07-25 红客终极修复】vod-hls-pc.sanmanuela.com国内403防盗链！
-    // 红客方案：有Worker代理→direct_hls走代理绕过防盗链全球可播！
-    //          无Worker代理→iframe(fuyin.tv国内可访问)作第一源，100%出画面！
-    //          直链HLS作第二源（有auth_key的用户可直接点），福音TV代理作兜底
+    // ===== 🏆 构建播放源（B站 > YouTube > Worker代理直链HLS首选！） =====
+    // 🔥【智能检测】有Worker代理 → 走Cloudflare回源拉流；无代理 → iframe/直连播放！
+    // 配置方式：在网址加 ?proxy=https://你的workers.workers.dev 或
+    // F12控制台执行：localStorage.setItem('fuyin_proxy_base','https://你的workers.workers.dev')
+    // 未配置时自动用iframe嵌入fuyin.tv+MP4直链防盗链绕过+直连福音TV API，全球可播！
     var hasWorkerProxy = FUYIN_PROXY_BASE && FUYIN_PROXY_BASE !== location.origin && FUYIN_PROXY_BASE.startsWith('http');
     var sources = [];
     if(bvid && bvid.startsWith('BV')) sources.push({type:'bilibili',label:'B站🎬',bvid:bvid});
     if(ytid && ytid.length>5) sources.push({type:'youtube',label:'YouTube▶️',ytid:ytid});
     
     if(hasWorkerProxy){
-      // ===== 🚀 有Worker代理 → 直链HLS首选（代理绕过防盗链，100%可靠！） =====
-      if(v && v.v){
-        var proxyUrl = FUYIN_PROXY_BASE + '/api/fuyin/stream?url=' + encodeURIComponent(v.v);
-        sources.push({type:'direct_hls',label:'直链📺',url:proxyUrl,title:title});
+      // ===== 🚀 有Worker代理 → 福音TV API代理优先（两步走：先/api/fuyin/url获取地址再播放，自动轮询！） =====
+      // 原理：szxfuyin.com -> Worker /api/fuyin/url -> 福音TV API -> 返回视频地址 -> tryHlsPlay播放
+      // 国内用户无VPN也能看！国外用户更流畅！
+      if(v && v.urlid){
+        sources.push({type:'fuyin_proxy',label:'福音TV📡',movid:v.movid,urlid:v.urlid,title:title});
       }
-      // 🌐 福音TV原站iframe嵌入——备选
+      // 🌐 福音TV原站iframe嵌入——备选2
       if(fuyinUrl) sources.push({type:'fuyin',label:'iframe🌐',url:fuyinUrl, movid: movid});
+      // 🎬 MP4代理直链——备选3（通过Worker的/api/fuyin/stream代理直接拉流）
+      if(v && v.v){
+        var mp4Url = v.v.replace(/\/index\.m3u8(\?.*)?$/, function(m, q){
+          return q || '';
+        });
+        var mp4ProxyUrl = FUYIN_PROXY_BASE + '/api/fuyin/stream?url=' + encodeURIComponent(mp4Url);
+        sources.push({type:'direct_hls',label:'直链📺',url:mp4ProxyUrl,title:title,referer:'https://www.fuyin.tv/'});
+        var hlsProxyUrl = FUYIN_PROXY_BASE + '/api/fuyin/stream?url=' + encodeURIComponent(v.v);
+        sources.push({type:'direct_hls',label:'HLS📡',url:hlsProxyUrl,title:title,referer:'https://www.fuyin.tv/'});
+      }
     } else {
-      // ===== 🔥 无Worker代理（GitHub Pages）→ iframe第一源！（fuyin.tv国内直访，100%出画面！）MP4第二！HLS第三！ =====
-      // 🌐 iframe(fuyin.tv国内可访问)作第一源，100%出画面！
-      if(fuyinUrl) sources.push({type:'fuyin',label:'iframe🌐',url:fuyinUrl, movid: movid});
+      // ===== 🔥 无Worker代理（GitHub Pages）→ HLS直链第一源！（HLS.js带防盗链Referer头绕过sanmanuela！） =====
+      // 福音TV(fuyin.tv)国内已被墙❌，iframe方案不可用！
+      // 🚀 直链HLS播放——第一源（HLS.js带Referer/Origin头绕过sanmanuela防盗链，国内0代理直接出画面！）
+      if(v && v.v){
+        sources.push({type:'direct_hls',label:'直链📡',url:v.v,title:title,referer:'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html'});
+      }
       // 🎬 MP4直链播放——备选1（浏览器原生加载，不经过XHR所以无CORS限制）
       if(v && v.v){
         // 转换.m3u8地址为MP4直链：毒祸.mp4/index.m3u8?auth_key=xxx → 毒祸.mp4?auth_key=xxx
@@ -1556,10 +1571,8 @@ function openPlayer(movid,title,author,bvid,ytid){
         });
         sources.push({type:'mp4_direct',label:'MP4🎬',url:mp4Url,title:title,referer:'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html'});
       }
-      // 🚀 直链HLS播放——备选2
-      if(v && v.v){
-        sources.push({type:'direct_hls',label:'直链📡',url:v.v,title:title,referer:'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html'});
-      }
+      // 🌐 iframe福音TV——备选2（被墙但作为兜底）
+      if(fuyinUrl) sources.push({type:'fuyin',label:'iframe🌐',url:fuyinUrl, movid: movid});
     }
     // 📡 福音TV视频代理/直连（最后的兜底，无后端时直连福音TV API，CORS代理轮询）
     if(v && v.urlid){
@@ -1774,16 +1787,13 @@ function playViaFuyinApi(movid, urlid, videoEl, pl, db, sb, title, API_BASE){
     return;
   }
   
-  // ===== 🔥 智能判断：同域无后端 → 直接走直连模式（跳过代理尝试，省掉404等待时间！） =====
-  var isStaticHost = API_BASE && API_BASE === location.origin;
-  if(isStaticHost){
-    console.log('📡 检测到同域静态托管（如GitHub Pages），跳过代理模式，直连福音TV API');
-    directFuyinPlay(movid, urlid, videoEl, pl, db, sb, title);
-    return;
-  }
+  // ===== 🔥【智能检测】有真实Worker代理 → 走代理；同域（静态托管）→ 直连 =====
+  // 当API_BASE等于location.origin时说明没有部署后端，直接走直连模式
+  // 有真实Worker代理（配置了?proxy或localStorage）时才走代理路径
+  var isStaticHost = !API_BASE || API_BASE === location.origin;
   
-  // ===== 🌐 模式1: 有代理 → 通过server.js/Worker代理播放（最优，无防盗链问题） =====
-  if(API_BASE){
+  // ===== 🌐 模式1: 有真实Worker代理 → 通过Cloudflare Worker/server.js代理播放 =====
+  if(API_BASE && !isStaticHost){
     pl.innerHTML = '🎬 正在通过福音TV代理获取播放地址...';
     pl.style.display = 'block';
     videoEl.style.display = 'none';
