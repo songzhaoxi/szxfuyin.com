@@ -228,24 +228,32 @@ async function proxyStream(videoUrl, extraHeaders = {}, rangeHeader = '') {
   // 透传响应内容并添加CORS头
   const responseHeaders = new Headers(response.headers);
   responseHeaders.set('Access-Control-Allow-Origin', '*');
-  responseHeaders.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  responseHeaders.set('Access-Control-Allow-Methods', 'GET, OPTIONS, HEAD');
   
   // 删除可能影响代理的编码头
   responseHeaders.delete('content-encoding');
   responseHeaders.delete('transfer-encoding');
+  responseHeaders.delete('x-frame-options');
+  responseHeaders.delete('x-content-type-options');
   
-  // 确保Content-Type正确
-  if (!responseHeaders.has('Content-Type') || 
-      responseHeaders.get('Content-Type').includes('text/html')) {
-    // 自动检测类型
-    if (videoUrl.includes('.m3u8')) {
-      responseHeaders.set('Content-Type', 'application/vnd.apple.mpegurl');
-    } else if (videoUrl.includes('.mp4')) {
-      responseHeaders.set('Content-Type', 'video/mp4');
-    } else if (videoUrl.includes('.ts')) {
-      responseHeaders.set('Content-Type', 'video/MP2T');
-    }
+  // 🔥🔥🔥 极速播/迅雷极速播优化响应头
+  // 强制Content-Type为video/mp4——极速播靠它识别视频！
+  if (videoUrl.includes('.m3u8')) {
+    responseHeaders.set('Content-Type', 'application/vnd.apple.mpegurl');
+  } else if (videoUrl.includes('.mp4') || videoUrl.includes('.mp4/')) {
+    responseHeaders.set('Content-Type', 'video/mp4');
+  } else if (videoUrl.includes('.ts')) {
+    responseHeaders.set('Content-Type', 'video/MP2T');
+  } else {
+    responseHeaders.set('Content-Type', 'video/mp4');
   }
+  // 强制Accept-Ranges=bytes——浏览器识别为可拖拽视频，极速播才能叠加！
+  responseHeaders.set('Accept-Ranges', 'bytes');
+  // 极速播需要完整CORS跨域头
+  responseHeaders.set('Access-Control-Expose-Headers', 'Content-Length, Content-Range, Accept-Ranges, Content-Type');
+  responseHeaders.set('Access-Control-Allow-Headers', 'Range, Content-Type, If-Range, Accept-Encoding');
+  // 删除可能混淆的Content-Disposition
+  responseHeaders.delete('Content-Disposition');
 
   return new Response(response.body, {
     status: response.status,

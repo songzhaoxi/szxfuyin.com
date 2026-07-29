@@ -519,8 +519,10 @@ app.get('/api/fuyin/url', async (req, res) => {
   }
 });
 
-// ===== API: 福音TV视频流代理 - 解决防盗链 =====
+// ===== API: 福音TV视频流代理 - 解决防盗链 + 自动重写m3u8中的ts分片地址 =====
 // 直接在服务器端代理视频流，绕过防盗链
+// 🔥【2025-07-25 HLS全链路修复】自动检测m3u8内容，重写其中所有ts分片URL
+// 使得浏览器请求ts分片时也走server代理，彻底解决国内无法访问sanmanuela.com的问题！
 // 请求示例: /api/fuyin/stream?url=https://vod-hls-pc.sanmanuela.com/...
 app.get('/api/fuyin/stream', (req, res) => {
   const { url } = req.query;
@@ -549,12 +551,54 @@ app.get('/api/fuyin/stream', (req, res) => {
     };
     
     const proxyReq = mod.request(options, (proxyRes) => {
-      const headers = { ...proxyRes.headers };
-      delete headers['content-encoding'];
-      delete headers['transfer-encoding'];
-      delete headers['connection'];
-      res.writeHead(proxyRes.statusCode, headers);
-      proxyRes.pipe(res);
+      const contentType = (proxyRes.headers['content-type'] || '').toLowerCase();
+      const isM3U8 = contentType.includes('mpegurl') || contentType.includes('octet-stream') ||
+                     contentType.includes('text/plain') || decodedUrl.includes('.m3u8');
+      
+      if (isM3U8) {
+        // 🔥 m3u8内容 → 读取完整文本，重写ts分片URL
+        let m3u8Data = '';
+        proxyRes.on('data', (chunk) => { m3u8Data += chunk.toString(); });
+        proxyRes.on('end', () => {
+          try {
+            const streamBase = req.protocol + '://' + req.get('host') + '/api/fuyin/stream?url=';
+            const baseUrl = decodedUrl.substring(0, decodedUrl.lastIndexOf('/') + 1);
+            
+            // 重写每一行：将ts/m3u8等媒体URL改为走server代理
+            const rewritten = m3u8Data.split('\n').map(function(line) {
+              const trimmed = line.trim();
+              if (trimmed && !trimmed.startsWith('#') && !trimmed.startsWith('//') &&
+                  !trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+                // 相对路径 → 绝对路径
+                return streamBase + encodeURIComponent(baseUrl + trimmed);
+              } else if (trimmed && !trimmed.startsWith('#') && !trimmed.startsWith('//') &&
+                         (trimmed.startsWith('http://') || trimmed.startsWith('https://'))) {
+                // 绝对路径 → 直接转代理
+                return streamBase + encodeURIComponent(trimmed);
+              }
+              return line;
+            }).join('\n');
+            
+            res.setHeader('Content-Type', 'application/vnd.apple.mpegurl; charset=utf-8');
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Cache-Control', 'no-cache');
+            res.status(200).send(rewritten);
+          } catch(e) {
+            // 重写出错时返回原始内容
+            res.setHeader('Content-Type', contentType);
+            res.status(proxyRes.statusCode).send(m3u8Data);
+          }
+        });
+        proxyRes.on('error', (e) => { res.status(500).send('代理错误: ' + e.message); });
+      } else {
+        // 非m3u8内容（MP4等）→ 直接pipe透传
+        const headers = { ...proxyRes.headers };
+        delete headers['content-encoding'];
+        delete headers['transfer-encoding'];
+        delete headers['connection'];
+        res.writeHead(proxyRes.statusCode, headers);
+        proxyRes.pipe(res);
+      }
     });
     
     proxyReq.on('error', (e) => {
