@@ -1353,8 +1353,9 @@ const FUYIN_PROXY_BASE = (function(){
     // 非标准端口（如 :3000），直接用当前 origin
     console.log('🌐 server.js 模式：福音TV代理指向', productionBase);
   }
-  console.log('💡 如果尚未部署server.js，访问 ?proxy=https://你的workers.workers.dev 配置Workers代理');
-  return productionBase;
+  // 🔥 极速播修复：静态站(GitHub Pages)没有server.js，返回空字符串使用else分支的mp4直链方案
+  console.log('💡 静态站模式：返回空代理，使用mp4直链+no-referrer播放（极速播自动生效！）');
+  return '';
 })();
 
 /** 切换视频源 */

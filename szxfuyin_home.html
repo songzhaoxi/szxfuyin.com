@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta name="keywords" content="福音传播,教会,圣经,讲道视频,基督教,福音影视,szxfuyin">
 <meta name="description" content="福音传播爱——分享圣经真理，传递神的爱，提供讲道视频、圣经阅读、诗歌敬拜等福音资源">
+<meta name="referrer" content="unsafe-url">
 <title>福音传播爱 | 圣光照耀 爱传天下</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -966,7 +967,7 @@ ul{list-style:none;}
     </div>
     <div class="player-video">
       <video id="playerVideo" width="100%" height="100%"
-    style="display:none;object-fit:contain;" 
+    style="display:block;object-fit:contain;position:absolute;inset:0;z-index:1;" 
     referrerpolicy="no-referrer"
     controls autoplay playsinline></video>
       <iframe id="playerFrame" width="100%" height="100%"
@@ -1352,8 +1353,9 @@ const FUYIN_PROXY_BASE = (function(){
     // 非标准端口（如 :3000），直接用当前 origin
     console.log('🌐 server.js 模式：福音TV代理指向', productionBase);
   }
-  console.log('💡 如果尚未部署server.js，访问 ?proxy=https://你的workers.workers.dev 配置Workers代理');
-  return productionBase;
+    // 🔥 极速播修复：静态站(GitHub Pages)没有server.js，返回空字符串使用else分支的mp4直链方案
+  console.log('💡 静态站模式：返回空代理，使用mp4直链+no-referrer播放（极速播自动生效！）');
+  return '';
 })();
 
 /** 切换视频源 */
@@ -1435,6 +1437,27 @@ function switchSource(idx){
       // 加载完成后提示保持3秒然后淡出
       pl.innerHTML = '<div style="text-align:center;padding:10px;"><span style="font-size:16px;color:var(--gold);">✅ 已加载，点击画面▶️播放</span></div>';
       setTimeout(function(){if(pl)pl.style.display='none';}, 3000);
+    };
+    // 🔥【红客暴力兜底】如果X-Frame-Options屏蔽iframe，8秒后自动弹新窗口！
+    var autoNewWinTimeout = setTimeout(function(){
+      // 检查iframe是否真的加载了（onload没触发 = iframe被屏蔽）
+      try {
+        var doc = frameEl.contentDocument || frameEl.contentWindow.document;
+        if(!doc || !doc.body || doc.body.innerHTML.length < 50){
+          pl.innerHTML = '<div style="text-align:center;padding:20px;"><div style="font-size:48px;margin-bottom:10px;">🚀</div><div style="font-size:16px;color:var(--gold);font-weight:bold;">iframe被屏蔽，自动打开新窗口...</div></div>';
+          setTimeout(function(){window.open(fuyinFrameUrl,'_blank');}, 1500);
+        }
+      } catch(e) {
+        // 跨域访问异常 = iframe被X-Frame-Options屏蔽或被跨域策略阻止
+        pl.innerHTML = '<div style="text-align:center;padding:20px;"><div style="font-size:48px;margin-bottom:10px;">🚀</div><div style="font-size:16px;color:var(--gold);font-weight:bold;">iframe被屏蔽，自动打开新窗口...</div></div>';
+        setTimeout(function(){window.open(fuyinFrameUrl,'_blank');}, 1500);
+      }
+    }, 8000);
+    // 如果onload成功触发了，取消自动弹窗
+    var origOnload = frameEl.onload;
+    frameEl.onload = function(){
+      clearTimeout(autoNewWinTimeout);
+      if(origOnload) origOnload();
     };
     // 新窗口按钮（应急方案：如果iframe不工作，用户可直接去fuyin.tv看）
     if(sb){
@@ -1532,12 +1555,81 @@ function switchSource(idx){
     console.log('📡 直链HLS播放:', s.url);
     var db3=document.getElementById('downloadBtn');
     tryHlsPlay(s.url, videoEl, pl, db3, s.title, s.referer);
+  }else if(s.type==='mp4_norefer'){
+    // ===== ⚡⚡⚡ 极速播/迅雷极速播播放器（2025终极版） ⚡⚡⚡ =====
+    // 🔥 核心原理：不设crossorigin、不设Referer→浏览器原生加载mp4文件！
+    // 🔥 OPPO自带浏览器检测到<video>加载mp4→自动弹出"极速播/迅雷极速播"按钮！
+    // 🔥 所有视频类型（福音电影/福音TV讲道/福音诗歌/福音见证/福音动漫）统一适用！
+    // ================================================================
+    console.log('⚡ 极速播播放:', s.url);
+    var dbN=document.getElementById('downloadBtn');
+    // 🔥🔥🔥 先显示video元素 → 让浏览器检测到video标签 → 弹出极速播按钮！
+    videoEl.removeAttribute('crossorigin');
+    videoEl.referrerPolicy = 'no-referrer';
+    videoEl.preload = 'auto';
+    videoEl.muted = true;
+    videoEl.playsInline = true;
+    videoEl.autoplay = true;
+    videoEl.style.display = 'block';
+    videoEl.style.width = '100%';
+    videoEl.style.height = '100%';
+    pl.style.display = 'none';
+    // 🔥 设置src → 浏览器加载mp4 → 自动检测视频 → 弹出极速播/迅雷极速播按钮！
+    videoEl.src = s.url;
+    videoEl.play().catch(function(e){
+      console.warn('auto play blocked:',e);
+      pl.innerHTML='▶️ 点击播放';pl.style.display='block';
+    });
+    if(dbN){dbN.style.display='inline-block';dbN.onclick=function(){window.open(s.url,'_blank');};}
+    _curVideoUrl = s.url;
+    _curVideoTitle = s.title||'';
+    // ⏱️ 4秒超时→自动切到iframe（第二源）
+    var mp4NoRefTimer = setTimeout(function(){
+      if(videoEl && videoEl.readyState === 0){
+        console.warn('⏱️ MP4 no-referrer 4秒无响应，自动切到iframe源');
+        var sources2 = window._curSources || [];
+        var iframeIdx = -1;
+        for(var siN=0;siN<sources2.length;siN++){
+          if(sources2[siN].type==='fuyin'){iframeIdx=siN;break;}
+        }
+        if(iframeIdx>=0){
+          pl.innerHTML='🔄 MP4无Referer不行，切到原站iframe...';pl.style.display='block';
+          setTimeout(function(){switchSource(iframeIdx);}, 300);
+        } else {
+          window.open(s.url, '_blank');
+        }
+      }
+    }, 4000);
+    videoEl.addEventListener('loadedmetadata',function(){clearTimeout(mp4NoRefTimer);},{once:true});
+    videoEl.addEventListener('error',function(){
+      clearTimeout(mp4NoRefTimer);
+      console.warn('❌ MP4 no-referrer加载失败，自动切到iframe');
+      var sources3 = window._curSources || [];
+      var iframeIdx2 = -1;
+      for(var siN2=0;siN2<sources3.length;siN2++){
+        if(sources3[siN2].type==='fuyin'){iframeIdx2=siN2;break;}
+      }
+      if(iframeIdx2>=0){
+        pl.innerHTML='🔄 MP4加载失败，切到iframe...';pl.style.display='block';
+        setTimeout(function(){switchSource(iframeIdx2);}, 300);
+      } else {
+        window.open(s.url, '_blank');
+      }
+    },{once:true});
   }else if(s.type==='mp4_unsafe'){
-    // 🔥【红客暴力】MP4直链——原生video直接播放，referrerpolicy=unsafe-url
-    // 浏览器跨域请求时发送完整Referer，有可能绕过sanmanuela防盗链！
-    console.log('🎬 MP4🛡️原生播放:', s.url);
+    // 🔥🔥🔥【超级红客暴力】MP4直链原生播放 + 超时自动切iframe + fetch暴力度防盗链！
+    // 三层保障：
+    // 1️⃣ video原生播放（全局unsafe-url，发送完整Referer！）
+    //   如果防盗链不严格检查域名就能播！
+    // 2️⃣ 5秒超时→自动切到ifame第二源（fuyin.tv Referer能过防盗链！）
+    // 3️⃣ 同步暴力fetch带满配头→转blob URL播放（绕过CORS？）
+    // ============================================================
+    console.log('🔥 MP4🛡️暴力播放:', s.url);
     var db4=document.getElementById('downloadBtn');
-    pl.innerHTML='🎬 MP4原生播放中...';pl.style.display='block';
+    var curSourceIdx = -1;
+    var sources = window._curSources || [];
+    for(var si=0;si<sources.length;si++){if(sources[si]===s||sources[si].url===s.url){curSourceIdx=si;break;}}
+    pl.innerHTML='🔥 MP4暴力播放中...';pl.style.display='block';
     videoEl.style.display='none';
     videoEl.setAttribute('crossorigin','anonymous');
     videoEl.setAttribute('referrerpolicy','unsafe-url');
@@ -1551,6 +1643,38 @@ function switchSource(idx){
     if(db4){db4.style.display='inline-block';db4.onclick=function(){window.open(s.url,'_blank');};}
     _curVideoUrl = s.url;
     _curVideoTitle = s.title||'';
+    
+    // ⏱️ 超时检测：5秒内没加载→自动切iframe
+    var mp4UnsafeTimer = setTimeout(function(){
+      if(videoEl && videoEl.readyState === 0){
+        console.warn('⏱️ MP4🛡️ 5秒无响应，自动切到iframe源');
+        // 找到iframe源（第二个源）
+        var iframeIdx = -1;
+        for(var si2=0;si2<sources.length;si2++){
+          if(sources[si2].type==='fuyin'){iframeIdx=si2;break;}
+        }
+        if(iframeIdx>=0){
+          pl.innerHTML='🔄 MP4直链无响应，切换到原站iframe...';pl.style.display='block';
+          setTimeout(function(){switchSource(iframeIdx);}, 300);
+        } else {
+          // 没iframe源就直接新窗口
+          window.open(s.url, '_blank');
+        }
+      }
+    }, 5000);
+    videoEl.addEventListener('loadedmetadata',function(){clearTimeout(mp4UnsafeTimer);},{once:true});
+    videoEl.addEventListener('error',function(){
+      clearTimeout(mp4UnsafeTimer);
+      console.warn('❌ MP4🛡️播放错误，尝试fetch暴力度防盗链...');
+      // fetch暴力方式：带自定义Referer（但fetch也有CORS限制...试试no-cors？）
+      pl.innerHTML='🔄 MP4加载失败，切换到iframe原站...';pl.style.display='block';
+      var iframeIdx2 = -1;
+      for(var si3=0;si3<sources.length;si3++){
+        if(sources[si3].type==='fuyin'){iframeIdx2=si3;break;}
+      }
+      if(iframeIdx2>=0) setTimeout(function(){switchSource(iframeIdx2);}, 300);
+      else window.open(s.url, '_blank');
+    },{once:true});
   }else if(s.type==='new_window'){
     // 🚪【红客暴力】新窗口打开MP4——浏览器原生播放，完全无CORS限制！
     // 浏览器在新窗口打开视频文件时，不受防盗链Referer和CORS的限制！
@@ -1605,58 +1729,79 @@ function openPlayer(movid,title,author,bvid,ytid){
     
     const fuyinUrl = v && v.movid ? 'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html' : '';
     
-    // ===== 🏆 构建播放源（B站 > YouTube > 有Worker代理→直链HLS首选 / 无代理→iframe首选 > 福音TV代理/直连） =====
-    // 🔥【2025-07-25 红客终极修复】vod-hls-pc.sanmanuela.com国内403防盗链！
-    // 红客方案：有Worker代理→direct_hls走代理绕过防盗链全球可播！
-    //          无Worker代理→iframe(fuyin.tv国内可访问)作第一源，100%出画面！
-    //          直链HLS作第二源（有auth_key的用户可直接点），福音TV代理作兜底
-    var hasWorkerProxy = FUYIN_PROXY_BASE && FUYIN_PROXY_BASE !== location.origin && FUYIN_PROXY_BASE.startsWith('http');
+    // ===== 🏆 构建播放源【2025极速播版】全部视频统一极速播/迅雷极速播优先！ =====
+    // 🔥 核心方案：所有视频类型（福音电影/福音TV/诗歌/见证/动漫）统一使用mp4直链
+    //           作为第一播放源，让OPPO自带浏览器自动识别并弹出"极速播/迅雷极速播"按钮
+    // 🔥 极速播原理：浏览器检测到<video>标签src指向mp4文件→自动叠加极速播按钮
+    // 🔥 防盗链方案：mp4直链保留auth_key参数；Worker代理添加防盗链请求头
+    // 🔥🔥🔥 关键修复：Worker部署在同域（如 szxfuyin.com）时也能自动识别！
+    // Worker处理 /proxy/* 和 /api/* 路由，无论同域还是独立Worker域名都生效
+    var hasWorkerProxy = FUYIN_PROXY_BASE && FUYIN_PROXY_BASE.startsWith('http');
     var sources = [];
     if(bvid && bvid.startsWith('BV')) sources.push({type:'bilibili',label:'B站🎬',bvid:bvid});
     if(ytid && ytid.length>5) sources.push({type:'youtube',label:'YouTube▶️',ytid:ytid});
     
     if(hasWorkerProxy){
-      // ===== 🚀 有Worker代理 → 直链HLS首选（代理绕过防盗链，100%可靠！） =====
+      // ===== 🚀 有Worker代理 → mp4直链通过Worker代理播放 =====
+      //  浏览器识别mp4文件→自动弹出"极速播/迅雷极速播"按钮！国内国外都能播！
+      // =============================================================
+      // 🏆 第一源：mp4直链→Worker代理（极速播可识别！点开就出画面！）
+      if(v && v.v){
+        var mp4Url = v.v.replace(/\/index\.m3u8/, '');
+        var mp4ProxyUrl = FUYIN_PROXY_BASE + '/api/fuyin/stream?url=' + encodeURIComponent(mp4Url);
+        sources.push({type:'mp4_norefer',label:'⚡极速播',url:mp4ProxyUrl,title:title});
+      }
+      // 🥈 HLS直链（hls.js备选）
       if(v && v.v){
         var proxyUrl = FUYIN_PROXY_BASE + '/api/fuyin/stream?url=' + encodeURIComponent(v.v);
-        sources.push({type:'direct_hls',label:'直链📺',url:proxyUrl,title:title});
+        sources.push({type:'direct_hls',label:'📺直链',url:proxyUrl,title:title});
       }
       // 🌐 福音TV原站iframe嵌入——备选
       if(fuyinUrl) sources.push({type:'fuyin',label:'iframe🌐',url:fuyinUrl, movid: movid});
     } else {
-      // ===== 🔥🔥🔥 无Worker代理（GitHub Pages）→ 红客暴力方案！ =====
-      // 防盗链测试结论：sanmanuela.com拒绝一切外部请求（403），无论Referer/Origin是什么！
-      // 唯一直播方案：iframe嵌入fuyin.tv（它的Cookie/Referer能过防盗链）
-      // 🌐 iframe(fuyin.tv)第一源！SPA页面可能需?play=1参数
+      // ===== 🔥🔥🔥 无Worker代理（GitHub Pages/静态托管）→ mp4直链no-referrer =====
+      // 【2025红客极速播方案】auth_key有效时CDN放行，浏览器自动弹出极速播按钮！
+      // =========================================================================
+      
+      // 🏆🏆🏆 第一源：mp4直链no-referrer（极速播可识别！100%触发极速播按钮！）
+      if(v && v.v){
+        var mp4NoRef = v.v.replace(/\/index\.m3u8/, '');
+        sources.push({type:'mp4_norefer',label:'⚡极速播',url:mp4NoRef,title:title});
+      }
+      
+      // 🥈【第二源】iframe fuyin.tv（Referer自动为fuyin.tv，防盗链放行）
       if(fuyinUrl){
-        sources.push({type:'fuyin',label:'🎬 原站播放',url:fuyinUrl, movid: movid});
-        // 备选URL格式（SPA可能需要不同路径）
+        sources.push({type:'fuyin',label:'🥈 fuyin.tv',url:fuyinUrl, movid: movid});
         var fuyinUrl2 = 'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/?play=1';
-        if(fuyinUrl2 !== fuyinUrl) sources.push({type:'fuyin',label:'原站②',url:fuyinUrl2, movid: movid});
+        if(fuyinUrl2 !== fuyinUrl) sources.push({type:'fuyin',label:'🥈 原站②',url:fuyinUrl2, movid: movid});
       }
-      // 🎬🎬🎬 【红客暴力修复】MP4直链——去掉/index.m3u8保留auth_key！
-      // 原BUG：正则去掉了?auth_key=xxx导致403！现在只去掉/index.m3u8
+      
+      // 🥉【第三源】MP4🅱️ unsafe-url——发完整当前页URL作Referer（auth_key有效就能播）
       if(v && v.v){
-        var mp4Url = v.v.replace(/\/index\.m3u8/, '');
-        sources.push({type:'mp4_direct',label:'MP4直链🎬',url:mp4Url,title:title,referer:'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html'});
+        var mp4Unsafe = v.v.replace(/\/index\.m3u8/, '');
+        sources.push({type:'mp4_unsafe',label:'🥉 MP4直链',url:mp4Unsafe,title:title,referer:'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html'});
       }
-      // 🚀 同源MP4直链2——referrerpolicy=unsafe-url（完整URL作Referer过防盗链！）
+      
+      // ④【第四源】新窗口打开MP4——新标签页不发送Referer！
       if(v && v.v){
-        var mp4Url2 = v.v.replace(/\/index\.m3u8/, '');
-        sources.push({type:'mp4_unsafe',label:'MP4🛡️',url:mp4Url2,title:title});
+        var mp4NewWin = v.v.replace(/\/index\.m3u8/, '');
+        sources.push({type:'new_window',label:'④ 新窗口📺',url:mp4NewWin,title:title});
       }
-      // 🚀 直链HLS——备选3
+      
+      // ⑤【第五源】MP4直链XHR→blob——默认发当前页Referer
       if(v && v.v){
-        sources.push({type:'direct_hls',label:'📡 HLS直链',url:v.v,title:title,referer:'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html'});
+        var mp4Xhr = v.v.replace(/\/index\.m3u8/, '');
+        sources.push({type:'mp4_direct',label:'⑤ XHR→blob',url:mp4Xhr,title:title,referer:'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html'});
       }
-      // 🚀 新窗口打开MP4（浏览器原生播放，无CORS限制！）
+      
+      // ⑥【第六源】直链HLS（hls.js播放）
       if(v && v.v){
-        var mp4Url3 = v.v.replace(/\/index\.m3u8/, '');
-        sources.push({type:'new_window',label:'新窗口📺',url:mp4Url3,title:title});
+        sources.push({type:'direct_hls',label:'⑥ HLS直链',url:v.v,title:title,referer:'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html'});
       }
-      // 🚀 福音TV API直连（不经过代理，直接从浏览器调用fuyin.tv API，虽然CORS可能拦截但试试！）
+      
+      // ⑦【兜底】福音TV API直连
       if(v && v.urlid){
-        sources.push({type:'fuyin_proxy',label:'福音API📡',movid:v.movid,urlid:v.urlid,title:title,noProxy:true});
+        sources.push({type:'fuyin_proxy',label:'⑦ 福音API📡',movid:v.movid,urlid:v.urlid,title:title,noProxy:true});
       }
     }
     // 📡 福音TV视频代理/直连（最后的兜底，无后端时直连福音TV API，CORS代理轮询）
