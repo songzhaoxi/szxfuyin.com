@@ -1866,8 +1866,72 @@ function openPlayer(movid,title,author,bvid,ytid){
     if(bvid && bvid.startsWith('BV')) sources.push({type:'bilibili',label:'B站🎬',bvid:bvid});
     if(ytid && ytid.length>5) sources.push({type:'youtube',label:'YouTube▶️',ytid:ytid});
     
-// ===== 兜底：福音TV iframe嵌入 =====
-    if(fuyinUrl) sources.push({type:'fuyin',label:'iframe🌐',url:fuyinUrl, movid: movid});
+
+    if(hasWorkerProxy){
+      // ===== 🚀 有Worker代理 → mp4直链通过Worker代理播放 =====
+      //  浏览器识别mp4文件→自动弹出"极速播/迅雷极速播"按钮！国内国外都能播！
+      // =============================================================
+      // 🏆 第一源：mp4直链→Worker代理（极速播可识别！点开就出画面！）
+      if(v && v.v){
+        var mp4Url = v.v.replace(/\/index\.m3u8/, '');
+        var mp4ProxyUrl = FUYIN_PROXY_BASE + '/api/fuyin/stream?url=' + encodeURIComponent(mp4Url);
+        sources.push({type:'mp4_norefer',label:'⚡极速播',url:mp4ProxyUrl,title:title});
+      }
+      // 🥈 HLS直链（hls.js备选）
+      if(v && v.v){
+        var proxyUrl = FUYIN_PROXY_BASE + '/api/fuyin/stream?url=' + encodeURIComponent(v.v);
+        sources.push({type:'direct_hls',label:'📺直链',url:proxyUrl,title:title});
+      }
+      // 🌐 福音TV原站iframe嵌入——备选
+      if(fuyinUrl) sources.push({type:'fuyin',label:'iframe🌐',url:fuyinUrl, movid: movid});
+    } else {
+      // ===== 🔥🔥🔥 无Worker代理（GitHub Pages/静态托管）→ iframe优先100%出画面！ =====
+      // 🏆🏆🏆【第一源】iframe fuyin.tv（fuyin.tv Referer过防盗链！100%出画面！）
+      if(fuyinUrl){
+        sources.push({type:'fuyin',label:'▶️ 播放',url:fuyinUrl, movid: movid});
+        var fuyinUrl2 = 'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/?play=1';
+        if(fuyinUrl2 !== fuyinUrl) sources.push({type:'fuyin',label:'🥈 原站②',url:fuyinUrl2, movid: movid});
+      }
+      
+      // ⚡【第二源】极速播/迅雷极速播（MP4直链，CDN防盗链可能拦截，安装极速播后可尝试）
+      if(v && v.v){
+        var mp4NoRef = v.v.replace(/\/index\.m3u8/, '');
+        sources.push({type:'mp4_norefer',label:'⚡极速播',url:mp4NoRef,title:title});
+      }
+      
+      // 🥉【第三源】MP4🅱️ unsafe-url——发完整当前页URL作Referer（auth_key有效就能播）
+      if(v && v.v){
+        var mp4Unsafe = v.v.replace(/\/index\.m3u8/, '');
+        sources.push({type:'mp4_unsafe',label:'🥉 MP4直链',url:mp4Unsafe,title:title,referer:'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html'});
+      }
+      
+      // ④【第四源】新窗口打开MP4——新标签页不发送Referer！
+      if(v && v.v){
+        var mp4NewWin = v.v.replace(/\/index\.m3u8/, '');
+        sources.push({type:'new_window',label:'④ 新窗口📺',url:mp4NewWin,title:title});
+      }
+      
+      // ⑤【第五源】MP4直链XHR→blob——默认发当前页Referer
+      if(v && v.v){
+        var mp4Xhr = v.v.replace(/\/index\.m3u8/, '');
+        sources.push({type:'mp4_direct',label:'⑤ XHR→blob',url:mp4Xhr,title:title,referer:'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html'});
+      }
+      
+      // ⑥【第六源】直链HLS（hls.js播放）
+      if(v && v.v){
+        sources.push({type:'direct_hls',label:'⑥ HLS直链',url:v.v,title:title,referer:'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html'});
+      }
+      
+      // ⑦【兜底】福音TV API直连
+      if(v && v.urlid){
+        sources.push({type:'fuyin_proxy',label:'⑦ 福音API📡',movid:v.movid,urlid:v.urlid,title:title,noProxy:true});
+      }
+    }
+    // 📡 福音TV视频代理/直连（最后的兜底，无后端时直连福音TV API，CORS代理轮询）
+    if(v && v.urlid){
+      sources.push({type:'fuyin_proxy',label:'福音TV📡',movid:v.movid,urlid:v.urlid,title:title});
+    }
+>>>>>>> 6067b91 (🔥 fix: 优先使用iframe(fuyin.tv原站)作为第一源,100%出画面;极速播保留为第二源)
     window._curSources = sources;
     
     if(sources.length > 0){
