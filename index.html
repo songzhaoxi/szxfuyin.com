@@ -1527,57 +1527,42 @@ function openPlayer(movid,title,author,bvid,ytid){
     
     const fuyinUrl = v && v.movid ? 'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html' : '';
     
-    // ===== 🏆 构建播放源（B站 > YouTube > Worker代理直链HLS首选！） =====
-    // 🔥【智能检测】有Worker代理 → 走Cloudflare回源拉流；无代理 → iframe/直连播放！
-    // 配置方式：在网址加 ?proxy=https://你的workers.workers.dev 或
-    // F12控制台执行：localStorage.setItem('fuyin_proxy_base','https://你的workers.workers.dev')
-    // 未配置时自动用iframe嵌入fuyin.tv+MP4直链防盗链绕过+直连福音TV API，全球可播！
+    // ===== 🏆 构建播放源（🔥极速播方案：<video>元素第一！iframe兜底！） =====
+    // 🔥【关键】OPPO/迅雷极速播会检测页面中的<video>元素并叠加加速层！
+    // 因此必须将<video>播放的源放在第一（HLS/MP4直链），iframe做最后兜底！
+    // 配置Worker: ?proxy=https://你的workers.workers.dev 或 localStorage.setItem('fuyin_proxy_base','地址')
     var hasWorkerProxy = FUYIN_PROXY_BASE && FUYIN_PROXY_BASE !== location.origin && FUYIN_PROXY_BASE.startsWith('http');
     var sources = [];
+    
+    // ===== 🥇 第一源：HLS/MP4直链播放（<video>元素触发极速播/迅雷极速播！） =====
+    // 🎬 video元素直接显示在弹窗中，OPPO浏览器自动检测并叠加"极速播"加速按钮！
+    if(v && v.v){
+      if(hasWorkerProxy){
+        // 有Worker代理 → 通过代理播放（绕防盗链+全球加速）
+        var mp4Url = v.v.replace(/\/index\.m3u8(\?.*)?$/, function(m, q){ return q || ''; });
+        var hlsProxyUrl = FUYIN_PROXY_BASE + '/api/fuyin/stream?url=' + encodeURIComponent(v.v);
+        sources.push({type:'direct_hls',label:'📺极速播',url:hlsProxyUrl,title:title,referer:'https://www.fuyin.tv/'});
+        var mp4ProxyUrl = FUYIN_PROXY_BASE + '/api/fuyin/stream?url=' + encodeURIComponent(mp4Url);
+        sources.push({type:'direct_hls',label:'🎬极速播',url:mp4ProxyUrl,title:title,referer:'https://www.fuyin.tv/'});
+      } else {
+        // 无Worker代理 → MP4直链+直链HLS（浏览器原生video触发极速播！）
+        var mp4Url = v.v.replace(/\/index\.m3u8(\?.*)?$/, function(m, q){ return q || ''; });
+        sources.push({type:'mp4_direct',label:'🎬极速播',url:mp4Url,title:title,referer:'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html'});
+        sources.push({type:'direct_hls',label:'📺极速播',url:v.v,title:title,referer:'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html'});
+      }
+    }
+    
+    // ===== 🥈 第二源：福音TV API代理（通过Worker绕过防盗链，video元素播放→极速播可检测） =====
+    if(v && v.urlid){
+      sources.push({type:'fuyin_proxy',label:'📡极速播',movid:v.movid,urlid:v.urlid,title:title});
+    }
+    
+    // ===== 🥉 第三源：B站/YouTube（iframe嵌入） =====
     if(bvid && bvid.startsWith('BV')) sources.push({type:'bilibili',label:'B站🎬',bvid:bvid});
     if(ytid && ytid.length>5) sources.push({type:'youtube',label:'YouTube▶️',ytid:ytid});
     
-    if(hasWorkerProxy){
-      // ===== 🚀 有Worker代理 → 福音TV API代理优先（两步走：先/api/fuyin/url获取地址再播放，自动轮询！） =====
-      // 原理：szxfuyin.com -> Worker /api/fuyin/url -> 福音TV API -> 返回视频地址 -> tryHlsPlay播放
-      // 国内用户无VPN也能看！国外用户更流畅！
-      if(v && v.urlid){
-        sources.push({type:'fuyin_proxy',label:'福音TV📡',movid:v.movid,urlid:v.urlid,title:title});
-      }
-      // 🌐 福音TV原站iframe嵌入——备选2
-      if(fuyinUrl) sources.push({type:'fuyin',label:'iframe🌐',url:fuyinUrl, movid: movid});
-      // 🎬 MP4代理直链——备选3（通过Worker的/api/fuyin/stream代理直接拉流）
-      if(v && v.v){
-        var mp4Url = v.v.replace(/\/index\.m3u8(\?.*)?$/, function(m, q){
-          return q || '';
-        });
-        var mp4ProxyUrl = FUYIN_PROXY_BASE + '/api/fuyin/stream?url=' + encodeURIComponent(mp4Url);
-        sources.push({type:'direct_hls',label:'直链📺',url:mp4ProxyUrl,title:title,referer:'https://www.fuyin.tv/'});
-        var hlsProxyUrl = FUYIN_PROXY_BASE + '/api/fuyin/stream?url=' + encodeURIComponent(v.v);
-        sources.push({type:'direct_hls',label:'HLS📡',url:hlsProxyUrl,title:title,referer:'https://www.fuyin.tv/'});
-      }
-    } else {
-      // ===== 🔥 无Worker代理（GitHub Pages）→ HLS直链第一源！（HLS.js带防盗链Referer头绕过sanmanuela！） =====
-      // 福音TV(fuyin.tv)国内已被墙❌，iframe方案不可用！
-      // 🚀 直链HLS播放——第一源（HLS.js带Referer/Origin头绕过sanmanuela防盗链，国内0代理直接出画面！）
-      if(v && v.v){
-        sources.push({type:'direct_hls',label:'直链📡',url:v.v,title:title,referer:'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html'});
-      }
-      // 🎬 MP4直链播放——备选1（浏览器原生加载，不经过XHR所以无CORS限制）
-      if(v && v.v){
-        // 转换.m3u8地址为MP4直链：毒祸.mp4/index.m3u8?auth_key=xxx → 毒祸.mp4?auth_key=xxx
-        var mp4Url = v.v.replace(/\/index\.m3u8(\?.*)?$/, function(m, q){
-          return q || '';
-        });
-        sources.push({type:'mp4_direct',label:'MP4🎬',url:mp4Url,title:title,referer:'https://www.fuyin.tv/content/view/movid/'+encodeURIComponent(v.movid)+'/index.html'});
-      }
-      // 🌐 iframe福音TV——备选2（被墙但作为兜底）
-      if(fuyinUrl) sources.push({type:'fuyin',label:'iframe🌐',url:fuyinUrl, movid: movid});
-    }
-    // 📡 福音TV视频代理/直连（最后的兜底，无后端时直连福音TV API，CORS代理轮询）
-    if(v && v.urlid){
-      sources.push({type:'fuyin_proxy',label:'福音TV📡',movid:v.movid,urlid:v.urlid,title:title});
-    }
+    // ===== 🏁 兜底：福音TV iframe嵌入（极速播仅在OPPO浏览器iframe内子页面检测到） =====
+    if(fuyinUrl) sources.push({type:'fuyin',label:'🎬iframe',url:fuyinUrl, movid: movid});
     window._curSources = sources;
     
     if(sources.length > 0){
