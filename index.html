@@ -328,11 +328,13 @@ ul{list-style:none;}
 .allcat-chip:hover{
   background:var(--gold);color:#fff;border-color:var(--gold);
 }
-.allcat-top.active,.allcat-chip.active{
+.allcat-chip em{
+  font-style:normal;font-size:10px;opacity:.7;margin-left:2px;
+}
+.allcat-chip.active{
   background:var(--gold);color:#fff;border-color:var(--gold);
 }
-.allcat-top.active .allcat-name,.allcat-top.active .allcat-cnt{color:#fff;}
-.allcat-chip em{font-style:normal;font-size:10px;opacity:.75;margin-left:2px;}
+.allcat-top.active .allcat-name{color:var(--gold);}
 
 /* ===== 视频卡片 ===== */
 .albums-grid{
@@ -1297,6 +1299,7 @@ function switchCatByC(c, el){
 }
 
 // ===== 🗂️ 全部分类板块（250分类，自动同步福音TV） =====
+// 🔥 递归渲染：把福音TV全部250个分类（含3级、4级深层子分类）全部显示出来！
 function renderAllCats(){
   const box = document.getElementById('allCatsBox');
   if(!box) return;
@@ -1307,24 +1310,32 @@ function renderAllCats(){
     box.innerHTML = '<div style="color:var(--text-light);padding:12px;">⏳ 分类数据加载中...</div>';
     return;
   }
-  // 顶级分类（parentid==0）
-  const tops = cats.filter(c=>c.parentid===0);
-  tops.sort((a,b)=>(a.sort||0)-(b.sort||0));
+  const byParent = {};
+  cats.forEach(c=>{ (byParent[c.parentid] = byParent[c.parentid]||[]).push(c); });
+  Object.keys(byParent).forEach(k=>byParent[k].sort((a,b)=>(a.sort||0)-(b.sort||0)));
+  // 递归构建分类树HTML（深度缩进）
+  function buildTree(pid, depth){
+    const kids = byParent[pid]||[];
+    let h = '';
+    kids.forEach(k=>{
+      const sub = byParent[k.id]||[];
+      const pad = depth>0 ? ' style="margin-left:'+(depth*12)+'px;display:inline-flex;align-items:center;"' : '';
+      h += '<span class="allcat-chip'+(sub.length?' allcat-haschild':'')+'"'+
+           ' onclick="loadAllCat('+k.id+',\''+escJs(k.category)+'\',this)" title="'+escHtml(k.category)+'（'+k.moviecount+'部）"'+pad+'>'+
+           (depth>0?'└ ':'')+escHtml(k.category)+' <em>'+k.moviecount+'</em></span>';
+      if(sub.length) h += buildTree(k.id, depth+1);
+    });
+    return h;
+  }
+  // 顶级分类（parentid==0）作为卡片组
+  const tops = (byParent[0]||[]);
   let html = '';
   tops.forEach(t=>{
-    const kids = cats.filter(c=>c.parentid===t.id);
-    kids.sort((a,b)=>(a.sort||0)-(b.sort||0));
     html += '<div class="allcat-group">';
     html += '<div class="allcat-top" onclick="loadAllCat('+t.id+',\''+escJs(t.category)+'\',this)">'+
             '<span class="allcat-name">📁 '+escHtml(t.category)+'</span>'+
             '<span class="allcat-cnt">'+t.moviecount+'部</span></div>';
-    if(kids.length){
-      html += '<div class="allcat-kids">';
-      kids.forEach(k=>{
-        html += '<span class="allcat-chip" onclick="loadAllCat('+k.id+',\''+escJs(k.category)+'\',this)">'+escHtml(k.category)+' <em>'+k.moviecount+'</em></span>';
-      });
-      html += '</div>';
-    }
+    html += '<div class="allcat-kids">'+buildTree(t.id, 1)+'</div>';
     html += '</div>';
   });
   box.innerHTML = html;
@@ -1337,7 +1348,7 @@ function loadAllCat(catid, name, el){
   if(typeof window.loadCat === 'function'){
     var catEl = document.getElementById('catHeader');
     if(catEl) catEl.scrollIntoView({behavior:'smooth',block:'start'});
-    window.loadCat(catid, 1);
+    window.loadCat(catid, 1, name);
   }
 }
 function escHtml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -2032,20 +2043,6 @@ function openPlayer(movid,title,author,bvid,ytid,urlid){
     const pl=document.getElementById('playerPlaceholder');
     const db=document.getElementById('downloadBtn');
     var sb=document.getElementById('sourceBtns');
-    
-    // 🔁 连续播放状态记录
-    window._curMovid = movid;
-    window._curTitle = title||'';
-    window._curAuthor = author||'';
-    window._curUrlid = urlid||'';
-    if(window._playQueue && window._playQueue.length){
-      var _qi = -1;
-      for(var _i=0;_i<window._playQueue.length;_i++){
-        if(String(window._playQueue[_i].movid)===String(movid)){ _qi=_i; break; }
-      }
-      if(_qi>=0){ window._playIdx = _qi; }
-      else { window._playQueue.unshift({movid:movid,title:title||'',actor:author||'',pic:(v&&v.pic)?v.pic:''}); window._playIdx=0; }
-    }
     
     // 重置状态
     frameEl.style.display='none';frameEl.src='';
