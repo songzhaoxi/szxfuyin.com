@@ -291,6 +291,49 @@ ul{list-style:none;}
 }
 .section-header .more-btn:hover{color:var(--brown);}
 
+/* ===== 全部分类板块（自动同步福音TV） ===== */
+.allcats-wrap{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:14px;margin-bottom:28px;
+}
+.allcat-group{
+  background:#fff;border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:14px 16px;
+  border-left:3px solid var(--gold);
+  transition:var(--trans);
+}
+.allcat-group:hover{box-shadow:var(--shadow-lg);}
+.allcat-top{
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;padding:4px 0 10px;
+  border-bottom:1px dashed rgba(200,151,58,.35);
+}
+.allcat-top .allcat-name{
+  font-size:14px;font-weight:700;color:var(--brown-dark);
+  display:flex;align-items:center;gap:6px;
+}
+.allcat-top .allcat-cnt{
+  font-size:11px;color:var(--text-light);white-space:nowrap;
+}
+.allcat-kids{
+  display:flex;flex-wrap:wrap;gap:6px;padding-top:10px;
+}
+.allcat-chip{
+  font-size:11px;color:var(--text-muted);
+  background:var(--gold-pale);border:1px solid rgba(200,151,58,.3);
+  border-radius:14px;padding:4px 10px;cursor:pointer;
+  transition:var(--trans);line-height:1.4;
+}
+.allcat-chip:hover{
+  background:var(--gold);color:#fff;border-color:var(--gold);
+}
+.allcat-top.active,.allcat-chip.active{
+  background:var(--gold);color:#fff;border-color:var(--gold);
+}
+.allcat-top.active .allcat-name,.allcat-top.active .allcat-cnt{color:#fff;}
+.allcat-chip em{font-style:normal;font-size:10px;opacity:.75;margin-left:2px;}
+
 /* ===== 视频卡片 ===== */
 .albums-grid{
   display:grid;
@@ -888,6 +931,16 @@ ul{list-style:none;}
   </div>
   <div class="albums-grid" id="extraGrid"></div>
 
+  <!-- 🗂️ 全部分类（自动同步福音TV 250分类） -->
+  <div class="section-header">
+    <div class="left">
+      <div class="s-icon">🗂️</div>
+      <h3>全部分类 <small id="allCatCount" style="font-size:11px;color:var(--text-light);font-weight:400;"></small></h3>
+    </div>
+    <a class="more-btn" href="#" onclick="loadCat(0,1)">加载全部 ›</a>
+  </div>
+  <div class="allcats-wrap" id="allCatsBox"></div>
+
   <!-- 分类视频 -->
   <div class="section-header" id="catHeader">
     <div class="left">
@@ -1242,6 +1295,53 @@ function switchCatByC(c, el){
   const videos=V.filter(v=>v.c===c);
   renderGrid('catGrid', videos);
 }
+
+// ===== 🗂️ 全部分类板块（250分类，自动同步福音TV） =====
+function renderAllCats(){
+  const box = document.getElementById('allCatsBox');
+  if(!box) return;
+  const cats = window.FUYIN_ALL_CATEGORIES || [];
+  const cntEl = document.getElementById('allCatCount');
+  if(cntEl) cntEl.textContent = '· '+cats.length+'个分类 · 自动同步福音TV';
+  if(!cats.length){
+    box.innerHTML = '<div style="color:var(--text-light);padding:12px;">⏳ 分类数据加载中...</div>';
+    return;
+  }
+  // 顶级分类（parentid==0）
+  const tops = cats.filter(c=>c.parentid===0);
+  tops.sort((a,b)=>(a.sort||0)-(b.sort||0));
+  let html = '';
+  tops.forEach(t=>{
+    const kids = cats.filter(c=>c.parentid===t.id);
+    kids.sort((a,b)=>(a.sort||0)-(b.sort||0));
+    html += '<div class="allcat-group">';
+    html += '<div class="allcat-top" onclick="loadAllCat('+t.id+',\''+escJs(t.category)+'\',this)">'+
+            '<span class="allcat-name">📁 '+escHtml(t.category)+'</span>'+
+            '<span class="allcat-cnt">'+t.moviecount+'部</span></div>';
+    if(kids.length){
+      html += '<div class="allcat-kids">';
+      kids.forEach(k=>{
+        html += '<span class="allcat-chip" onclick="loadAllCat('+k.id+',\''+escJs(k.category)+'\',this)">'+escHtml(k.category)+' <em>'+k.moviecount+'</em></span>';
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+  });
+  box.innerHTML = html;
+}
+function loadAllCat(catid, name, el){
+  // 高亮当前点击
+  document.querySelectorAll('.allcat-top,.allcat-chip').forEach(x=>x.classList.remove('active'));
+  if(el) el.classList.add('active');
+  // 调用补丁的loadCat加载该分类全部视频（滚动到分类视频区）
+  if(typeof window.loadCat === 'function'){
+    var catEl = document.getElementById('catHeader');
+    if(catEl) catEl.scrollIntoView({behavior:'smooth',block:'start'});
+    window.loadCat(catid, 1);
+  }
+}
+function escHtml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escJs(s){ return String(s==null?'':s).replace(/'/g,"\\'").replace(/"/g,'"'); }
 
 // ===== 讲员 =====
 function renderSpeakers(){
@@ -2496,6 +2596,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   // ===== 🚀 渲染B站/YouTube双源视频 =====
   renderGrid('extraGrid',DATA.extraVideos);
   renderCatTabs();
+  renderAllCats();  // 🗂️ 全部分类板块（250分类）
   renderSpeakers();
   renderHotRank(DATA.hotVideos);
   renderBibleBooks();
@@ -3497,6 +3598,7 @@ const catLabels = {mudao:1,zhengdao:2,hunyin:3,zanmei:4,jianzheng:5,shipin:6,she
 })();
 
 </script>
+<script src="fuyin_all_categories.js"></script>
 <script src="fuyin-api-patch.js"></script>
 </body>
 </html>
