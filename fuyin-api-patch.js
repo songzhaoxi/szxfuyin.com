@@ -77,6 +77,7 @@
         return;
       }
       grid.innerHTML = d.data.map(cardHtml).join('');
+      window._playQueue = d.data; // 🔁 记录分类播放队列，供"下一个"切换
       var total = d.total||0, lastPage = d.last_page||1;
       grid.innerHTML += '<div style="grid-column:1/-1;display:flex;justify-content:center;align-items:center;gap:12px;padding:16px;">'+
         '<button onclick="loadCat('+catid+','+((page||1)-1)+')" style="padding:8px 18px;background:var(--gold);color:#fff;border-radius:8px;font-size:12px;cursor:pointer;'+(page<=1?'opacity:0.4;':'')+'">⬅ 上一页</button>'+
@@ -114,6 +115,7 @@
       grid.className = 'albums-grid';
       main.appendChild(grid);
       grid.innerHTML = hits.map(cardHtml).join('');
+      window._playQueue = hits; // 🔁 搜索结果作为播放队列
     });
   };
 
@@ -133,6 +135,7 @@
       grid.className = 'albums-grid';
       main.appendChild(grid);
       grid.innerHTML = list.map(cardHtml).join('');
+      window._playQueue = list; // 🔁 热播/最新列表作为播放队列
     });
   }
 
@@ -158,6 +161,10 @@
           html += g.outerHTML;
         });
         main.innerHTML = html;
+        // 🔁 全部视频页：合并所有分类列表为播放队列
+        var merged = [];
+        for(var k in boxes){ if(boxes[k] && boxes[k].list) merged = merged.concat(boxes[k].list); }
+        window._playQueue = merged;
       });
     });
   }
@@ -238,6 +245,7 @@
       var grid = makeGrid();
       if(hits.length){
         grid.innerHTML = hits.slice(0,24).map(cardHtml).join('');
+        window._playQueue = hits.slice(0,24); // 🔁 专题视频队列
       } else {
         grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#8A7A6A;">😕 专题暂无数据，为您推荐热门视频</div>';
         api('/api/movie/tops?did=0').then(function(dd){
@@ -260,6 +268,7 @@
       main.appendChild(renderHeader('📡','福音TV频道','最新节目 · 点击立即播放'));
       var grid = makeGrid();
       grid.innerHTML = list.slice(0,12).map(cardHtml).join('');
+      window._playQueue = list.slice(0,12); // 🔁 频道最新节目队列
       main.appendChild(grid);
       main.appendChild(renderHeader('🗂️','频道分类','全部10大分类'));
       var cg = makeGrid();
@@ -338,6 +347,7 @@
       main.appendChild(renderHeader('🎬','福音相关视频', hits.length?('共'+hits.length+'部'):''));
       var grid = makeGrid();
       grid.innerHTML = (hits.length?hits.slice(0,12):[]).map(cardHtml).join('') || '<div style="grid-column:1/-1;text-align:center;padding:20px;color:#8A7A6A;">暂无</div>';
+      if(hits.length) window._playQueue = hits.slice(0,12); // 🔁 福音信息视频队列
       main.appendChild(grid);
     });
   }
@@ -362,6 +372,7 @@
           '<div class="thumb"><img src="'+(pic||'https://picsum.photos/seed/h'+(h.movid||0)+'/300/186')+'" loading="lazy" onerror="this.src=\'https://picsum.photos/seed/h'+(h.movid||0)+'/300/186\'"><div class="play-btn"><div class="play-btn-circle">▶</div></div></div>'+
           '<div class="card-body"><div class="card-title">'+(h.title||'')+'</div></div></div>';
       }).join('');
+      window._playQueue = hist; // 🔁 播放历史队列
       main.appendChild(g);
       var clearBtn = document.createElement('div');
       clearBtn.style.cssText = 'text-align:center;margin:16px 0 40px;';
@@ -529,6 +540,7 @@
           '<div class="list-thumb"><img src="'+(pic||'https://picsum.photos/seed/'+m+'/180/112')+'" alt="'+t+'" loading="lazy" onerror="this.src=\'https://picsum.photos/seed/'+m+'/180/112\'"></div>'+
           '<div class="list-info"><div class="list-title">'+t+'</div><div class="list-author">'+a+'</div></div></div>';
       }).join('');
+      window._playQueue = list; // 🔁 首页最新发布队列
     });
     // 热门推荐网格（用热门视频）
     api('/api/movie/tops?did=0').then(function(d){
@@ -537,6 +549,7 @@
       var el = document.getElementById('hotGrid');
       if(!el) return;
       el.innerHTML = list.map(cardHtml).join('');
+      window._playQueue = list; // 🔁 首页热门推荐队列
     });
     // 热播排行（真实海报）
     api('/api/movie/tops?did=0').then(function(d){
@@ -553,6 +566,7 @@
           '<div class="hot-info"><div class="hot-title">'+t+'</div><div class="hot-author">'+a+'</div></div>'+
           '<div class="hot-views">'+(Math.floor(Math.random()*9+1))+'w次</div></div>';
       }).join('');
+      window._playQueue = list; // 🔁 首页热播排行队列
     });
     // 讲员行（API真实讲员）
     api('/api/speaker/index?page=1').then(function(d){
@@ -576,6 +590,95 @@
       }).join('');
     });
   }
+
+  // ===== 🔁 连续播放：播放队列 + 上一个/下一个（点击"下一个"真正切换下一集！） =====
+  window._playQueue = [];
+  window._playIdx = -1;
+
+  /** 设置当前播放队列（渲染完列表后调用） */
+  window.setPlayQueue = function(list){
+    if(list && list.length){ window._playQueue = list.slice(); }
+    else { window._playQueue = []; }
+    window._playIdx = -1;
+  };
+
+  /** 更新播放器弹窗里的连续播放区域 */
+  window.updatePlayerControls = function(){
+    var box = document.getElementById('playerContinue');
+    if(!box) return;
+    if(!window._playQueue || !window._playQueue.length || window._playIdx < 0){
+      box.style.display = 'none';
+      return;
+    }
+    box.style.display = 'block';
+    var posEl = document.getElementById('pcPos');
+    if(posEl) posEl.textContent = '第 ' + (window._playIdx+1) + ' / ' + window._playQueue.length + ' 集';
+    var listEl = document.getElementById('pcList');
+    if(listEl){
+      listEl.innerHTML = window._playQueue.map(function(x, i){
+        var t = String(x.title || x.t || '未知视频');
+        var active = (i === window._playIdx);
+        return '<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;'+
+          (active ? 'background:rgba(200,151,58,0.22);color:var(--gold-light);font-weight:600;' : 'background:rgba(255,255,255,0.03);color:var(--text-muted);')+
+          '" onclick="playAt('+i+')"><span>'+(active?'▶ ':'')+(i+1)+'. '+t.replace(/</g,'&lt;')+'</span></div>';
+      }).join('');
+    }
+  };
+
+  /** 播放队列中指定位置 */
+  window.playAt = function(i){
+    if(!window._playQueue || i < 0 || i >= window._playQueue.length) return;
+    window._playIdx = i;
+    var v = window._playQueue[i];
+    if(!v) return;
+    var mid = v.movid || v.id || 0;
+    var t = v.title || v.t || '';
+    var a = v.actor || v.author || v.s || '';
+    if(typeof openPlayer === 'function'){
+      openPlayer(mid, t, a);
+    }
+  };
+
+  /** 播放下一集 */
+  window.playNext = function(){
+    if(!window._playQueue || !window._playQueue.length) return;
+    var i = (window._playIdx + 1) % window._playQueue.length;
+    playAt(i);
+  };
+
+  /** 播放上一集 */
+  window.playPrev = function(){
+    if(!window._playQueue || !window._playQueue.length) return;
+    var i = (window._playIdx - 1 + window._playQueue.length) % window._playQueue.length;
+    playAt(i);
+  };
+
+  /** 🔥 包装 openPlayer：自动在队列中定位当前视频，并显示连续播放区域 */
+  (function(){
+    var _origOpenPlayer = window.openPlayer;
+    if(typeof _origOpenPlayer !== 'function') return;
+    window.openPlayer = function(movid, title, author, bvid, ytid, urlid){
+      if(window._playQueue && window._playQueue.length){
+        var idx = -1;
+        for(var i=0;i<window._playQueue.length;i++){
+          var v = window._playQueue[i];
+          var id = String(v.movid||v.id||'');
+          if(id && id === String(movid)){ idx = i; break; }
+        }
+        if(idx < 0){
+          for(var j=0;j<window._playQueue.length;j++){
+            if(String(window._playQueue[j].title||window._playQueue[j].t||'') === String(title||'')){ idx = j; break; }
+          }
+        }
+        window._playIdx = idx;
+      }
+      var r = _origOpenPlayer.apply(this, arguments);
+      if(typeof window.updatePlayerControls === 'function'){
+        setTimeout(function(){ window.updatePlayerControls(); }, 200);
+      }
+      return r;
+    };
+  })();
 
   // ===== 页面加载完成后自动升级 =====
   function boot(){
