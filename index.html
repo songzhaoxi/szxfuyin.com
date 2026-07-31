@@ -715,20 +715,23 @@ ul{list-style:none;}
   </div>
 
   <nav class="topbar-nav">
-    <a href="#movies" class="active" onclick="switchTab('movies',this)">
-      <span class="nav-icon">🎬</span><span>影视</span>
+    <a href="#home" class="active" onclick="switchTab('home',this)">
+      <span class="nav-icon">🏠</span><span>首页</span>
+    </a>
+    <a href="#cats" onclick="switchTab('cats',this)">
+      <span class="nav-icon">🗂️</span><span>分类</span>
     </a>
     <a href="#lives" onclick="switchTab('lives',this)">
       <span class="nav-icon">📡</span><span>频道</span>
     </a>
-    <a href="#bible" onclick="openBible()">
-      <span class="nav-icon">📖</span><span>圣经</span>
-    </a>
     <a href="#articles" onclick="switchTab('articles',this)">
       <span class="nav-icon">📰</span><span>阅读</span>
     </a>
-    <a href="#gospel" onclick="switchTab('gospel',this)">
-      <span class="nav-icon">✝️</span><span>福音</span>
+    <a href="#bible" onclick="switchTab('bible',this)">
+      <span class="nav-icon">📖</span><span>圣经</span>
+    </a>
+    <a href="#mine" onclick="switchTab('mine',this)">
+      <span class="nav-icon">👤</span><span>我的</span>
     </a>
   </nav>
 
@@ -1931,7 +1934,17 @@ function openPlayer(movid,title,author,bvid,ytid){
     // 🔥 100%真实可用，与福音TV App同源同源！
     if(movid){
       fuyinPlay(movid, title||v?.t||'', v?.urlid).then(function(ok){
-        if(ok){ return; }
+        if(ok){
+          // 📝 记录播放历史
+          try{
+            var hist = JSON.parse(localStorage.getItem('fuyin_hist')||'[]');
+            hist = hist.filter(function(h){ return h.movid!=movid; });
+            hist.unshift({movid:movid, title:title||v?.t||'', actor:author||v?.actor||'', pic:(v&&v.pic)?v.pic:'', time:Date.now()});
+            if(hist.length>30) hist = hist.slice(0,30);
+            localStorage.setItem('fuyin_hist', JSON.stringify(hist));
+          }catch(e){}
+          return;
+        }
         // API失败时回退到旧逻辑
         legacyOpenPlayer(movid,title,author,bvid,ytid,v,videoEl,frameEl,pl,db,sb);
       });
