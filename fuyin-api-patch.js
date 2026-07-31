@@ -211,6 +211,39 @@
     loadCat(catid, 1);
   };
 
+  /** 🔥 首页Banner升级：用福音TV真实视频海报自动轮播 + 点击播放 */
+  function upgradeBanner(){
+    api('/api/movie/tops?did=0').then(function(d){
+      var list = (d && d.new_list) ? d.new_list.slice(0,6) : [];
+      if(!list.length || !window.DATA) return;
+      DATA.banners = list.map(function(v){
+        var t = v.title || '';
+        var a = v.actor || '';
+        var sub = (a?a+' · ':'') + '福音TV' + (v.urlcount_1>1 ? (' · 共'+v.urlcount_1+'集') : '');
+        return {title:t, sub:sub, img:(v.pic||'').replace(/\\/g,'/'), movid:v.movid, actor:a};
+      });
+      // 重新渲染Banner（保留自动轮播机制）
+      try{
+        if(typeof bannerIdx !== 'undefined') bannerIdx = 0;
+        var dots = document.getElementById('bannerDots');
+        if(dots) dots.innerHTML = '';
+        if(typeof renderBanner === 'function') renderBanner();
+        if(typeof initBanner === 'function'){ initBanner(); } // 重建dots+定时器
+      }catch(e){ console.warn('upgradeBanner render err', e); }
+      // 🎬 点击Banner直接播放该视频！
+      var bs = document.getElementById('bannerSlide');
+      if(bs){
+        bs.style.cursor = 'pointer';
+        bs.onclick = function(){
+          var b = (window.DATA && DATA.banners) ? DATA.banners[bannerIdx||0] : null;
+          if(b && b.movid && typeof openPlayer === 'function'){
+            openPlayer(b.movid, b.title, b.actor||'');
+          }
+        };
+      }
+    });
+  }
+
   /** 首页数据升级：最新发布/热门推荐 用福音TV真实数据刷新 */
   function upgradeHome(){
     // 最新发布列表（用最新视频）
@@ -238,7 +271,7 @@
       if(!el) return;
       el.innerHTML = list.map(cardHtml).join('');
     });
-    // 热播排行
+    // 热播排行（真实海报）
     api('/api/movie/tops?did=0').then(function(d){
       var list = (d && d.new_list) ? d.new_list.slice(0,8) : [];
       if(!list.length) return;
@@ -246,9 +279,10 @@
       if(!el) return;
       el.innerHTML = list.map(function(v, i){
         var t=v.title||'', a=v.actor||'', m=v.movid||'';
+        var pic=v.pic?v.pic.replace(/\\/g,'/'):('https://picsum.photos/seed/'+(m+10)+'/140/88');
         return '<div class="hot-item fade-in" onclick="openPlayer('+m+',\''+t.replace(/'/g,"\\'")+'\',\''+a.replace(/'/g,"\\'")+'\')">'+
           '<div class="hot-rank">'+(i+1)+'</div>'+
-          '<div class="hot-thumb"><img src="https://picsum.photos/seed/'+(m+10)+'/140/88" alt="'+t+'" loading="lazy"></div>'+
+          '<div class="hot-thumb"><img src="'+pic+'" alt="'+t+'" loading="lazy" onerror="this.src=\'https://picsum.photos/seed/'+(m+10)+'/140/88\'"></div>'+
           '<div class="hot-info"><div class="hot-title">'+t+'</div><div class="hot-author">'+a+'</div></div>'+
           '<div class="hot-views">'+(Math.floor(Math.random()*9+1))+'w次</div></div>';
       }).join('');
@@ -278,6 +312,7 @@
 
   // ===== 页面加载完成后自动升级 =====
   function boot(){
+    upgradeBanner(); // 🔥 首页Banner换成福音TV真实海报轮播
     upgradeHome();
     // 分类Tabs改为福音TV官方分类（延迟到原renderCatTabs执行后覆盖）
     setTimeout(function(){
