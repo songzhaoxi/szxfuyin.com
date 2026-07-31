@@ -623,6 +623,8 @@
           '" onclick="playAt('+i+')"><span>'+(active?'▶ ':'')+(i+1)+'. '+t.replace(/</g,'&lt;')+'</span></div>';
       }).join('');
     }
+  };
+
   /** 播放队列中指定位置（彻底修复：数字索引 + 完整参数 + urlid） */
   window.playAt = function(i){
     var q = window._playQueue;
@@ -657,8 +659,6 @@
     var cur = (typeof window._playIdx === 'number' && window._playIdx >= 0) ? window._playIdx : 0;
     var i = (cur - 1 + q.length) % q.length;
     playAt(i);
-  };
-
   };
 
   /** 🔥 视频播放结束 → 自动播放下一集（同剧下一集优先，否则队列下一个） */

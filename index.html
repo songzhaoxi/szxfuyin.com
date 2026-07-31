@@ -1933,6 +1933,20 @@ function openPlayer(movid,title,author,bvid,ytid,urlid){
     const db=document.getElementById('downloadBtn');
     var sb=document.getElementById('sourceBtns');
     
+    // 🔁 连续播放状态记录
+    window._curMovid = movid;
+    window._curTitle = title||'';
+    window._curAuthor = author||'';
+    window._curUrlid = urlid||'';
+    if(window._playQueue && window._playQueue.length){
+      var _qi = -1;
+      for(var _i=0;_i<window._playQueue.length;_i++){
+        if(String(window._playQueue[_i].movid)===String(movid)){ _qi=_i; break; }
+      }
+      if(_qi>=0){ window._playIdx = _qi; }
+      else { window._playQueue.unshift({movid:movid,title:title||'',actor:author||'',pic:(v&&v.pic)?v.pic:''}); window._playIdx=0; }
+    }
+    
     // 重置状态
     frameEl.style.display='none';frameEl.src='';
     videoEl.style.display='none';videoEl.pause();videoEl.src='';videoEl.load();
