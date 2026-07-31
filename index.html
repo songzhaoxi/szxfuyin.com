@@ -1945,7 +1945,7 @@ function openPlayer(movid,title,author,bvid,ytid,urlid){
     // 🔥 MP4直链 down-mp4-cf.sanmanuela.com 无防盗链，video标签直接播放！
     // 🔥 100%真实可用，与福音TV App同源同源！
     if(movid){
-      fuyinPlay(movid, title||v?.t||'', v?.urlid).then(function(ok){
+      fuyinPlay(movid, title||v?.t||'', urlid || (v&&v.urlid) || '').then(function(ok){
         if(ok){
           // 📝 记录播放历史
           try{
@@ -1963,9 +1963,11 @@ function openPlayer(movid,title,author,bvid,ytid,urlid){
       // 展示选集按钮
       fuyinGetMovie(movid).then(function(movie){
         if(movie && movie.urls && movie.urls.length > 1){
+          var curUrlid = urlid || (v&&v.urlid) || '';
           var epsHtml = '<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">';
           movie.urls.forEach(function(u){
-            epsHtml += '<button onclick="openPlayer('+movid+',\''+(title||'').replace(/'/g,"\\'")+'\','+(u.urlid||'')+')" style="padding:5px 12px;background:rgba(200,151,58,0.15);color:var(--gold-light);border-radius:6px;font-size:11px;cursor:pointer;border:none;">'+u.title+'</button>';
+            var isCur = (String(u.urlid)===String(curUrlid));
+            epsHtml += '<button onclick="openPlayer('+movid+',\''+(title||'').replace(/'/g,"\\'")+'\',\''+(author||'').replace(/'/g,"\\'")+'\',\'\',\'\','+(u.urlid||'')+')" style="padding:5px 12px;background:'+(isCur?'var(--gold)':'rgba(200,151,58,0.15)')+';color:'+(isCur?'#fff':'var(--gold-light)')+';border-radius:6px;font-size:11px;cursor:pointer;border:none;'+(isCur?'box-shadow:0 0 8px rgba(200,151,58,0.5);':'')+'">'+u.title+'</button>';
           });
           epsHtml += '</div>';
           var meta=document.getElementById('playerMeta');

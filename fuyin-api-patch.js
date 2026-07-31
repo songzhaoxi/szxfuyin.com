@@ -623,41 +623,90 @@
           '" onclick="playAt('+i+')"><span>'+(active?'▶ ':'')+(i+1)+'. '+t.replace(/</g,'&lt;')+'</span></div>';
       }).join('');
     }
-  };
-
-  /** 播放队列中指定位置 */
+  /** 播放队列中指定位置（彻底修复：数字索引 + 完整参数 + urlid） */
   window.playAt = function(i){
-    if(!window._playQueue || i < 0 || i >= window._playQueue.length) return;
+    var q = window._playQueue;
+    if(!q || !q.length) return;
+    i = parseInt(i, 10);
+    if(isNaN(i) || i < 0 || i >= q.length) return;
     window._playIdx = i;
-    var v = window._playQueue[i];
+    var v = q[i];
     if(!v) return;
     var mid = v.movid || v.id || 0;
     var t = v.title || v.t || '';
     var a = v.actor || v.author || v.s || '';
+    var uid = v.urlid || v.url_id || '';
     if(typeof openPlayer === 'function'){
-      openPlayer(mid, t, a);
+      openPlayer(mid, t, a, '', '', uid);
     }
   };
 
-  /** 播放下一集 */
+  /** 播放下一集（修复：_playIdx 无效时从 0 开始，保证永远能切换！） */
   window.playNext = function(){
-    if(!window._playQueue || !window._playQueue.length) return;
-    var i = (window._playIdx + 1) % window._playQueue.length;
+    var q = window._playQueue;
+    if(!q || !q.length) return;
+    var cur = (typeof window._playIdx === 'number' && window._playIdx >= 0) ? window._playIdx : 0;
+    var i = (cur + 1) % q.length;
     playAt(i);
   };
 
   /** 播放上一集 */
   window.playPrev = function(){
-    if(!window._playQueue || !window._playQueue.length) return;
-    var i = (window._playIdx - 1 + window._playQueue.length) % window._playQueue.length;
+    var q = window._playQueue;
+    if(!q || !q.length) return;
+    var cur = (typeof window._playIdx === 'number' && window._playIdx >= 0) ? window._playIdx : 0;
+    var i = (cur - 1 + q.length) % q.length;
     playAt(i);
   };
 
-  /** 🔥 包装 openPlayer：自动在队列中定位当前视频，并显示连续播放区域 */
+  };
+
+  /** 🔥 视频播放结束 → 自动播放下一集（同剧下一集优先，否则队列下一个） */
+  window.bindAutoNext = function(){
+    var videoEl = document.getElementById('playerVideo');
+    if(!videoEl || videoEl._autoNextBound) return;
+    videoEl._autoNextBound = true;
+    videoEl.addEventListener('ended', function(){
+      console.log('📺 当前视频播放完毕，自动切换到下一集！');
+      // ① 同一部剧有下一集 → 优先播同剧下一集
+      if(window._curMovieEps && window._curMovieEps.length > 1 &&
+         window._curEpsIdx >= 0 && window._curEpsIdx < window._curMovieEps.length - 1){
+        var eps = window._curMovieEps[window._curEpsIdx + 1];
+        window._curEpsIdx++;
+        if(typeof openPlayer === 'function'){
+          openPlayer(window._curMovieId, window._curMovieTitle, window._curMovieAuthor, '', '', eps.urlid);
+          return;
+        }
+      }
+      // ② 否则播放队列中的下一个视频
+      window.playNext();
+    });
+  };
+
+  /** 🔥 包装 openPlayer：自动定位队列 + 记录剧集 + 显示连续区域 + 绑定自动连播 */
   (function(){
     var _origOpenPlayer = window.openPlayer;
     if(typeof _origOpenPlayer !== 'function') return;
     window.openPlayer = function(movid, title, author, bvid, ytid, urlid){
+      // ===== 记录当前剧信息（供同剧自动连播） =====
+      window._curMovieId = movid;
+      window._curMovieTitle = title;
+      window._curMovieAuthor = author;
+      window._curMovieEps = [];
+      window._curEpsIdx = -1;
+      if(typeof fuyinGetMovie === 'function' && movid){
+        fuyinGetMovie(movid).then(function(movie){
+          if(movie && movie.urls && movie.urls.length){
+            window._curMovieEps = movie.urls;
+            var curUid = String(urlid || '');
+            window._curEpsIdx = 0;
+            for(var i=0;i<movie.urls.length;i++){
+              if(String(movie.urls[i].urlid) === curUid){ window._curEpsIdx = i; break; }
+            }
+          }
+        }).catch(function(){});
+      }
+      // ===== 队列定位：movid优先，title兜底 =====
       if(window._playQueue && window._playQueue.length){
         var idx = -1;
         for(var i=0;i<window._playQueue.length;i++){
@@ -670,11 +719,19 @@
             if(String(window._playQueue[j].title||window._playQueue[j].t||'') === String(title||'')){ idx = j; break; }
           }
         }
+        if(idx < 0 && movid){
+          // 当前视频不在队列 → 追加到队尾，保证"下一个"永远有效！
+          window._playQueue.push({movid:movid, id:movid, title:title||'', t:title||'', actor:author||'', author:author||'', urlid:urlid||''});
+          idx = window._playQueue.length - 1;
+        }
         window._playIdx = idx;
       }
       var r = _origOpenPlayer.apply(this, arguments);
       if(typeof window.updatePlayerControls === 'function'){
         setTimeout(function(){ window.updatePlayerControls(); }, 200);
+      }
+      if(typeof window.bindAutoNext === 'function'){
+        setTimeout(function(){ window.bindAutoNext(); }, 300);
       }
       return r;
     };
