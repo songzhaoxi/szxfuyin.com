@@ -291,38 +291,38 @@ ul{list-style:none;}
 }
 .section-header .more-btn:hover{color:var(--brown);}
 
-/* ===== 全部分类板块（自动同步福音TV） ===== */
+/* ===== 全部分类板块（自动同步福音TV，紧凑版） ===== */
 .allcats-wrap{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
-  gap:14px;margin-bottom:28px;
+  grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+  gap:8px;margin-bottom:16px;
 }
 .allcat-group{
-  background:#fff;border-radius:var(--radius);
-  box-shadow:var(--shadow);padding:14px 16px;
+  background:#fff;border-radius:8px;
+  box-shadow:0 1px 4px rgba(0,0,0,.06);padding:6px 8px;
   border-left:3px solid var(--gold);
   transition:var(--trans);
 }
-.allcat-group:hover{box-shadow:var(--shadow-lg);}
+.allcat-group:hover{box-shadow:0 2px 8px rgba(0,0,0,.12);}
 .allcat-top{
   display:flex;align-items:center;justify-content:space-between;
-  cursor:pointer;padding:4px 0 10px;
+  cursor:pointer;padding:2px 0 6px;
   border-bottom:1px dashed rgba(200,151,58,.35);
 }
 .allcat-top .allcat-name{
-  font-size:14px;font-weight:700;color:var(--brown-dark);
-  display:flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:700;color:var(--brown-dark);
+  display:flex;align-items:center;gap:4px;
 }
 .allcat-top .allcat-cnt{
-  font-size:11px;color:var(--text-light);white-space:nowrap;
+  font-size:10px;color:var(--text-light);white-space:nowrap;
 }
 .allcat-kids{
-  display:flex;flex-wrap:wrap;gap:6px;padding-top:10px;
+  display:flex;flex-wrap:wrap;gap:4px;padding-top:5px;
 }
 .allcat-chip{
-  font-size:11px;color:var(--text-muted);
+  font-size:10px;color:var(--text-muted);
   background:var(--gold-pale);border:1px solid rgba(200,151,58,.3);
-  border-radius:14px;padding:4px 10px;cursor:pointer;
+  border-radius:10px;padding:1px 6px;cursor:pointer;
   transition:var(--trans);line-height:1.4;
 }
 .allcat-chip:hover{
@@ -933,16 +933,6 @@ ul{list-style:none;}
   </div>
   <div class="albums-grid" id="extraGrid"></div>
 
-  <!-- 🗂️ 全部分类（自动同步福音TV 250分类） -->
-  <div class="section-header">
-    <div class="left">
-      <div class="s-icon">🗂️</div>
-      <h3>全部分类 <small id="allCatCount" style="font-size:11px;color:var(--text-light);font-weight:400;"></small></h3>
-    </div>
-    <a class="more-btn" href="#" onclick="loadCat(0,1)">加载全部 ›</a>
-  </div>
-  <div class="allcats-wrap" id="allCatsBox"></div>
-
   <!-- 分类视频 -->
   <div class="section-header" id="catHeader">
     <div class="left">
@@ -1313,7 +1303,7 @@ function renderAllCats(){
   const byParent = {};
   cats.forEach(c=>{ (byParent[c.parentid] = byParent[c.parentid]||[]).push(c); });
   Object.keys(byParent).forEach(k=>byParent[k].sort((a,b)=>(a.sort||0)-(b.sort||0)));
-  // 递归构建分类树HTML（深度缩进）
+  // 递归构建分类树HTML（深度缩进，深层子分类默认折叠→板块更紧凑）
   function buildTree(pid, depth){
     const kids = byParent[pid]||[];
     let h = '';
@@ -1323,7 +1313,14 @@ function renderAllCats(){
       h += '<span class="allcat-chip'+(sub.length?' allcat-haschild':'')+'"'+
            ' onclick="loadAllCat('+k.id+',\''+escJs(k.category)+'\',this)" title="'+escHtml(k.category)+'（'+k.moviecount+'部）"'+pad+'>'+
            (depth>0?'└ ':'')+escHtml(k.category)+' <em>'+k.moviecount+'</em></span>';
-      if(sub.length) h += buildTree(k.id, depth+1);
+      if(sub.length){
+        // 深度≥1的子分类放入折叠容器，默认隐藏（点击父级展开），板块大幅缩小
+        if(depth>=1){
+          h += '<span class="allcat-fold" id="fold'+k.id+'" style="display:none;">'+buildTree(k.id, depth+1)+'</span>';
+        }else{
+          h += buildTree(k.id, depth+1);
+        }
+      }
     });
     return h;
   }
@@ -1344,6 +1341,15 @@ function loadAllCat(catid, name, el){
   // 高亮当前点击
   document.querySelectorAll('.allcat-top,.allcat-chip').forEach(x=>x.classList.remove('active'));
   if(el) el.classList.add('active');
+  // 若该分类有折叠的子分类，点击时展开（板块紧凑但入口完整）
+  var fold = document.getElementById('fold'+catid);
+  if(fold){
+    if(fold.style.display==='none'){
+      fold.style.display='inline';
+    }else{
+      fold.style.display='none';
+    }
+  }
   // 调用补丁的loadCat加载该分类全部视频（滚动到分类视频区）
   if(typeof window.loadCat === 'function'){
     var catEl = document.getElementById('catHeader');
