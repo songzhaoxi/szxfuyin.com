@@ -252,6 +252,62 @@ async function handleRequest(request) {
     return handleFuyinStream(request, url.searchParams);
   }
 
+  // 🔥 一站式播放路由：接收movid+urlid，内部获取真实URL后代理视频流
+  if (path === '/proxy/fuyin/play') {
+    const movid = url.searchParams.get('movid');
+    const urlid = url.searchParams.get('urlid');
+    if (!movid || !urlid) {
+      return new Response(JSON.stringify({success:false,message:'缺少movid或urlid'}),{status:400,headers:{'Content-Type':'application/json'}});
+    }
+    try {
+      // 第一步：从福音TV获取真实视频URL
+      const apiUrl = `${CONFIG.FUYIN_API_BASE}/url?movid=${encodeURIComponent(movid)}&urlid=${encodeURIComponent(urlid)}&type=1&lang=zh`;
+      const apiResp = await fetch(apiUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'application/json',
+          'Referer': 'https://www.fuyin.tv/'
+        }
+      });
+      const data = await apiResp.json();
+      let videoUrl = null;
+      if (data && data.data && data.data.url) videoUrl = data.data.url;
+      else if (data && data.url) videoUrl = data.url;
+      else if (data && data.data && data.data.path) videoUrl = data.data.path;
+      
+      if (!videoUrl) {
+        return new Response(JSON.stringify({success:false,message:'未获取到视频地址'}),{headers:{'Content-Type':'application/json'}});
+      }
+      
+      // 第二步：代理视频流
+      const decodedUrl = decodeURIComponent(videoUrl);
+      const reqHeaders = {
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36',
+        'Accept': 'video/mp4,video/*,*/*',
+        'Referer': 'https://www.fuyin.tv/',
+        'Origin': 'https://www.fuyin.tv',
+      };
+      const clientRange = request.headers.get('Range');
+      if (clientRange) reqHeaders['Range'] = clientRange;
+      
+      const videoResp = await fetch(decodedUrl, { headers: reqHeaders });
+      const respHeaders = new Headers(videoResp.headers);
+      respHeaders.set('Access-Control-Allow-Origin', '*');
+      respHeaders.set('Access-Control-Expose-Headers', 'Content-Length,Content-Range,Accept-Ranges');
+      respHeaders.delete('content-encoding');
+      respHeaders.delete('transfer-encoding');
+      
+      if (decodedUrl.includes('.m3u8')) respHeaders.set('Content-Type', 'application/vnd.apple.mpegurl');
+      else respHeaders.set('Content-Type', 'video/mp4');
+      respHeaders.set('Accept-Ranges', 'bytes');
+      respHeaders.set('Cache-Control', 'public, max-age=3600');
+      
+      return new Response(videoResp.body, { status: videoResp.status, headers: respHeaders });
+    } catch(e) {
+      return new Response(JSON.stringify({success:false,message:e.message}),{status:500,headers:{'Content-Type':'application/json'}});
+    }
+  }
+
   // 支持直接 /proxy?url=xxx 的简化代理方式
   if (path === '/proxy') {
     return handleFuyinStream(request, url.searchParams);
