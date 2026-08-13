@@ -4,7 +4,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var CFG_KEY = 'avatar_ai_cfg_v206';
   var CFG = {
-    img: 'avatar_3d.png',
+    img: 'avatar_3d.png?v=206',
     mouthX: 0.50, mouthY: 0.56, mouthW: 0.13, mouthH: 0.07,
     eyeY: 0.47, eyeGap: 0.10, eyeW: 0.055, eyeH: 0.028,
     voiceRate: 0.98, voicePitch: 0.82
