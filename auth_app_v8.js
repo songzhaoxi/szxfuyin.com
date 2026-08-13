@@ -51,6 +51,11 @@
     if (tip) tip.style.display = 'none';
   }
   function speak(text, onEnd) {
+    /* ===== 统一语音出口：全部交给3D数字人引擎（AvatarAI），彻底杜绝双声音 ===== */
+    if (window.AvatarAI && window.AvatarAI.speak) {
+      try { window.AvatarAI.speak(text, { onEnd: onEnd }); } catch (e) {}
+      return;
+    }
     try {
       if (lastVoice) speechSynthesis.cancel();
       var u = new SpeechSynthesisUtterance(text);

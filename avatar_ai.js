@@ -4,7 +4,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var CFG_KEY = 'avatar_ai_cfg_v209';
   var CFG = {
-    img: 'avatar_3d.png?v=215',
+    img: 'avatar_3d.png?v=216',
     mouthX: 0.50, mouthY: 0.56, mouthW: 0.14, mouthH: 0.07,
     eyeY: 0.47, eyeGap: 0.10, eyeW: 0.055, eyeH: 0.028,
     browY: 0.44, browGap: 0.10, browW: 0.07,
@@ -12,7 +12,7 @@
   };
   try { var _c = JSON.parse(localStorage.getItem(CFG_KEY) || '{}'); for (var k in _c) CFG[k] = _c[k]; } catch (e) {}
   var canvas, ctx, img = null, imgW = 0, imgH = 0;
-  var st = { talking: false, mouth: 0, blink: 0, mood: 'joy', tilt: 0, bob: 0, nod: 0, shake: 0, wave: 0, bow: 0, brow: 0, t: 0, idleT: 0 };
+  var st = { talking: false, mouth: 0, blink: 0, mood: 'joy', tilt: 0, bob: 0, nod: 0, shake: 0, wave: 0, bow: 0, brow: 0, t: 0, idleT: 0, walking: true, walk: 0, walkX: 0, armWave: 0 };
   var audioCtx = null, analyser = null, audioEl = null, audioSrc = null, bubbleTimer = null;
   var BIBLE = null, bibleReady = false;
 
@@ -66,23 +66,40 @@
     if (st.shake > 0) st.shake -= 0.05;
     if (st.wave > 0) st.wave -= 0.03;
     if (st.bow > 0) st.bow -= 0.03;
+    /* 自动走路：空闲时来回踱步（腿部摆动+身体位移），说话时站定 */
+    if (st.talking) {
+      st.walking = false;
+      st.walkX += (0 - st.walkX) * 0.045;
+    } else {
+      st.walking = true;
+      st.walk += 0.115;
+      st.walkX = Math.sin(st.walk * 0.72) * (canvas.width * 0.05);
+    }
+    st.armWave = st.wave > 0 ? Math.sin(st.wave * 9) * Math.min(1, st.wave) : 0;
     draw();
   }
   function draw() {
     var cw = canvas.width, ch = canvas.height;
     ctx.clearRect(0, 0, cw, ch); if (!img) return;
-    /* 人物完整占满舞台，展示全身全貌，不被裁剪遮挡 */
-    var area = ch * 0.98;
-    var scale = Math.min(cw / imgW, area / imgH);
+    /* 全身布局：上半身图片 + 下方程序化双腿，整体垂直居中，完整展示全身全貌 */
+    var scale = Math.min(cw * 0.85 / imgW, ch * 0.50 / imgH);
     var dw = imgW * scale, dh = imgH * scale;
-    var dx = (cw - dw) / 2, dy = ch * 0.01 + st.bob;
+    var legLen = Math.max(dh * 0.55, dw * 0.14);
+    var totalH = dh + legLen;
+    var dx = (cw - dw) / 2 + st.walkX;
+    var dy = Math.max(ch * 0.02, (ch - totalH) / 2) + st.bob;
+    /* 先画双腿（在身体后方下方，走路时前后摆动） */
+    drawLegs(dx, dw, dy + dh, legLen);
+    /* 身体旋转（点头/摇头/鞠躬/挥手/走路摇摆） */
     ctx.save();
-    var rcx = cw / 2, rcy = dy + dh / 2;
+    var rcx = cw / 2 + st.walkX, rcy = dy + dh / 2;
     ctx.translate(rcx, rcy);
     var rot = st.tilt;
     if (st.shake > 0) rot += Math.sin(st.shake * 14) * 0.16 * Math.min(1, st.shake * 3);
     if (st.nod > 0) rot += Math.sin(st.nod * 9) * 0.10 * Math.min(1, st.nod * 3);
     if (st.bow > 0) rot += 0.22 * Math.min(1, st.bow * 2.5);
+    if (st.wave > 0) rot += Math.sin(st.wave * 9) * 0.07 * Math.min(1, st.wave);
+    if (st.walking) rot += Math.sin(st.walk * 1.4) * 0.03;
     ctx.rotate(rot);
     ctx.translate(-rcx, -rcy);
     var glow = st.mood === 'praise' ? 'rgba(255,215,90,0.5)' : st.mood === 'comfort' ? 'rgba(120,180,255,0.4)' : 'rgba(212,175,55,0.32)';
@@ -92,6 +109,27 @@
     drawMouth(dx, dy, dw, dh);
     if (st.blink > 0.02) drawEyes(dx, dy, dw, dh);
     if (st.mood === 'think' || st.mood === 'wonder' || st.mood === 'sad' || st.mood === 'comfort' || st.brow > 0.15) drawBrows(dx, dy, dw, dh);
+    ctx.restore();
+  }
+  /* 程序化绘制双腿（补全全身形态 + 自动走路摆动） */
+  function drawLegs(dx, dw, hipY, legLen) {
+    var cx = dx + dw * 0.5;
+    var legW = Math.max(7, dw * 0.085);
+    var swing = st.walking ? Math.sin(st.walk * 1.5) * legW * 1.7 : 0;
+    var hip = Math.max(0, legLen * 0.12);
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#3b2f27'; ctx.lineWidth = legW;
+    /* 左腿 */
+    ctx.beginPath(); ctx.moveTo(cx - legW * 0.8, hipY + hip);
+    ctx.lineTo(cx - legW * 0.8 + swing, hipY + legLen); ctx.stroke();
+    /* 右腿 */
+    ctx.beginPath(); ctx.moveTo(cx + legW * 0.8, hipY + hip);
+    ctx.lineTo(cx + legW * 0.8 - swing, hipY + legLen); ctx.stroke();
+    /* 鞋子 */
+    ctx.fillStyle = '#241c17';
+    ctx.beginPath(); ctx.ellipse(cx - legW * 0.8 + swing, hipY + legLen, legW * 0.72, legW * 0.42, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + legW * 0.8 - swing, hipY + legLen, legW * 0.72, legW * 0.42, 0, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
   function drawMouth(dx, dy, dw, dh) {
@@ -182,14 +220,18 @@
   function speakText(text, opts) {
     opts = opts || {}; if (!text) return;
     try { speechSynthesis.cancel(); } catch (e) {}
-    var u = new SpeechSynthesisUtterance(String(text));
-    u.lang = 'zh-CN'; u.rate = CFG.voiceRate; u.pitch = CFG.voicePitch;
-    var pick = pickMaleVoice();
-    if (pick) u.voice = pick;
-    u.onstart = function () { st.talking = true; };
-    u.onend = function () { st.talking = false; if (opts.onEnd) opts.onEnd(); };
-    u.onerror = function () { st.talking = false; if (opts.onEnd) opts.onEnd(); };
-    speechSynthesis.speak(u);
+    /* 延迟一帧确保旧语音彻底停止，杜绝安卓上双声音叠加；统一中年男声 */
+    setTimeout(function () {
+      try { speechSynthesis.cancel(); } catch (e) {}
+      var u = new SpeechSynthesisUtterance(String(text));
+      u.lang = 'zh-CN'; u.rate = CFG.voiceRate; u.pitch = CFG.voicePitch;
+      var pick = pickMaleVoice();
+      if (pick) u.voice = pick;
+      u.onstart = function () { st.talking = true; };
+      u.onend = function () { st.talking = false; if (opts.onEnd) opts.onEnd(); };
+      u.onerror = function () { st.talking = false; if (opts.onEnd) opts.onEnd(); };
+      speechSynthesis.speak(u);
+    }, 60);
   }
   function greeting() {
     var name = mem.name;
