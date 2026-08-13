@@ -165,19 +165,21 @@ function playMedia(uid, mp3Url, bookId, unitNum) {
   var seq = (unitNum < 10 ? '0' : '') + unitNum;
   var playerUrl = 'https://xue2.52fuyin.com/file/doc/' + bookId + '/' + seq + '/html5.html';
   var playerHtml = '<div id="vp-' + uid + '" style="margin-top:15px;border:2px solid #337ab7;border-radius:6px;overflow:hidden;background:#8a8a8a">';
-  // iSpring播放器iframe——直接嵌入完整播放画面
+  // 播放区标题
+  playerHtml += '<div style="padding:10px 15px;background:#337ab7;color:#fff;font-size:16px">';
+  playerHtml += '📖 第' + unitNum + '课 · 点击下方画面播放 ▶ 画面与语音同步一致';
+  playerHtml += '</div>';
+  // iSpring播放器iframe——画面与语音同步的主播放器（唯一音源，杜绝双音冲突）
   playerHtml += '<div class="video-player"><iframe src="' + playerUrl + '" allowfullscreen></iframe></div>';
-  // MP3音频内嵌播放
+  // MP3音频备选（不自动播放，避免与画面声音冲突）
   playerHtml += '<div style="padding:15px;background:#f9f9f9;border-top:1px solid #ddd">';
-  playerHtml += '<strong>🎵 MP3音频（内嵌播放）</strong><br>';
-  playerHtml += '<audio controls autoplay style="width:100%;max-width:500px;margin-top:8px"><source src="' + mp3Url + '" type="audio/mpeg"></audio>';
+  playerHtml += '<strong>🎵 MP3音频（内嵌播放）</strong> <small style="color:#999">如画面无声音，点此播放MP3（二选一，避免冲突）</small><br>';
+  playerHtml += '<audio controls preload="none" style="width:100%;max-width:500px;margin-top:8px"><source src="' + mp3Url + '" type="audio/mpeg"></audio>';
   playerHtml += '</div>';
   playerHtml += '</div>';
   $(playerHtml).insertAfter('#jumbo');
-  var a = document.querySelector('#vp-' + uid + ' audio');
-  curMedia = {audio: a, uid: uid};
+  curMedia = {audio: document.querySelector('#vp-' + uid + ' audio'), uid: uid};
   curPlayerDiv = document.getElementById('vp-' + uid);
-  a.play().catch(function(){});
   // 滚动到播放器
   curPlayerDiv.scrollIntoView({behavior:'smooth'});
 }
