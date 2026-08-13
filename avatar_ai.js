@@ -4,7 +4,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var CFG_KEY = 'avatar_ai_cfg_v209';
   var CFG = {
-    img: 'avatar_3d.png?v=209',
+    img: 'avatar_3d.png?v=210',
     mouthX: 0.50, mouthY: 0.56, mouthW: 0.14, mouthH: 0.07,
     eyeY: 0.47, eyeGap: 0.10, eyeW: 0.055, eyeH: 0.028,
     browY: 0.44, browGap: 0.10, browW: 0.07,
@@ -180,7 +180,7 @@
     var txt = name ? ('欢迎回来，' + name + '！我是你的圣经AI伙伴，新旧约66卷书我都熟读，今天想聊点什么？') : '欢迎来到兆西福音传递爱，我是你的圣经AI伙伴，新旧约66卷书我都熟读，有问必答，愿你平安。';
     showBubble(txt, 6000);
     /* 优先播放真实男声MP3（edge-tts YunjianNeural），失败回退浏览器TTS */
-    playMp3('voice/welcome.mp3?v=208', function () {});
+    playMp3('voice/welcome.mp3?v=210', function () {});
     setTimeout(function () {
       if (!st.talking && speechSynthesis) {
         speakText(txt.replace(/66卷书/g, '六十六卷书'));
