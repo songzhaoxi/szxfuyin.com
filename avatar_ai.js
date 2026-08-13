@@ -27,6 +27,7 @@
     img.src = CFG.img;
     fit(); window.addEventListener('resize', fit);
     try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); analyser = audioCtx.createAnalyser(); analyser.fftSize = 256; } catch (e) {}
+    if ('speechSynthesis' in window) { try { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = function () {}; } catch (e) {} }
     loadBible();
     requestAnimationFrame(loop);
     setTimeout(function () { greeting(); }, 1600);
@@ -154,15 +155,20 @@
       audioEl.play().catch(function () { st.talking = false; });
     } catch (e) { st.talking = false; }
   }
+  function pickMaleVoice() {
+    try {
+      var vs = speechSynthesis.getVoices() || [];
+      var zh = vs.filter(function (v) { return /zh|Chinese/i.test(v.lang + v.name); });
+      var male = zh.filter(function (v) { return /male|男|Yunyang|Yunjian|Daniel|Kangkang|Liang|Xiaoyi|Yunxi/i.test(v.name); });
+      return male[0] || zh[0] || null;
+    } catch (e) { return null; }
+  }
   function speakText(text, opts) {
     opts = opts || {}; if (!text) return;
     try { speechSynthesis.cancel(); } catch (e) {}
     var u = new SpeechSynthesisUtterance(String(text));
     u.lang = 'zh-CN'; u.rate = CFG.voiceRate; u.pitch = CFG.voicePitch;
-    var vs = speechSynthesis.getVoices();
-    var zh = vs.filter(function (v) { return /zh|Chinese/i.test(v.lang + v.name); });
-    var male = zh.filter(function (v) { return /male|男|Yunyang|Yunjian|Daniel/i.test(v.name); });
-    var pick = male[0] || zh[0];
+    var pick = pickMaleVoice();
     if (pick) u.voice = pick;
     u.onstart = function () { st.talking = true; };
     u.onend = function () { st.talking = false; if (opts.onEnd) opts.onEnd(); };
@@ -466,5 +472,4 @@
     showBubble(txt, 5000);
     speakText(txt);
   }
-  /*__MORE2__*/
 })();
