@@ -12,9 +12,18 @@
 </head>
 <body>
 <div class="auth-shell">
-  <!-- ===== 左侧：真实3D人物 ===== -->
+  <!-- ===== 左侧：会说话的圣经AI数字人（全身） ===== -->
   <div class="auth-stage" id="authStage">
-    <canvas id="threeCanvas"></canvas>
+    <canvas id="avatarCanvas"></canvas>
+    <!-- 圣经AI聊天问答 -->
+    <div class="ai-chat" id="aiChat">
+      <div class="ai-chat-head">✝ 圣经AI · 有问必答（66卷）</div>
+      <div class="ai-chat-body" id="aiChatLog"><div class="ai-msg ai">欢迎！问我任何圣经问题，例如「耶稣是谁」「诗篇23篇」…</div></div>
+      <div class="ai-chat-row">
+        <input id="aiChatInput" maxlength="80" placeholder="问我任何圣经问题…" onkeydown="if(event.key==='Enter')aiSend()">
+        <button class="ai-chat-btn" onclick="aiSend()">问 ➤</button>
+      </div>
+    </div>
     <div class="stage-overlay">
       <div class="stage-title">兆西福音传递爱</div>
       <div class="stage-sub">JESUS LOVES YOU ✝</div>
@@ -115,6 +124,25 @@
 <script src="js/GLTFLoader-r128.js"></script>
 <script src="auth_api_config.js?v=9"></script>
 <script src="auth_app_v8.js?v=9"></script>
+<script src="avatar_ai.js?v=206"></script>
+<script>
+/* ===== 圣经AI聊天交互 ===== */
+function escH(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'"',"'":'&#39;'}[c];});}
+function aiSend(){
+  var inp=document.getElementById('aiChatInput');if(!inp)return;
+  var q=inp.value.trim();if(!q)return;
+  var log=document.getElementById('aiChatLog');if(!log)return;
+  var d=document.createElement('div');d.className='ai-msg user';d.textContent=q;
+  log.appendChild(d);log.scrollTop=log.scrollHeight;inp.value='';
+  if(window.AvatarAI)AvatarAI.ask(q);
+}
+window.onAISay=function(text){
+  var log=document.getElementById('aiChatLog');if(!log)return;
+  var d=document.createElement('div');d.className='ai-msg ai';d.textContent=text;
+  log.appendChild(d);log.scrollTop=log.scrollHeight;
+};
+window.addEventListener('load',function(){ if(window.AvatarAI)AvatarAI.init(); });
+</script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"a69169ae778848939d3ece0ba67d2718","r":1}' crossorigin="anonymous"></script>
 </body>
 </html>
