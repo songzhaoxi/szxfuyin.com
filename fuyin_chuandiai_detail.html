@@ -1,0 +1,186 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>福音传递爱圣经学院研读课程</title>
+<meta name="keywords" content="有声圣经学习,圣经学习,圣经教学" />
+<meta name="description" content="圣经学苑在线交互多媒体圣经教学网站">
+<link rel="stylesheet" href="bootstrap.min.css?v=9" >
+<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap-theme.min.css" >
+<!--[if lt IE 9]>
+  <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+  <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+<body>
+<style>
+.cen{text-align:center}
+.mobile-table .mobile-table-row{position:relative;display:flex;align-items:center;height:44px;border-bottom:1px solid #e2e2e2}
+.mobile-table .mobile-table-row>span:first-child{width:80px}
+.mobile-table .mobile-table-row-more{background-color:#f8f8f8}
+.mobile-table .mobile-table-row-more>div{display:flex;align-items:center;height:40px;padding:0 10px}
+.mobile-table .mobile-table-row-more span{margin-left:30px}
+.mobile-table .mobile-table-row-more a{margin-left:30px}
+.mobile-table .mobile-table-row-more span:first-child{margin-left:0}
+.mobile-table .mtr-max{flex:1}
+.mobile-table label{position:absolute;left:55px}
+@media screen and (min-width:500px){.mobile-table{display:none}}
+@media screen and (max-width:500px){.desktop-table{display:none}}
+.desktop-table{width:100%;border-collapse:collapse}
+.desktop-table th,.desktop-table td{border:1px solid #ddd;padding:8px 12px;text-align:center}
+.desktop-table th{background:#f5f5f5}
+.desktop-table .turl{margin:0 5px}
+.audio-player{margin:10px 0;padding:10px;background:#f9f9f9;border-radius:4px}
+.video-player{margin:10px 0;border:1px solid #ddd;border-radius:4px;overflow:hidden;position:relative;background:#8a8a8a}
+.video-player iframe{width:100%;height:480px;border:0}
+@media screen and (max-width:500px){.video-player iframe{height:280px}}
+</style>
+
+<nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-nav">
+        <span class="sr-only">Toggle</span>
+        <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="fuyin_chuandiai.html">福音传递爱圣经学院研读课程</a>
+    </div>
+    <div class="collapse navbar-collapse" id="bs-nav">
+      <ul class="nav navbar-nav">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">授教师 <span class="caret"></span></a>
+          <ul class="dropdown-menu" id="teacher-menu"></ul>
+        </li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">课程分类 <span class="caret"></span></a>
+          <ul class="dropdown-menu" id="cat-menu"></ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<section class="main">
+<div class="container">
+  <div class="jumbotron" id="jumbo">
+    <h1 id="ctitle">加载中... <small>课程目录</small></h1>
+    <p id="cteacher">授教师: 加载中...</p>
+    <p><a class="btn btn-primary btn-lg" href="fuyin_chuandiai.html" role="button">返回课程列表</a></p>
+  </div>
+
+  <table class="desktop-table" id="desktop-table">
+    <thead><tr><th>讲义</th><th>主题</th><th>资源下载</th></tr></thead>
+    <tbody id="desktop-tbody"></tbody>
+  </table>
+
+  <div class="mobile-table" id="mobile-table">
+    <div class="mobile-table-row"><span>讲义</span><span class="mtr-max">主题</span></div>
+  </div>
+</div>
+</section>
+
+<footer class="my-footer" style="text-align:center;padding:20px;background:#f5f5f5;margin-top:30px">
+  <p>
+    <a href="https://szxfuyin.com/">圣经学苑</a>|
+    <a href="https://szxfuyin.com/">福音影视网</a>|
+    <a href="https://szxfuyin.com/">查经大全</a>|
+    <a href="https://szxfuyin.com/">信仰宝库</a>
+  </p>
+  <p>Email:contact@szxfuyin.com 中文域名:szxfuyin.com</p>
+</footer>
+
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery_lazyload/1.9.7/jquery.lazyload.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+ <script src="fuyin_chuandiai_data.js?v=9"></script>
+<script>
+$(function() {
+  var id = parseInt(new URLSearchParams(window.location.search).get('id')) || 1;
+
+  var course = null;
+  for (var ci = 0; ci < COURSE_DATA.length; ci++) {
+    for (var bi = 0; bi < COURSE_DATA[ci].books.length; bi++) {
+      if (COURSE_DATA[ci].books[bi].id === id) {
+        course = COURSE_DATA[ci].books[bi];
+        break;
+      }
+    }
+    if (course) break;
+  }
+  if (!course) { course = COURSE_DATA[0].books[0]; id = course.id; }
+
+  document.title = course.title + ' - ' + course.teacher + ' - 福音传递爱圣经学院研读课程';
+  $('#ctitle').html(course.title + ' <small>课程目录</small>');
+  $('#cteacher').text('授教师: ' + course.teacher);
+
+  // 导航菜单
+  var tmenu = '', cmenu = '';
+  for (var i = 0; i < COURSE_DATA.length; i++) {
+    cmenu += '<li><a href="fuyin_chuandiai.html#cat' + (i+1) + '">' + COURSE_DATA[i].cat + '</a></li>';
+    if (i < COURSE_DATA.length - 1) cmenu += '<li role="separator" class="divider"></li>';
+    for (var j = 0; j < COURSE_DATA[i].books.length; j++) {
+      var b = COURSE_DATA[i].books[j];
+      tmenu += '<li><a href="fuyin_chuandiai_detail.html?id=' + b.id + '">' + b.teacher + '</a></li>';
+      tmenu += '<li role="separator" class="divider"></li>';
+    }
+  }
+  $('#teacher-menu').html(tmenu);
+  $('#cat-menu').html(cmenu);
+
+  // 生成单元列表
+  var units = parseInt(course.units) || 20;
+  var dRows = '', mRows = '';
+  for (var u = 1; u <= units; u++) {
+    var seq = (u < 10 ? '0' : '') + u;
+    var uid = 'u' + id + '_' + u;
+    var mp3 = 'https://xue2.52fuyin.com/file/mp3/' + id + '/' + seq + '.mp3';
+    var doc = 'https://xue2.52fuyin.com/file/doc/' + id + '/' + seq + '.pdf';
+
+    dRows += '<tr><td>' + seq + '</td>';
+    dRows += '<td><a href="javascript:void(0)" onclick="playMedia(\'' + uid + '\',\'' + mp3 + '\',' + id + ',' + u + ')">第' + u + '课</a></td>';
+    dRows += '<td><a target="_blank" class="turl" href="' + mp3 + '">MP3 <i class="glyphicon glyphicon-download-alt"></i></a> ';
+    dRows += '<a target="_blank" class="turl" href="' + doc + '">讲义 <i class="glyphicon glyphicon-download-alt"></i></a></td></tr>';
+
+    mRows += '<div class="mobile-table-row">';
+    mRows += '<span>' + seq + '</span><label></label>';
+    mRows += '<span class="mtr-max"><a href="javascript:void(0)" onclick="playMedia(\'' + uid + '\',\'' + mp3 + '\',' + id + ',' + u + ')">第' + u + '课</a></span>';
+    mRows += '<span onclick="$(\'#mm-' + uid + '\').toggle()">详情</span></div>';
+    mRows += '<div class="mobile-table-row-more" id="mm-' + uid + '" style="display:none">';
+    mRows += '<div></div><div><span>资源下载：</span>';
+    mRows += '<a target="_blank" class="turl" href="' + mp3 + '">MP3 <i class="glyphicon glyphicon-download-alt"></i></a> ';
+    mRows += '<a target="_blank" class="turl" href="' + doc + '">讲义 <i class="glyphicon glyphicon-download-alt"></i></a>';
+    mRows += '</div></div>';
+  }
+  $('#desktop-tbody').html(dRows);
+  $('#mobile-table').append(mRows);
+});
+
+var curMedia = null;
+var curPlayerDiv = null;
+function playMedia(uid, mp3Url, bookId, unitNum) {
+  if (curMedia) { curMedia.audio.pause(); }
+  if (curPlayerDiv) { curPlayerDiv.remove(); curPlayerDiv = null; }
+  var seq = (unitNum < 10 ? '0' : '') + unitNum;
+  var playerUrl = 'https://xue2.52fuyin.com/file/doc/' + bookId + '/' + seq + '/html5.html';
+  var playerHtml = '<div id="vp-' + uid + '" style="margin-top:15px;border:2px solid #337ab7;border-radius:6px;overflow:hidden;background:#8a8a8a">';
+  // iSpring播放器iframe——直接嵌入完整播放画面
+  playerHtml += '<div class="video-player"><iframe src="' + playerUrl + '" allowfullscreen></iframe></div>';
+  // MP3音频内嵌播放
+  playerHtml += '<div style="padding:15px;background:#f9f9f9;border-top:1px solid #ddd">';
+  playerHtml += '<strong>🎵 MP3音频（内嵌播放）</strong><br>';
+  playerHtml += '<audio controls autoplay style="width:100%;max-width:500px;margin-top:8px"><source src="' + mp3Url + '" type="audio/mpeg"></audio>';
+  playerHtml += '</div>';
+  playerHtml += '</div>';
+  $(playerHtml).insertAfter('#jumbo');
+  var a = document.querySelector('#vp-' + uid + ' audio');
+  curMedia = {audio: a, uid: uid};
+  curPlayerDiv = document.getElementById('vp-' + uid);
+  a.play().catch(function(){});
+  // 滚动到播放器
+  curPlayerDiv.scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
