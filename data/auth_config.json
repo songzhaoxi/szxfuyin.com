@@ -1,0 +1,17 @@
+{
+  "sms_provider": "aliyun",
+  "sms_aliyun": {
+    "accessKeyId": "PLACEHOLDER_AK",
+    "accessKeySecret": "PLACEHOLDER_SK",
+    "signName": "福音传播爱",
+    "templateCode": "SMS_XXXXXXXXX"
+  },
+  "smtp": {
+    "host": "smtp.qq.com",
+    "port": 465,
+    "user": "your_email@qq.com",
+    "pass": "PLACEHOLDER_AUTH_CODE",
+    "fromName": "福音传播爱"
+  },
+  "admin_key": "admin888"
+}

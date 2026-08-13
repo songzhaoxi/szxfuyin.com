@@ -1,0 +1,69 @@
+{
+    "projectType": "java",
+    "title": "Java 项目",
+    "description": "标准 Gradle 项目结构，支持构建、测试和打包",
+    "server": {
+        "enabled": false,
+        "port": 8080,
+        "autoStart": false
+    },
+    "preview": {
+        "type": "terminal",
+        "url": "",
+        "showPreviewButton": false
+    },
+    "commands": [
+        {
+            "id": "gradle_init",
+            "label": "初始化 Gradle Wrapper",
+            "command": "gradle wrapper --gradle-version 8.5",
+            "workingDir": ".",
+            "shell": true
+        },
+        {
+            "id": "gradle_build",
+            "label": "构建项目",
+            "command": "./gradlew build || gradle build",
+            "workingDir": ".",
+            "shell": true
+        },
+        {
+            "id": "gradle_run",
+            "label": "运行程序",
+            "command": "./gradlew run || gradle run",
+            "workingDir": ".",
+            "shell": true
+        },
+        {
+            "id": "gradle_test",
+            "label": "运行测试",
+            "command": "./gradlew test || gradle test",
+            "workingDir": ".",
+            "shell": true
+        },
+        {
+            "id": "gradle_jar",
+            "label": "打包 JAR",
+            "command": "./gradlew jar || gradle jar",
+            "workingDir": ".",
+            "shell": true
+        },
+        {
+            "id": "gradle_clean",
+            "label": "清理构建",
+            "command": "./gradlew clean || gradle clean",
+            "workingDir": ".",
+            "shell": true
+        },
+        {
+            "id": "gradle_tasks",
+            "label": "查看所有任务",
+            "command": "./gradlew tasks || gradle tasks",
+            "workingDir": ".",
+            "shell": true
+        }
+    ],
+    "export": {
+        "enabled": false
+    }
+}

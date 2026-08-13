@@ -1,0 +1,34 @@
+# ============================================================
+# 福音传播爱 - 认证系统 Cloudflare Workers 部署配置
+# 部署命令: npx wrangler deploy
+# 需先登录: npx wrangler login
+# ============================================================
+name = "szxfuyin-auth"
+main = "auth-worker.js"
+compatibility_date = "2025-01-01"
+
+# KV 命名空间（认证数据存储）
+# 创建命令: npx wrangler kv namespace create AUTH_KV
+# 把输出的 id 填到下面（替换 REPLACE_WITH_YOUR_KV_NAMESPACE_ID）
+[[kv_namespaces]]
+binding = "AUTH_KV"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+
+# ⚠️ 重要：如果 szxfuyin.com 的 DNS 托管在 GitHub Pages（当前情况），
+# 不要使用下方 routes（域名不在 Cloudflare 时路由不生效）。
+# 直接使用 workers.dev 域名访问: https://szxfuyin-auth.<你的账号>.workers.dev
+# 前端 auth.html?auth_api=https://szxfuyin-auth.<你的账号>.workers.dev/api/auth 即可
+# routes = [
+#   { pattern = "szxfuyin.com/api/auth/*", zone_name = "szxfuyin.com" }
+# ]
+
+# ============================================================
+# 🔥 真实短信/邮箱通道配置（二选一，也可都不配=开发模式）
+# 方式1（推荐，部署后在线配置）：部署后调用管理接口填入，无需改这里
+#   POST https://szxfuyin-auth.<账号>.workers.dev/api/auth/admin/config
+#   Headers: X-Admin-Key: admin888
+#   Body: { "sms_provider":"aliyun", "aliyun":{...}, "resend_api_key":"re_xxx" }
+# 方式2（此处配置）：
+# [vars]
+# RESEND_API_KEY = "re_xxxxxxxxxxxx"   # 邮箱验证码（resend.com 免费注册）
+# ============================================================
