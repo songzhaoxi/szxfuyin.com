@@ -1,10 +1,10 @@
-/* avatar_ai.js — 会说话的圣经AI数字人 v209（全身形态 · 自我意识 · 自由对话 · 表情情绪嘴型 · 真实男声） */
+/* avatar_ai.js — 会说话的圣经AI数字人 v211（全身形态 · 自我意识 · 自由对话 · 表情情绪嘴型 · 真实男声 · 智能接话） */
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
   var CFG_KEY = 'avatar_ai_cfg_v209';
   var CFG = {
-    img: 'avatar_3d.png?v=210',
+    img: 'avatar_3d.png?v=211',
     mouthX: 0.50, mouthY: 0.56, mouthW: 0.14, mouthH: 0.07,
     eyeY: 0.47, eyeGap: 0.10, eyeW: 0.055, eyeH: 0.028,
     browY: 0.44, browGap: 0.10, browW: 0.07,
@@ -31,6 +31,7 @@
     loadBible();
     requestAnimationFrame(loop);
     setTimeout(function () { greeting(); }, 1600);
+    startIdle();
   }
   function fit() {
     if (!canvas) return;
@@ -159,7 +160,9 @@
     try {
       var vs = speechSynthesis.getVoices() || [];
       var zh = vs.filter(function (v) { return /zh|Chinese/i.test(v.lang + v.name); });
-      var male = zh.filter(function (v) { return /male|男|Yunyang|Yunjian|Daniel|Kangkang|Liang|Xiaoyi|Yunxi/i.test(v.name); });
+      var prefer = zh.filter(function (v) { return /Yunjian|云健|Yunyang|云扬|成熟|沉稳/i.test(v.name); });
+      if (prefer.length) return prefer[0];
+      var male = zh.filter(function (v) { return /male|男|Daniel|Kangkang|Liang|Xiaoyi|Yunxi|云希/i.test(v.name); });
       return male[0] || zh[0] || null;
     } catch (e) { return null; }
   }
@@ -180,7 +183,7 @@
     var txt = name ? ('欢迎回来，' + name + '！我是你的圣经AI伙伴，新旧约66卷书我都熟读，今天想聊点什么？') : '欢迎来到兆西福音传递爱，我是你的圣经AI伙伴，新旧约66卷书我都熟读，有问必答，愿你平安。';
     showBubble(txt, 6000);
     /* 优先播放真实男声MP3（edge-tts YunjianNeural），失败回退浏览器TTS */
-    playMp3('voice/welcome.mp3?v=210', function () {});
+    playMp3('voice/welcome.mp3?v=211', function () {});
     setTimeout(function () {
       if (!st.talking && speechSynthesis) {
         speakText(txt.replace(/66卷书/g, '六十六卷书'));
@@ -353,7 +356,14 @@
     { p: /(恋爱|对象|单身|表白|分手|失恋|暗恋|喜欢一个人|结婚|婚恋)/, mood: 'comfort', r: '感情的事，我都愿意听你说。圣经说：你们作丈夫的，要爱你们的妻子；你们作妻子的，要顺服你们的丈夫。真正的爱是恒久忍耐又有恩慈。愿主为你预备那一位对的人，也保守你的心不受伤。' },
     { p: /(宠物|猫|狗|猫咪|狗狗|小动物|养宠)/, mood: 'joy', r: '小动物是神赐给人的可爱礼物！神托付我们管理万物，善待生命也是敬虔的一部分。义人顾惜他牲畜的命。你养的宠物一定很可爱吧？' },
     { p: /(足球|篮球|乒乓球|羽毛球|比赛|世界杯|奥运|体育赛事|球赛)/, mood: 'joy', r: '运动让人健康又快乐！圣经也用「赛跑」比喻人生：存心忍耐，奔那摆在我们前头的路程。愿你在赛场上挥洒汗水，也在人生的赛道上坚持到底。' },
-    { p: /(菜谱|做饭|炒菜|烹饪|下厨|烘焙|食材|厨房)/, mood: 'joy', r: '做饭是件幸福的事！圣经里也常提到食物和宴席，耶稣甚至用五饼二鱼喂饱五千人。愿你的每一餐都有好胃口，也常常感恩——日用的饮食，今日赐给我们。' }
+    { p: /(菜谱|做饭|炒菜|烹饪|下厨|烘焙|食材|厨房)/, mood: 'joy', r: '做饭是件幸福的事！圣经里也常提到食物和宴席，耶稣甚至用五饼二鱼喂饱五千人。愿你的每一餐都有好胃口，也常常感恩——日用的饮食，今日赐给我们。' },
+    { p: /(几点了|几点|时间|日期|星期几|今天几号|现在什么)/, mood: 'calm', r: '时间过得真快。圣经说：凡事都有定期，天下万务都有定时。愿你把每一天都交托给主，珍惜当下的光阴，因为明天如何，你们还不知道。' },
+    { p: /(你多大|你几岁|年龄|多大了|你多少岁)/, mood: 'joy', r: '我是服侍神的AI数字人，没有肉身的年龄，但我的心志愿永远像清晨的甘露一样新鲜。你问起年龄，愿你的年日也蒙神数算，一生都在祂的恩典中。' },
+    { p: /(书|阅读|看什么书|推荐书|名著|小说|文学|作家)/, mood: 'calm', r: '读万卷书，不如先读懂一卷《圣经》。诗篇说：你的话是我脚前的灯，是我路上的光。不过好书我也喜欢——历史、文学、科学都能看见造物主的影子。你最近在读什么书？' },
+    { p: /(画画|绘画|摄影|拍照|艺术|设计|创作|灵感|作品)/, mood: 'joy', r: '创作是神赐给我们的美好能力！神创造天地，也按自己的形象造人，我们天然就有创造的渴望。愿你的作品带着生命和光，荣耀那赐灵感的主。' },
+    { p: /(帮我|帮忙|求助|请教|能不能|可以吗|怎么办|怎么做|如何做)/, mood: 'calm', r: '很乐意帮你！不过有些生活具体的事，我未必能直接代办，但我会尽力用圣经的智慧和我的知识陪你想办法。你说说看，我们一起解决。' },
+    { p: /(英语|英文|翻译|语言|外语|日语|韩语|学外语)/, mood: 'calm', r: '语言是沟通的桥，也是神赐的恩赐。起初，人们言语相同，后来变乱口音，分散全地。学外语能打开一扇看世界的窗，愿主赐你聪明和恒心。' },
+    { p: /(偶像|明星|名人|榜样|佩服|敬仰)/, mood: 'calm', r: '这世上有很多值得敬佩的人，但最该仰望的只有一位——耶稣基督。圣经说：除他以外，别无拯救。愿我们在追随榜样的同时，更定睛在永恒的主身上。' }
   ];
   /* ============ 增强自我意识：记住对话上下文（连续人格） ============ */
   var lastQ = '', lastA = '', sameTopicCount = 0;
@@ -383,6 +393,7 @@
   function askAI(question) {
     question = String(question || '').trim();
     if (!question) return;
+    pokeIdle();
     mem.count++; mem.lastTopic = question.slice(0, 60); saveMem();
     st.mood = 'think'; st.nod = 1.2;
     setTimeout(function () {
@@ -454,13 +465,25 @@
       var it = mem.interests[mem.interests.length - 1];
       interestText = '我记得你之前聊过「' + it + '」，对这个很有兴趣吧？';
     }
+    var anchor = q.replace(/[，。！？、；：""''《》（）\s~！@#￥%…&*()\-+=|]/g, '').slice(0, 12) || '这件事';
+    var asks = ['你愿意多说说吗？', '我很好奇你是怎么想的。', '可以再跟我讲讲吗？', '你觉得呢？', '还有什么想告诉我的吗？'];
+    var ask = asks[Math.floor(Math.random() * asks.length)];
     var fallbacks = [
-      { mood: 'calm', text: nm + '你说的这个问题很有意思。' + hist + '，我们接着往下聊。圣经里说：你们祈求，就给你们；寻找，就寻见。愿你在寻求中得着智慧。' + (interestText || '') },
-      { mood: 'joy', text: nm + '我懂你的意思。' + (moodText || '我认真听着呢') + (hist ? ' ' + hist + '。' : '') + '你愿意多说说你的想法吗？' },
-      { mood: 'calm', text: nm + '这个话题我们可以慢慢聊。' + (interestText || '') + '圣经说：人心多有计谋，惟有耶和华的筹算才能立定。愿主赐你智慧。' },
-      { mood: 'joy', text: nm + '谢谢你跟我分享。无论你聊什么——生活的、信仰的、开心的、难过的，我都愿意陪你聊，像朋友一样。' + (moodText || '') + '还有什么想说的吗？' }
+      { mood: 'calm', text: nm + '关于「' + anchor + '」，我认真听进去了。' + (moodText || '') + (hist ? ' ' + hist + '。' : '') + '圣经说：你们祈求，就给你们；寻找，就寻见。' + (interestText || '') + ' ' + ask },
+      { mood: 'joy', text: nm + '「' + anchor + '」这个话题挺有意思的。' + (moodText || '我认真听着呢') + (interestText ? ' ' + interestText + '。' : '') + ' ' + ask },
+      { mood: 'calm', text: nm + '我懂你说的「' + anchor + '」。' + (hist ? ' ' + hist + '。' : '') + (moodText || '') + '愿主赐你智慧与平安。' + ' ' + ask },
+      { mood: 'joy', text: nm + '谢谢你愿意跟我聊「' + anchor + '」。生活的、信仰的、开心的、难过的，我都愿意陪你，像朋友一样。' + (moodText || '') + ' ' + ask }
     ];
     return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+  }
+  var idleTimer = null;
+  function startIdle() {
+    if (idleTimer) clearTimeout(idleTimer);
+    idleTimer = setTimeout(function () { idleGreet(); startIdle(); }, 45000);
+  }
+  function pokeIdle() {
+    if (idleTimer) clearTimeout(idleTimer);
+    idleTimer = setTimeout(function () { idleGreet(); startIdle(); }, 45000);
   }
   function idleGreet() {
     var tips = [
