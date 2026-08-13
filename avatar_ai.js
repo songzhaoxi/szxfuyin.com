@@ -4,7 +4,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var CFG_KEY = 'avatar_ai_cfg_v209';
   var CFG = {
-    img: 'avatar_3d.png?v=213',
+    img: 'avatar_3d.png?v=215',
     mouthX: 0.50, mouthY: 0.56, mouthW: 0.14, mouthH: 0.07,
     eyeY: 0.47, eyeGap: 0.10, eyeW: 0.055, eyeH: 0.028,
     browY: 0.44, browGap: 0.10, browW: 0.07,
@@ -32,6 +32,9 @@
     requestAnimationFrame(loop);
     setTimeout(function () { greeting(); }, 1600);
     startIdle();
+    updateClock();
+    setInterval(updateClock, 1000);
+    fetchWeather();
   }
   function fit() {
     if (!canvas) return;
@@ -43,14 +46,14 @@
     requestAnimationFrame(loop);
     var t = Date.now() / 1000;
     if (!img) return;
-    st.bob = Math.sin(t * 1.3) * 5 * (st.talking ? 1.5 : 1);
-    if (st.blink <= 0 && Math.random() < 0.005) st.blink = 1;
-    if (st.blink > 0) st.blink -= 0.06;
+    st.bob = Math.sin(t * 1.3) * 8 * (st.talking ? 1.6 : 1);
+    if (st.blink <= 0 && Math.random() < 0.02) st.blink = 1;
+    if (st.blink > 0) st.blink -= 0.055;
     if (st.talking) {
       st.t += 0.08;
       var vol = 0;
       if (analyser) { var a = new Uint8Array(analyser.frequencyBinCount); analyser.getByteFrequencyData(a); var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; vol = s / a.length / 255; }
-      var tg = vol > 0.05 ? Math.min(1, vol * 3.4) : (Math.sin(st.t * 9) * 0.5 + 0.5) * 0.38;
+      var tg = vol > 0.05 ? Math.min(1, vol * 3.4) : (Math.sin(st.t * 9) * 0.5 + 0.5) * 0.62;
       st.mouth += (tg - st.mouth) * 0.55;
       st.tilt += (Math.sin(st.t * 2.1) * 0.035 - st.tilt) * 0.12;
       st.brow = 0.5 + Math.sin(st.t * 6) * 0.2;
@@ -68,22 +71,25 @@
   function draw() {
     var cw = canvas.width, ch = canvas.height;
     ctx.clearRect(0, 0, cw, ch); if (!img) return;
-    var scale = Math.min(cw / imgW, ch / imgH) * 0.98;
+    /* 人物完整占满舞台，展示全身全貌，不被裁剪遮挡 */
+    var area = ch * 0.98;
+    var scale = Math.min(cw / imgW, area / imgH);
     var dw = imgW * scale, dh = imgH * scale;
-    var dx = (cw - dw) / 2, dy = (ch - dh) / 2 + st.bob;
+    var dx = (cw - dw) / 2, dy = ch * 0.01 + st.bob;
     ctx.save();
-    ctx.translate(cw / 2, ch / 2 + dh * 0.16);
+    var rcx = cw / 2, rcy = dy + dh / 2;
+    ctx.translate(rcx, rcy);
     var rot = st.tilt;
     if (st.shake > 0) rot += Math.sin(st.shake * 14) * 0.16 * Math.min(1, st.shake * 3);
     if (st.nod > 0) rot += Math.sin(st.nod * 9) * 0.10 * Math.min(1, st.nod * 3);
     if (st.bow > 0) rot += 0.22 * Math.min(1, st.bow * 2.5);
     ctx.rotate(rot);
-    ctx.translate(-cw / 2, -ch / 2 - dh * 0.16);
+    ctx.translate(-rcx, -rcy);
     var glow = st.mood === 'praise' ? 'rgba(255,215,90,0.5)' : st.mood === 'comfort' ? 'rgba(120,180,255,0.4)' : 'rgba(212,175,55,0.32)';
     ctx.shadowColor = glow; ctx.shadowBlur = 46;
     ctx.drawImage(img, dx, dy, dw, dh);
     ctx.shadowBlur = 0;
-    if (st.talking || st.mouth > 0.04 || st.mood !== 'joy') drawMouth(dx, dy, dw, dh);
+    drawMouth(dx, dy, dw, dh);
     if (st.blink > 0.02) drawEyes(dx, dy, dw, dh);
     if (st.mood === 'think' || st.mood === 'wonder' || st.mood === 'sad' || st.mood === 'comfort' || st.brow > 0.15) drawBrows(dx, dy, dw, dh);
     ctx.restore();
@@ -146,24 +152,31 @@
     try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch (e) {}
     try {
       if (!audioEl) audioEl = new Audio();
-      audioEl.src = url;
-      if (audioSrc) { try { audioSrc.disconnect(); } catch (e) {} }
-      audioSrc = audioCtx.createMediaElementSource(audioEl);
-      audioSrc.connect(analyser); analyser.connect(audioCtx.destination);
       st.talking = true;
+      if (audioSrc) { try { audioSrc.disconnect(); } catch (e) {} }
+      /* 只有 AudioContext 与 analyser 都可用时才接分析器（否则直接播放，仍用事件驱动嘴型） */
+      if (audioCtx && analyser) {
+        try {
+          audioSrc = audioCtx.createMediaElementSource(audioEl);
+          audioSrc.connect(analyser); analyser.connect(audioCtx.destination);
+        } catch (e) { audioSrc = null; }
+      }
+      audioEl.onplaying = function () { st.talking = true; };
       audioEl.onended = function () { st.talking = false; if (onEnd) onEnd(); };
       audioEl.onerror = function () { st.talking = false; if (onEnd) onEnd(); };
-      audioEl.play().catch(function () { st.talking = false; });
+      audioEl.src = url;
+      var p = audioEl.play();
+      if (p && p.catch) p.catch(function () { st.talking = false; if (onEnd) onEnd(); });
     } catch (e) { st.talking = false; }
   }
   function pickMaleVoice() {
     try {
       var vs = speechSynthesis.getVoices() || [];
-      var zh = vs.filter(function (v) { return /zh|Chinese/i.test(v.lang + v.name); });
-      var prefer = zh.filter(function (v) { return /Yunjian|云健|Yunyang|云扬|成熟|沉稳/i.test(v.name); });
+      var zh = vs.filter(function (v) { return /zh|Chinese|cmn/i.test(v.lang + v.name); });
+      var prefer = zh.filter(function (v) { return /Yunjian|云健|Yunyang|云扬|Yunxi|云希|Kangkang|康康|成熟|沉稳|male|男/i.test(v.name); });
       if (prefer.length) return prefer[0];
-      var male = zh.filter(function (v) { return /male|男|Daniel|Kangkang|Liang|Xiaoyi|Yunxi|云希/i.test(v.name); });
-      return male[0] || zh[0] || null;
+      var notFemale = zh.filter(function (v) { return !/Xiaoxiao|晓晓|Xiaoyi|晓伊|Liang|梁|Huihui|慧慧|Yaoyao|瑶瑶|female|女/i.test(v.name); });
+      return notFemale[0] || zh[0] || null;
     } catch (e) { return null; }
   }
   function speakText(text, opts) {
@@ -182,13 +195,8 @@
     var name = mem.name;
     var txt = name ? ('欢迎回来，' + name + '！我是你的圣经AI伙伴，新旧约66卷书我都熟读，今天想聊点什么？') : '欢迎来到兆西福音传递爱，我是你的圣经AI伙伴，新旧约66卷书我都熟读，有问必答，愿你平安。';
     showBubble(txt, 6000);
-    /* 优先播放真实男声MP3（edge-tts YunjianNeural），失败回退浏览器TTS */
-    playMp3('voice/welcome.mp3?v=212', function () {});
-    setTimeout(function () {
-      if (!st.talking && speechSynthesis) {
-        speakText(txt.replace(/66卷书/g, '六十六卷书'));
-      }
-    }, 1500);
+    /* 统一为单一中年男声（YunjianNeural），彻底杜绝双声音 */
+    speakText(txt.replace(/66卷书/g, '六十六卷书'));
   }
   /* ============ 圣经加载与索引（66卷） ============ */
   var BOOK_ALIAS = {
@@ -529,5 +537,52 @@
     var txt = tips[Math.floor(Math.random() * tips.length)];
     showBubble(txt, 5000);
     speakText(txt);
+  }
+  /* ============ 实时日期时间 + 天气（自动更新） ============ */
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+  function updateClock() {
+    var el = $('dateWeather'); if (!el) return;
+    var now = new Date();
+    var week = ['日', '一', '二', '三', '四', '五', '六'][now.getDay()];
+    var dateStr = now.getFullYear() + '年' + (now.getMonth() + 1) + '月' + now.getDate() + '日 星期' + week + ' ' + pad2(now.getHours()) + ':' + pad2(now.getMinutes()) + ':' + pad2(now.getSeconds());
+    el.textContent = '📅 ' + dateStr + (window._weatherStr ? '　' + window._weatherStr : '');
+  }
+  function weatherDesc(code) {
+    if (code === 0) return '晴 ☀';
+    if (code === 1) return '大部晴 🌤';
+    if (code === 2) return '多云 ⛅';
+    if (code === 3) return '阴天 ☁';
+    if (code <= 48) return '有雾 🌫';
+    if (code <= 57) return '毛毛雨 🌦';
+    if (code <= 67) return '有雨 🌧';
+    if (code <= 77) return '有雪 ❄';
+    if (code <= 82) return '阵雨 🌦';
+    if (code <= 86) return '阵雪 🌨';
+    if (code <= 99) return '雷雨 ⛈';
+    return '天气';
+  }
+  function loadWeather(lat, lon) {
+    var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current_weather=true&timezone=auto';
+    try {
+      fetch(url).then(function (r) { return r.json(); }).then(function (d) {
+        if (d && d.current_weather) {
+          var w = d.current_weather;
+          window._weatherStr = '🌡 ' + Math.round(w.temperature) + '°C ' + weatherDesc(w.weathercode);
+        } else {
+          window._weatherStr = '';
+        }
+        updateClock();
+      }).catch(function () { window._weatherStr = ''; updateClock(); });
+    } catch (e) { window._weatherStr = ''; updateClock(); }
+  }
+  function fetchWeather() {
+    var lat = 39.9042, lon = 116.4074; /* 默认北京 */
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function (pos) {
+        loadWeather(pos.coords.latitude, pos.coords.longitude);
+      }, function () { loadWeather(lat, lon); }, { timeout: 5000 });
+    } else {
+      loadWeather(lat, lon);
+    }
   }
 })();

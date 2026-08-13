@@ -54,10 +54,15 @@
     try {
       if (lastVoice) speechSynthesis.cancel();
       var u = new SpeechSynthesisUtterance(text);
-      u.lang = 'zh-CN'; u.rate = 1.0; u.pitch = 1.05;
-      var vs = speechSynthesis.getVoices();
-      var zh = vs.filter(function (v) { return /zh|Chinese/i.test(v.lang + v.name); });
-      if (zh.length) u.voice = zh[0];
+      /* 与3D数字人完全一致的中年男声 */
+      u.lang = 'zh-CN'; u.rate = 0.98; u.pitch = 0.82;
+      var vs = speechSynthesis.getVoices() || [];
+      var zh = vs.filter(function (v) { return /zh|Chinese|cmn/i.test(v.lang + v.name); });
+      var prefer = zh.filter(function (v) { return /Yunjian|云健|Yunyang|云扬|Yunxi|云希|Kangkang|康康|male|男/i.test(v.name); });
+      var notFemale = zh.filter(function (v) { return !/Xiaoxiao|晓晓|Xiaoyi|晓伊|Liang|梁|Huihui|慧慧|Yaoyao|瑶瑶|female|女/i.test(v.name); });
+      if (prefer.length) u.voice = prefer[0];
+      else if (notFemale.length) u.voice = notFemale[0];
+      else if (zh.length) u.voice = zh[0];
       u.onstart = function () { animTalk(1); };
       u.onend = function () { animTalk(0); if (onEnd) onEnd(); };
       u.onerror = function () { animTalk(0); if (onEnd) onEnd(); };
@@ -218,7 +223,7 @@
     camera.aspect = c.clientWidth / c.clientHeight; camera.updateProjectionMatrix();
   }
   /* ========== 页面交互 ========== */
-  function switchMode(m) {
+  function switchMode(m, silent) {
     mode = m;
     $('tabLogin').classList.toggle('active', m === 'login');
     $('tabReg').classList.toggle('active', m === 'register');
@@ -226,7 +231,8 @@
     $('regForm').classList.toggle('hidden', m !== 'register');
     if (m === 'register') loadCaptcha();
     showBubble(m === 'login' ? '欢迎回来，请登录 🙏' : '欢迎注册新账号 ✝');
-    speak(m === 'login' ? '欢迎回来，请登录' : '欢迎注册新账号');
+    /* 初始加载时不说话，统一交给3D数字人欢迎语，避免双声音 */
+    if (!silent) speak(m === 'login' ? '欢迎回来，请登录' : '欢迎注册新账号');
   }
   function switchAccType(t) {
     accType = t;
@@ -509,8 +515,8 @@
   /* ========== 初始化 ========== */
   function init() {
     init3D();
-    if (location.hash === '#register') switchMode('register');
-    else switchMode('login');
+    if (location.hash === '#register') switchMode('register', true);
+    else switchMode('login', true);
     try {
       if (speechSynthesis) speechSynthesis.getVoices();
     } catch (e) {}

@@ -8,13 +8,21 @@
 <title>登录注册 - 福音传播爱 ✝</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="auth_style_v205.css?v=205">
+<link rel="stylesheet" href="auth_style_v205.css?v=206">
 </head>
 <body>
 <div class="auth-shell">
-  <!-- ===== 左侧：会说话的圣经AI数字人（全身） ===== -->
+  <!-- ===== 左侧：3D数字人（全身全貌，不遮挡） ===== -->
   <div class="auth-stage" id="authStage">
     <canvas id="avatarCanvas"></canvas>
+    <!-- 语音气泡（顶部，不遮挡人物全身） -->
+    <div class="speech-bubble" id="speechBubble">欢迎来到兆西福音传递爱，愿你平安 🙏</div>
+    <!-- 实时日期天气（顶部角，自动更新） -->
+    <div class="date-weather" id="dateWeather">📅 加载日期天气中…</div>
+  </div>
+
+  <!-- ===== 右侧：账号表单 + 全能AI聊天（左右分开，互不遮挡） ===== -->
+  <div class="auth-panel">
     <!-- 圣经AI聊天问答 -->
     <div class="ai-chat" id="aiChat">
       <div class="ai-chat-head">✝ 全能AI数字人 · 圣经66卷 + 任何话题</div>
@@ -24,18 +32,6 @@
         <button class="ai-chat-btn" onclick="aiSend()">问 ➤</button>
       </div>
     </div>
-    <div class="stage-overlay">
-      <div class="stage-title">兆西福音传递爱</div>
-      <div class="stage-sub">JESUS LOVES YOU ✝</div>
-      <div class="stage-msg" id="stageMsg">欢迎来到兆西福音传递爱</div>
-    </div>
-    <!-- 语音气泡 -->
-    <div class="speech-bubble" id="speechBubble">欢迎来到兆西福音传递爱，愿你平安 🙏</div>
-  </div>
-
-
-  <!-- ===== 右侧：表单 ===== -->
-  <div class="auth-panel">
     <div class="auth-head">
       <h1>账号登录</h1>
       <p>真实注册 · 手机验证 · 邮箱验证 · 安全登录</p>
@@ -124,7 +120,7 @@
 <script src="js/GLTFLoader-r128.js"></script>
 <script src="auth_api_config.js?v=9"></script>
 <script src="auth_app_v8.js?v=9"></script>
-<script src="avatar_ai.js?v=214"></script>
+<script src="avatar_ai.js?v=215"></script>
 <script>
 /* ===== 圣经AI聊天交互 ===== */
 function escH(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'"',"'":'&#39;'}[c];});}
