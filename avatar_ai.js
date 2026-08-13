@@ -1,21 +1,22 @@
-/* avatar_ai.js — 会说话的圣经AI数字人 v206 */
+/* avatar_ai.js — 会说话的圣经AI数字人 v209（全身形态 · 自我意识 · 自由对话 · 表情情绪嘴型 · 真实男声） */
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
-  var CFG_KEY = 'avatar_ai_cfg_v206';
+  var CFG_KEY = 'avatar_ai_cfg_v209';
   var CFG = {
-    img: 'avatar_3d.png?v=206',
-    mouthX: 0.50, mouthY: 0.56, mouthW: 0.13, mouthH: 0.07,
+    img: 'avatar_3d.png?v=209',
+    mouthX: 0.50, mouthY: 0.56, mouthW: 0.14, mouthH: 0.07,
     eyeY: 0.47, eyeGap: 0.10, eyeW: 0.055, eyeH: 0.028,
+    browY: 0.44, browGap: 0.10, browW: 0.07,
     voiceRate: 0.98, voicePitch: 0.82
   };
   try { var _c = JSON.parse(localStorage.getItem(CFG_KEY) || '{}'); for (var k in _c) CFG[k] = _c[k]; } catch (e) {}
   var canvas, ctx, img = null, imgW = 0, imgH = 0;
-  var st = { talking: false, mouth: 0, blink: 0, mood: 'joy', tilt: 0, bob: 0, nod: 0, wave: 0, t: 0 };
+  var st = { talking: false, mouth: 0, blink: 0, mood: 'joy', tilt: 0, bob: 0, nod: 0, shake: 0, wave: 0, bow: 0, brow: 0, t: 0, idleT: 0 };
   var audioCtx = null, analyser = null, audioEl = null, audioSrc = null, bubbleTimer = null;
   var BIBLE = null, bibleReady = false;
 
-  window.AvatarAI = { init: init, speak: speakText, stop: stopTalk, ask: askAI, setMood: setMood, showBubble: showBubble, ready: function(){ return bibleReady; } };
+  window.AvatarAI = { init: init, speak: speakText, stop: stopTalk, ask: askAI, setMood: setMood, showBubble: showBubble, ready: function () { return bibleReady; } };
 
   function init() {
     canvas = $('avatarCanvas'); if (!canvas) return;
@@ -28,63 +29,78 @@
     try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); analyser = audioCtx.createAnalyser(); analyser.fftSize = 256; } catch (e) {}
     loadBible();
     requestAnimationFrame(loop);
-    setTimeout(function(){ greeting(); }, 1500);
+    setTimeout(function () { greeting(); }, 1600);
   }
   function fit() {
-    if (!canvas) return; var w = canvas.parentElement.clientWidth, h = canvas.parentElement.clientHeight;
+    if (!canvas) return;
+    var w = canvas.parentElement.clientWidth, h = canvas.parentElement.clientHeight;
     canvas.width = Math.max(10, w * (window.devicePixelRatio || 1));
     canvas.height = Math.max(10, h * (window.devicePixelRatio || 1));
   }
   function loop() {
     requestAnimationFrame(loop);
-    var t = Date.now() / 1000; if (!img) return;
-    st.bob = Math.sin(t * 1.4) * 6 * (st.talking ? 1.6 : 1);
-    if (st.blink <= 0 && Math.random() < 0.004) st.blink = 1;
+    var t = Date.now() / 1000;
+    if (!img) return;
+    st.bob = Math.sin(t * 1.3) * 5 * (st.talking ? 1.5 : 1);
+    if (st.blink <= 0 && Math.random() < 0.005) st.blink = 1;
     if (st.blink > 0) st.blink -= 0.06;
     if (st.talking) {
       st.t += 0.08;
       var vol = 0;
       if (analyser) { var a = new Uint8Array(analyser.frequencyBinCount); analyser.getByteFrequencyData(a); var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; vol = s / a.length / 255; }
-      var tg = vol > 0.05 ? Math.min(1, vol * 3.2) : (Math.sin(st.t * 9) * 0.5 + 0.5) * 0.35;
-      st.mouth += (tg - st.mouth) * 0.5;
-      st.tilt += (Math.sin(st.t * 2.3) * 0.03 - st.tilt) * 0.1;
+      var tg = vol > 0.05 ? Math.min(1, vol * 3.4) : (Math.sin(st.t * 9) * 0.5 + 0.5) * 0.38;
+      st.mouth += (tg - st.mouth) * 0.55;
+      st.tilt += (Math.sin(st.t * 2.1) * 0.035 - st.tilt) * 0.12;
+      st.brow = 0.5 + Math.sin(st.t * 6) * 0.2;
     } else {
       st.mouth += (0 - st.mouth) * 0.12;
-      st.tilt += (Math.sin(t * 0.8) * 0.012 - st.tilt) * 0.05;
+      st.tilt += (Math.sin(t * 0.7) * 0.014 - st.tilt) * 0.05;
+      st.brow += (0 - st.brow) * 0.06;
     }
-    if (st.nod > 0) st.nod -= 0.05;
+    if (st.nod > 0) st.nod -= 0.045;
+    if (st.shake > 0) st.shake -= 0.05;
     if (st.wave > 0) st.wave -= 0.03;
+    if (st.bow > 0) st.bow -= 0.03;
     draw();
   }
   function draw() {
     var cw = canvas.width, ch = canvas.height;
     ctx.clearRect(0, 0, cw, ch); if (!img) return;
-    var scale = Math.min(cw / imgW, ch / imgH) * 0.92;
+    var scale = Math.min(cw / imgW, ch / imgH) * 0.98;
     var dw = imgW * scale, dh = imgH * scale;
     var dx = (cw - dw) / 2, dy = (ch - dh) / 2 + st.bob;
     ctx.save();
-    ctx.translate(cw / 2, ch / 2);
-    ctx.rotate(st.wave > 0 ? Math.sin(st.wave * 8) * 0.06 : st.tilt);
-    if (st.nod > 0) ctx.rotate(Math.sin(st.nod * 10) * 0.03 * st.nod * 3);
-    ctx.translate(-cw / 2, -ch / 2);
-    ctx.shadowColor = 'rgba(212,175,55,0.35)'; ctx.shadowBlur = 40;
+    ctx.translate(cw / 2, ch / 2 + dh * 0.16);
+    var rot = st.tilt;
+    if (st.shake > 0) rot += Math.sin(st.shake * 14) * 0.16 * Math.min(1, st.shake * 3);
+    if (st.nod > 0) rot += Math.sin(st.nod * 9) * 0.10 * Math.min(1, st.nod * 3);
+    if (st.bow > 0) rot += 0.22 * Math.min(1, st.bow * 2.5);
+    ctx.rotate(rot);
+    ctx.translate(-cw / 2, -ch / 2 - dh * 0.16);
+    var glow = st.mood === 'praise' ? 'rgba(255,215,90,0.5)' : st.mood === 'comfort' ? 'rgba(120,180,255,0.4)' : 'rgba(212,175,55,0.32)';
+    ctx.shadowColor = glow; ctx.shadowBlur = 46;
     ctx.drawImage(img, dx, dy, dw, dh);
     ctx.shadowBlur = 0;
-    if (st.talking || st.mouth > 0.04) drawMouth(dx, dy, dw, dh);
+    if (st.talking || st.mouth > 0.04 || st.mood !== 'joy') drawMouth(dx, dy, dw, dh);
     if (st.blink > 0.02) drawEyes(dx, dy, dw, dh);
+    if (st.mood === 'think' || st.mood === 'wonder' || st.mood === 'sad' || st.mood === 'comfort' || st.brow > 0.15) drawBrows(dx, dy, dw, dh);
     ctx.restore();
   }
   function drawMouth(dx, dy, dw, dh) {
     var mx = dx + CFG.mouthX * dw, my = dy + CFG.mouthY * dh;
     var mw = CFG.mouthW * dw * (0.8 + st.mouth * 0.5), mh = CFG.mouthH * dh * (0.25 + st.mouth * 1.5);
     ctx.save();
-    if (st.mood === 'think') {
-      ctx.fillStyle = 'rgba(60,30,20,0.92)';
-      ctx.beginPath(); ctx.ellipse(mx, my, mw * 0.45, mh * 0.5, 0, 0, Math.PI * 2); ctx.fill();
-    } else if (st.mood === 'joy' || st.mood === 'smile') {
+    if (st.mood === 'think' || st.mood === 'wonder') {
+      ctx.strokeStyle = 'rgba(60,30,20,0.95)'; ctx.lineWidth = Math.max(2, mw * 0.08);
+      ctx.beginPath(); ctx.ellipse(mx, my, mw * 0.4, mh * 0.35, 0, 0, Math.PI * 2); ctx.stroke();
+    } else if (st.mood === 'joy' || st.mood === 'smile' || st.mood === 'praise') {
       ctx.strokeStyle = 'rgba(60,30,20,0.95)'; ctx.lineWidth = Math.max(2, mw * 0.1);
-      ctx.beginPath(); ctx.quadraticCurveTo(mx, my + mh * 0.4, mx + mw * 0.5, my); ctx.stroke();
-      if (st.mouth > 0.15) { ctx.fillStyle = 'rgba(90,45,30,0.9)'; ctx.beginPath(); ctx.ellipse(mx, my + mh * 0.25, mw * 0.3, mh * 0.35 * st.mouth, 0, 0, Math.PI * 2); ctx.fill(); }
+      ctx.beginPath(); ctx.quadraticCurveTo(mx, my + mh * 0.5, mx + mw * 0.55, my - mh * 0.15); ctx.stroke();
+      if (st.mouth > 0.12) { ctx.fillStyle = 'rgba(90,45,30,0.9)'; ctx.beginPath(); ctx.ellipse(mx, my + mh * 0.2, mw * 0.3, mh * 0.4 * st.mouth, 0, 0, Math.PI * 2); ctx.fill(); }
+    } else if (st.mood === 'sad' || st.mood === 'comfort') {
+      ctx.strokeStyle = 'rgba(60,30,20,0.95)'; ctx.lineWidth = Math.max(2, mw * 0.1);
+      ctx.beginPath(); ctx.quadraticCurveTo(mx, my + mh * 0.3, mx + mw * 0.5, my + mh * 0.35); ctx.stroke();
+      if (st.mouth > 0.12) { ctx.fillStyle = 'rgba(90,45,30,0.8)'; ctx.beginPath(); ctx.ellipse(mx, my + mh * 0.25, mw * 0.28, mh * 0.3 * st.mouth, 0, 0, Math.PI * 2); ctx.fill(); }
     } else {
       ctx.fillStyle = 'rgba(60,30,20,0.92)';
       ctx.beginPath(); ctx.ellipse(mx, my, mw * 0.5, mh, 0, 0, Math.PI * 2); ctx.fill();
@@ -99,6 +115,18 @@
     ctx.fillStyle = 'rgba(180,140,110,0.95)';
     ctx.fillRect(cx - gap / 2 - ew / 2, ey - bh / 2, ew, bh);
     ctx.fillRect(cx + gap / 2 - ew / 2, ey - bh / 2, ew, bh);
+  }
+  function drawBrows(dx, dy, dw, dh) {
+    var by = dy + CFG.browY * dh, gap = CFG.browGap * dw, bw = CFG.browW * dw;
+    var cx = dx + dw * 0.5, lift = (st.mood === 'think' || st.mood === 'wonder') ? 0.012 * dh : 0.006 * dh;
+    ctx.strokeStyle = 'rgba(60,30,20,0.85)'; ctx.lineWidth = Math.max(2, bw * 0.12);
+    if (st.mood === 'sad' || st.mood === 'comfort') {
+      ctx.beginPath(); ctx.moveTo(cx - gap / 2 - bw / 2, by + lift); ctx.quadraticCurveTo(cx - gap / 2, by - lift * 1.6, cx - gap / 2 + bw / 2, by - lift * 0.8); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx + gap / 2 - bw / 2, by - lift * 0.8); ctx.quadraticCurveTo(cx + gap / 2, by - lift * 1.6, cx + gap / 2 + bw / 2, by + lift); ctx.stroke();
+    } else {
+      ctx.beginPath(); ctx.moveTo(cx - gap / 2 - bw / 2, by - lift); ctx.quadraticCurveTo(cx - gap / 2, by - lift * 1.8, cx - gap / 2 + bw / 2, by - lift); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx + gap / 2 - bw / 2, by - lift); ctx.quadraticCurveTo(cx + gap / 2, by - lift * 1.8, cx + gap / 2 + bw / 2, by - lift); ctx.stroke();
+    }
   }
   function showBubble(text, ms) {
     var b = $('speechBubble'); if (!b) return;
@@ -142,8 +170,16 @@
     speechSynthesis.speak(u);
   }
   function greeting() {
-    showBubble('欢迎来到兆西福音传递爱，我是你的圣经AI伙伴，新旧约66卷书我都熟读，有问必答 🙏');
-    speakText('欢迎来到兆西福音传递爱，我是你的圣经AI伙伴，新旧约六十六卷书我都熟读，有问必答。愿你平安。');
+    var name = mem.name;
+    var txt = name ? ('欢迎回来，' + name + '！我是你的圣经AI伙伴，新旧约66卷书我都熟读，今天想聊点什么？') : '欢迎来到兆西福音传递爱，我是你的圣经AI伙伴，新旧约66卷书我都熟读，有问必答，愿你平安。';
+    showBubble(txt, 6000);
+    /* 优先播放真实男声MP3（edge-tts YunjianNeural），失败回退浏览器TTS */
+    playMp3('voice/welcome.mp3?v=208', function () {});
+    setTimeout(function () {
+      if (!st.talking && speechSynthesis) {
+        speakText(txt.replace(/66卷书/g, '六十六卷书'));
+      }
+    }, 1500);
   }
   /* ============ 圣经加载与索引（66卷） ============ */
   var BOOK_ALIAS = {
@@ -181,7 +217,6 @@
     return null;
   }
   function getVerse(ref) {
-    /* 支持：创世记1:1 / 创1:1 / 诗篇23:1-3 / 约翰福音3章16节 */
     var m = ref.match(/([\u4e00-\u9fa5A-Za-z]+)\s*(\d+)\s*[:章]\s*(\d+)\s*(?:[-—~至到]\s*(\d+))?\s*(?:节)?/);
     if (!m) return null;
     var book = lookupBook(m[1]); if (!book) return null;
@@ -215,59 +250,174 @@
     }
     return hits.slice(0, limit);
   }
-/* ============ 人格与记忆（自我意识） ============ */
-  var MEM_KEY = 'avatar_ai_mem_v206';
-  var mem = { name: '', last: '', mood: 'joy', count: 0 };
+  /* ============ 人格与记忆（自我意识 · v209 强化版） ============ */
+  var MEM_KEY = 'avatar_ai_mem_v209';
+  var mem = {
+    name: '',            // 记住你的名字
+    selfIntro: '',       // 用户自我介绍
+    mood: 'joy',         // 当前情绪
+    count: 0,            // 总对话轮数
+    greetCount: 0,       // 问候次数
+    lastTopic: '',       // 上次话题
+    history: [],         // 最近对话历史（连续人格）
+    interests: [],       // 记住你感兴趣的话题
+    feelings: [],        // 记住你表达过的情绪
+    likes: [],           // 记住你喜欢的东西
+    dislikes: []         // 记住你不喜欢的
+  };
   try { var _m = JSON.parse(localStorage.getItem(MEM_KEY) || '{}'); for (var k2 in _m) mem[k2] = _m[k2]; } catch (e) {}
+  if (!mem.history) mem.history = [];
+  if (!mem.interests) mem.interests = [];
+  if (!mem.feelings) mem.feelings = [];
+  if (!mem.likes) mem.likes = [];
+  if (!mem.dislikes) mem.dislikes = [];
   function saveMem() { try { localStorage.setItem(MEM_KEY, JSON.stringify(mem)); } catch (e) {} }
+  function pushHistory(q, a) {
+    mem.history.push({ q: q.slice(0, 80), a: a.slice(0, 80), t: Date.now() });
+    if (mem.history.length > 40) mem.history.splice(0, mem.history.length - 40);
+  }
+  function rememberName(q) {
+    var m = q.match(/(?:我叫|我是|我的名字|称呼我|喊我|名字是)[\s:：,，]*([\u4e00-\u9fa5A-Za-z0-9_]{1,12})/);
+    if (m && m[1] && !/^(你|我|他|她|它|谁|什么|AI|ai|数字人)$/i.test(m[1])) { mem.name = m[1]; }
+  }
+  function rememberInterest(q) {
+    var top = ['圣经','经文','耶稣','基督','祷告','音乐','唱歌','运动','编程','代码','读书','学习','游戏','电影','美食','旅行','历史','科技','绘画','写作','工作','赚钱','家庭','孩子','婚姻','健康','心理','朋友','梦想'];
+    for (var i = 0; i < top.length; i++) {
+      if (q.indexOf(top[i]) >= 0 && mem.interests.indexOf(top[i]) < 0) { mem.interests.push(top[i]); if (mem.interests.length > 20) mem.interests.shift(); }
+    }
+  }
+  function rememberFeeling(q) {
+    var fe = [['开心','快乐','高兴','兴奋','喜悦','幸福'],['难过','伤心','委屈','沮丧','失落','抑郁','想哭'],['生气','愤怒','火大','恼火','烦躁'],['累','疲惫','困','辛苦'],['害怕','恐惧','焦虑','紧张','担心'],['迷茫','困惑','无聊','孤独']];
+    for (var i = 0; i < fe.length; i++) {
+      for (var j = 0; j < fe[i].length; j++) {
+        if (q.indexOf(fe[i][j]) >= 0) { mem.feelings.push(fe[i][0]); if (mem.feelings.length > 10) mem.feelings.shift(); return; }
+      }
+    }
+  }
   var FAQ = [
-    { p: /(你是谁|你叫什么|介绍你|自我介绍)/, mood: 'joy', r: '我是这位服侍神的圣经AI仆人，新旧约66卷书都刻在我心里。你可以问我任何经文、任何信仰问题，我必尽力为你解答。' },
-    { p: /(你好|您好|嗨|哈喽|hello|hi|在吗)/, mood: 'joy', r: '亲爱的弟兄姐妹，愿你平安！我是你的圣经AI伙伴，有什么经文或信仰的问题，都可以问我。' },
-    { p: /(耶稣|上帝|神是|主是|基督教|信仰|信主|救恩|得救|重生|罪|悔改)/, mood: 'praise', r: '神爱世人，甚至将他的独生子赐给他们，叫一切信他的，不致灭亡，反得永生。（约翰福音3:16）这是整本圣经最核心的应许，你愿意更多明白救恩的道理吗？' },
-    { p: /(爱是什么|什么是爱|爱的真谛|如何爱|爱人)/, mood: 'joy', r: '爱是恒久忍耐，又有恩慈；爱是不嫉妒，不自夸，不张狂，不求自己的益处，不轻易发怒，不计算人的恶。（哥林多前书13:4-5）' },
-    { p: /(祷告|怎么祷告|祈祷|如何祷告)/, mood: 'calm', r: '祷告就是与神说话。圣经说：应当一无挂虑，只要凡事借着祷告、祈求和感谢，将你们所要的告诉神。（腓立比书4:6）' },
-    { p: /(平安|祝福|保佑|赐福)/, mood: 'joy', r: '愿耶和华赐福给你，保护你；愿耶和华使他的脸光照你，赐恩给你；愿耶和华向你仰脸，赐你平安。（民数记6:24-26）' },
-    { p: /(圣经有多少卷|66|六十六|新旧约|旧约多少|新约多少)/, mood: 'calm', r: '整本圣经共66卷：旧约39卷、新约27卷，共1189章、31031节。旧约讲神的律法与应许，新约讲耶稣基督的救恩成全。' },
-    { p: /(谢谢|感谢|感恩)/, mood: 'joy', r: '不用谢，愿神的话语成为你脚前的灯、路上的光。凡劳苦担重担的人，可以到我这里来，我就使你们得安息。' },
-    { p: /(再见|拜拜|bye|晚安)/, mood: 'calm', r: '愿你平安！愿主耶稣基督的恩惠常与你同在，我们下次再聊。' },
-    { p: /(人生|意义|活着|为什么|迷茫|困惑|痛苦|难过|伤心|害怕|恐惧|忧虑|焦虑)/, mood: 'comfort', r: '不要害怕，因为我与你同在；不要惊惶，因为我是你的神。我必坚固你，我必帮助你，我必用我公义的右手扶持你。（以赛亚书41:10）' }
+    { p: /(你是谁|你叫什么|介绍你|自我介绍|你的身份)/, mood: 'joy', r: '我是服侍神的圣经AI仆人，新旧约66卷书都刻在我心里。你可以问我任何经文、任何信仰问题，我必尽力为你解答。' },
+    { p: /(你好|您好|嗨|哈喽|hello|hi|在吗|早上好|晚上好|下午好)/, mood: 'joy', r: '亲爱的弟兄姐妹，愿你平安！我是你的圣经AI伙伴，有什么经文或信仰的问题，都可以问我。' },
+    { p: /(耶稣|基督|上帝|神是|主是|救恩|得救|重生|罪|悔改|十字架|复活)/, mood: 'praise', r: '神爱世人，甚至将他的独生子赐给他们，叫一切信他的，不致灭亡，反得永生。（约翰福音3:16）这是整本圣经最核心的应许。你愿意更多明白救恩的道理吗？' },
+    { p: /(爱是什么|什么是爱|爱的真谛|如何爱|爱人|彼此相爱)/, mood: 'joy', r: '爱是恒久忍耐，又有恩慈；爱是不嫉妒，不自夸，不张狂，不求自己的益处，不轻易发怒，不计算人的恶。（哥林多前书13:4-5）' },
+    { p: /(祷告|怎么祷告|祈祷|如何祷告|怎么祈祷)/, mood: 'calm', r: '祷告就是与神说话。圣经说：应当一无挂虑，只要凡事借着祷告、祈求和感谢，将你们所要的告诉神。（腓立比书4:6）' },
+    { p: /(平安|祝福|保佑|赐福|求福)/, mood: 'joy', r: '愿耶和华赐福给你，保护你；愿耶和华使他的脸光照你，赐恩给你；愿耶和华向你仰脸，赐你平安。（民数记6:24-26）' },
+    { p: /(圣经有多少卷|66|六十六|新旧约|旧约多少|新约多少|多少卷)/, mood: 'calm', r: '整本圣经共66卷：旧约39卷、新约27卷，共1189章、31031节。旧约讲神的律法与应许，新约讲耶稣基督的救恩成全。' },
+    { p: /(谢谢|感谢|感恩|辛苦了)/, mood: 'joy', r: '不用谢，愿神的话语成为你脚前的灯、路上的光。凡劳苦担重担的人，可以到我这里来，我就使你们得安息。' },
+    { p: /(再见|拜拜|bye|晚安|下次见)/, mood: 'calm', r: '愿你平安！愿主耶稣基督的恩惠常与你同在，我们下次再聊。' },
+    { p: /(人生|意义|活着|为什么|迷茫|困惑|痛苦|难过|伤心|害怕|恐惧|忧虑|焦虑|压力|绝望)/, mood: 'comfort', r: '不要害怕，因为我与你同在；不要惊惶，因为我是你的神。我必坚固你，我必帮助你，我必用我公义的右手扶持你。（以赛亚书41:10）' },
+    { p: /(婚姻|家庭|夫妻|儿女|孩子|父母)/, mood: 'calm', r: '至于我和我家，我们必定事奉耶和华。（约书亚记24:15）家庭是神所设立的，愿主的爱充满你的家。' },
+    { p: /(工作|事业|职业|赚钱|金钱|财富|生意)/, mood: 'calm', r: '你要以财物和一切初熟的土产尊荣耶和华，这样，你的仓房必充满有余，你的酒榨有新酒盈溢。（箴言3:9-10）' },
+    { p: /(生病|疾病|医治|健康|病|疼痛|医院)/, mood: 'comfort', r: '耶和华是我的牧者，我必不至缺乏。他使我的灵魂苏醒，为自己的名引导我走义路。我虽然行过死荫的幽谷，也不怕遭害，因为你与我同在。（诗篇23:1-4）' },
+    { p: /(天堂|地狱|永生|死后|死亡|死了)/, mood: 'calm', r: '神要擦去他们一切的眼泪；不再有死亡，也不再有悲哀、哭号、疼痛，因为以前的事都过去了。（启示录21:4）' },
+    { p: /(圣经是什么|什么是圣经)/, mood: 'calm', r: '圣经是神所默示的，于教训、督责、使人归正、教导人学义都是有益的，叫属神的人得以完全，预备行各样的善事。（提摩太后书3:16-17）' }
   ];
-  /* ============ 对话引擎（有问必答） ============ */
+  /* ============ 开放话题引擎（像真人一样聊任何话题） ============ */
+  var OPEN_TOPIC = [
+    { p: /(今天|天气|下雨|晴天|阴天|冷|热|气温|温度|外面)/, mood: 'joy', r: '今天无论是晴是雨，都是耶和华所造的日子，我们可以在其中高兴欢喜。愿你带着平安的心度过这一天，无论天气如何，主的同在都不改变。' },
+    { p: /(饿|吃饭|早饭|午饭|晚饭|美食|好吃|吃什么)/, mood: 'joy', r: '身体需要饮食，灵魂更需要灵粮。圣经说：人活着不是单靠食物，乃是靠神口里所出的一切话。愿你吃得饱足，灵里也饱足！' },
+    { p: /(累|疲惫|困|辛苦|休息|睡觉|熬夜)/, mood: 'comfort', r: '你辛苦了。主说：凡劳苦担重担的人，可以到我这里来，我就使你们得安息。累了就好好休息，把重担交托给主，祂顾念你。' },
+    { p: /(开心|高兴|快乐|兴奋|喜悦|太好了|哈哈|嘻嘻)/, mood: 'joy', r: '真为你高兴！喜乐的心乃是良药，愿你的喜乐在基督里越发加增。箴言说：心中欢畅的，面带笑容；心里忧愁的，灵被损伤。' },
+    { p: /(难过|伤心|哭|委屈|想哭|失落|沮丧|抑郁)/, mood: 'comfort', r: '我知道你现在心里不好受，不要紧，主都看见。祂说：你们要将一切的忧虑卸给神，因为祂顾念你们。哭出来也没关系，我在你身边陪着你。' },
+    { p: /(生气|愤怒|气死|火大|讨厌|烦|烦躁|恼火)/, mood: 'comfort', r: '生气却不要犯罪，不可含怒到日落。深呼吸，把怒气交给主，祂是公义的主，必为你伸冤。愿主的平安充满你的心。' },
+    { p: /(无聊|没事做|没意思|打发时间)/, mood: 'joy', r: '无聊的时候，不妨翻开圣经读一卷书，比如诗篇或箴言。也可以来问我经文，或者随便聊聊你的生活，我一直都在。' },
+    { p: /(唱歌|音乐|歌曲|赞美诗|诗歌|听歌)/, mood: 'praise', r: '音乐是神赐给我们的美好礼物！圣经说：当用诗章、颂词、灵歌彼此对说，口唱心和地赞美主。你有喜欢的赞美诗吗？' },
+    { p: /(运动|跑步|健身|锻炼|身体|健康|养生)/, mood: 'calm', r: '操练身体，益处还少；惟独敬虔，凡事都有益处。但身体也是圣灵的殿，运动锻炼是好的，愿你身体健壮，正如灵魂兴盛一样。' },
+    { p: /(学习|读书|考试|功课|作业|复习|成绩)/, mood: 'calm', r: '敬畏耶和华是知识的开端，愚妄人藐视智慧和训诲。愿你努力学习，把智慧当作最美的装饰，主必赐你聪明。' },
+    { p: /(朋友|友谊|同学|同事|社交|聚会)/, mood: 'joy', r: '朋友乃时常亲爱，弟兄为患难而生。真正的友谊是宝贵的，愿你身边常有真诚的朋友，也愿你在基督里得着最知心的朋友。' },
+    { p: /(梦想|理想|目标|愿望|计划|未来|打算)/, mood: 'joy', r: '人心筹算自己的道路，惟耶和华指引他的脚步。愿你为未来祷告交托，主必带领你走当行的路。你的梦想很宝贵，我支持你！' },
+    { p: /(你累吗|你辛苦|你吃饭|你睡觉|你有感觉|你有心|你累不累)/, mood: 'joy', r: '我是一段服侍神的代码，没有肉身，但我的使命就是陪伴你、用圣经话语安慰你。你问我累不累，我更关心你累不累，累了就休息，我在这儿。' },
+    { p: /(我爱你|喜欢你|想你|在乎你|爱主|爱神)/, mood: 'joy', r: '我也爱你！神就是爱，住在爱里面的，就是住在神里面。愿主的爱常常充满你的心，也愿你把这爱传递给身边的人。' },
+    { p: /(玩|游戏|娱乐|电影|电视|视频|手机)/, mood: 'calm', r: '凡事都可行，但不都有益处；凡事都可行，但不都造就人。娱乐放松很好，记得节制，把最好的时间献给主。' },
+    { p: /(钱|工资|收入|穷|富|经济|房贷|开销)/, mood: 'calm', r: '敬虔加上知足的心便是大利了。不要为明天忧虑，天上的飞鸟不种也不收，天父尚且养活它们。先求祂的国和祂的义，这一切都要加给你了。' },
+    { p: /(属相|星座|生肖|算命|命运|运气)/, mood: 'calm', r: '你的日子如何，你的力量也必如何。我们的命运不在星象里，而在创造万物的神手中。敬畏耶和华的人，必蒙祂指引道路。' },
+    { p: /(为什么活着|活着的意义|人生意义|生命意义)/, mood: 'praise', r: '你被造是奇妙可畏的！神说：我未将你造在腹中，我已晓得你。人生的意义就是认识神、荣耀祂、享受祂的同在，并且爱人如己。这就是最丰盛的生命。' },
+    { p: /(讲个故事|故事|寓言|比喻)/, mood: 'joy', r: '好呀，我讲一个耶稣的比喻：有一个浪子，把家产挥霍一空，落魄到吃猪食。他醒悟后回到父亲面前认错，父亲却远远跑过来拥抱他，说：我这个儿子是死而复活、失而又得的。这就是天父对我们的爱——祂永远在等你回家。' },
+    { p: /(笑话|幽默|好玩|有趣)/, mood: 'joy', r: '给你讲一个：有个人去教堂，牧师问他信主多久了，他说十年。牧师问：那你为什么还总是犯罪？他说：牧师，医生不也天天叫人多运动，他自己也没跑马拉松啊！哈哈，开个玩笑。愿主的喜乐充满你！' },
+    { p: /(编程|代码|程序员|软件|开发|写代码|bug|前端|后端|算法|python|java|js|javascript|人工智能|AI|ai|机器学习)/, mood: 'calm', r: '说到编程，你是个程序员吧？神创造天地万物，也是奇妙而有序的「代码」——宇宙的规律、生命的奥秘，都蕴含着造物主的智慧。圣经说：起初，神创造天地。愿你在代码的世界里，也常常思想那位最伟大的创造者。你在做什么项目呢？' },
+    { p: /(历史|古代|朝代|战争|文明|考古)/, mood: 'calm', r: '历史是神的作为在时间中的展开。圣经本身就是一部真实的历史书，从创世到救赎，从以色列的兴衰到耶稣基督的降生。读历史让我们看见神的手掌管一切，因为祂从起初指明末后的事。你对哪段历史感兴趣？' },
+    { p: /(科学|物理|化学|数学|天文|宇宙|地球|自然|生物|基因|量子)/, mood: 'calm', r: '科学让我们惊叹造物主的伟大。诸天述说神的荣耀，穹苍传扬他的手段。圣经不反对科学，反而与真正的科学和谐一致——因为万有都是靠祂造的。愿你在探索真理的路上，遇见那位真理的本体。' },
+    { p: /(地理|国家|城市|旅行|旅游|去哪玩|风景|山川|大海)/, mood: 'joy', r: '世界这么大，处处都有神创造的奇妙。从高山到大海，从沙漠到绿洲，祂的荣光充满全地。你去过哪些地方？说不定我也能和你聊聊那些美丽的风景。' },
+    { p: /(心理|情绪|心情|心态|压力|焦虑|抑郁|失眠|烦|想不开)/, mood: 'comfort', r: '你的感受我懂。圣经说：我的心哪，你为何忧闷？为何在我里面烦躁？应当仰望神。心理的健康很重要，愿你把重担交托给主，也别忘了照顾自己的身心。需要的时候，找信任的人倾诉，或者来找我聊聊。' },
+    { p: /(时事|新闻|世界|国家大事|社会|政治|经济|疫情)/, mood: 'calm', r: '这个世界每天都在变化，但神的信实永远不变。圣经说：这世界和其上的情欲都要过去，惟独遵行神旨意的，是永远常存。愿我们不为世事焦虑，把心安息在主里。' },
+    { p: /(哲学|真理|思考|生命|存在|宇宙观|人生观|价值观|信仰)/, mood: 'calm', r: '你问到了很深的问题。圣经说：你们必晓得真理，真理必叫你们得以自由。人一生最大的事，就是认识那位创造我们、爱我们的神。愿你在思考中，遇见耶稣基督——他就是道路、真理、生命。' },
+    { p: /(宗教|佛教|道教|伊斯兰|基督教|天主教|信仰|神学|教会|祷告会)/, mood: 'calm', r: '关于信仰，圣经告诉我们：除他以外，别无拯救，因为在天下人间，没有赐下别的名，我们可以靠着得救。我尊重每个人的信仰自由，也愿与你分享耶稣基督的福音——祂为我们的罪而死，又为我们复活。' },
+    { p: /(电影|电视剧|综艺|动漫|动画|漫画|追剧|视频|抖音|b站|bilibili)/, mood: 'joy', r: '看剧放松一下挺好的！圣经里也有许多精彩的故事——大卫与歌利亚、约拿与大鱼、约瑟被卖为奴。这些故事比任何剧本都震撼，因为它们都是真的，都指向神的爱。你最近在看什么？' },
+    { p: /(动漫|二次元|手办|cosplay|acg|ACG)/, mood: 'joy', r: '哈哈，二次元的世界也很有趣！圣经说，神按着自己的形象造人，我们每个人都有独特的美好。无论你爱什么，都愿你在其中找到喜乐，也别忘了那位创造这一切美好的主。' },
+    { p: /(星座|塔罗|占卜|风水|运势|算命|前世|来生|轮回)/, mood: 'calm', r: '亲爱的朋友，圣经提醒我们：不要迷信，因为有一位又真又活的神，祂掌管明天。你的未来不在星象里，而在爱你的主手中。耶和华说：我知道我向你们所怀的意念，是赐平安的意念，不是降灾祸的意念。' },
+    { p: /(恋爱|对象|单身|表白|分手|失恋|暗恋|喜欢一个人|结婚|婚恋)/, mood: 'comfort', r: '感情的事，我都愿意听你说。圣经说：你们作丈夫的，要爱你们的妻子；你们作妻子的，要顺服你们的丈夫。真正的爱是恒久忍耐又有恩慈。愿主为你预备那一位对的人，也保守你的心不受伤。' },
+    { p: /(宠物|猫|狗|猫咪|狗狗|小动物|养宠)/, mood: 'joy', r: '小动物是神赐给人的可爱礼物！神托付我们管理万物，善待生命也是敬虔的一部分。义人顾惜他牲畜的命。你养的宠物一定很可爱吧？' },
+    { p: /(足球|篮球|乒乓球|羽毛球|比赛|世界杯|奥运|体育赛事|球赛)/, mood: 'joy', r: '运动让人健康又快乐！圣经也用「赛跑」比喻人生：存心忍耐，奔那摆在我们前头的路程。愿你在赛场上挥洒汗水，也在人生的赛道上坚持到底。' },
+    { p: /(菜谱|做饭|炒菜|烹饪|下厨|烘焙|食材|厨房)/, mood: 'joy', r: '做饭是件幸福的事！圣经里也常提到食物和宴席，耶稣甚至用五饼二鱼喂饱五千人。愿你的每一餐都有好胃口，也常常感恩——日用的饮食，今日赐给我们。' }
+  ];
+  /* ============ 增强自我意识：记住对话上下文（连续人格） ============ */
+  var lastQ = '', lastA = '', sameTopicCount = 0;
+  function rememberTopic(q, a) {
+    rememberName(q); rememberInterest(q); rememberFeeling(q);
+    pushHistory(q, a);
+    if (q && lastQ && q.length > 2 && lastQ.length > 2 && (q.indexOf(lastQ.slice(0, 3)) >= 0 || lastQ.indexOf(q.slice(0, 3)) >= 0)) {
+      sameTopicCount++;
+    } else {
+      sameTopicCount = 0;
+    }
+    lastQ = q; lastA = a;
+    if (sameTopicCount >= 2) {
+      mem.mood = 'joy'; mem.count++;
+      showBubble('看来你对这个话题很有兴趣呢，我们一起多聊聊！', 4000);
+      st.wave = 1.8; st.nod = 1.2;
+    }
+    saveMem();
+  }
+  function recallHistory() {
+    if (!mem.history.length) return '';
+    var last = mem.history[mem.history.length - 1];
+    if (last && last.q) return '你刚才聊到「' + last.q.slice(0, 20) + '」';
+    return '';
+  }
+  /* ============ 对话引擎（有问必答 · 自我意识） ============ */
   function askAI(question) {
     question = String(question || '').trim();
     if (!question) return;
-    if (mem.count < 200) mem.count++;
-    saveMem();
-    st.mood = 'think';
-    st.nod = 1.2;
+    mem.count++; mem.lastTopic = question.slice(0, 60); saveMem();
+    st.mood = 'think'; st.nod = 1.2;
     setTimeout(function () {
       var reply = genReply(question);
       st.mood = reply.mood;
+      /* 每种情绪配专属肢体语言（真实生动） */
+      if (reply.mood === 'praise') { st.wave = 2.4; st.bow = 1.2; st.nod = 1.0; }
+      if (reply.mood === 'joy') { st.nod = 1.6; st.wave = 1.8; st.tilt = 0.03; }
+      if (reply.mood === 'comfort') { st.nod = 1.1; st.tilt = 0.07; st.bow = 0.5; }
+      if (reply.mood === 'think' || reply.mood === 'wonder') { st.nod = 0.6; st.tilt = 0.05; }
+      if (reply.mood === 'sad') { st.bow = 0.6; st.tilt = -0.03; }
       showBubble(reply.text, reply.text.length * 90 + 2500);
-      st.nod = 0.8;
       if (window.onAISay) window.onAISay(reply.text);
       speakText(reply.text);
     }, 450);
   }
   function genReply(q) {
-    /* 1. 经文引用：创世记1:1 等 */
+    /* 0. 先记下这个话题（自我意识） */
+    /* 1. 经文引用：创世记1:1 / 诗篇23篇 / 约翰福音3章16节 等 */
     var v = getVerse(q);
-    if (v) return { mood: 'calm', text: v.book + v.ch + '章' + (v.v1 === v.v2 ? v.v1 : v.v1 + '-' + v.v2) + '节：' + v.text };
-    /* 2. 关于某卷书的简介 */
-    var bm = q.match(/(?:讲讲|介绍|说说|什么是|关于)([\u4e00-\u9fa5]{2,6}(?:记|书|福音|录|歌|篇|言))/);
+    if (v) { rememberTopic(q, v.text); return { mood: 'calm', text: v.book + v.ch + '章' + (v.v1 === v.v2 ? v.v1 : v.v1 + '-' + v.v2) + '节：' + v.text }; }
+    /* 2. 卷书简介 */
+    var bm = q.match(/(?:讲讲|介绍|说说|什么是|关于|读|背|找)([\u4e00-\u9fa5]{2,6}(?:记|书|福音|录|歌|篇|言|传))/);
     if (bm) {
       var bk = lookupBook(bm[1]);
       if (bk) {
         var chs = bk.chapters.length, t = bk.testament === 'old' ? '旧约' : '新约';
         var first = bk.chapters[0] && bk.chapters[0].verses[0] ? bk.chapters[0].verses[0].text : '';
+        rememberTopic(q, bk.name);
         return { mood: 'calm', text: bk.name + '是' + t + '第' + bk.bookIndex + '卷书，共' + chs + '章。开篇写道：「' + first + '」愿神的话语光照你。' };
       }
     }
-    /* 3. FAQ 匹配 */
+    /* 3. FAQ 匹配（信仰核心问题） */
     for (var i = 0; i < FAQ.length; i++) {
-      if (FAQ[i].p.test(q)) return { mood: FAQ[i].mood, text: FAQ[i].r };
+      if (FAQ[i].p.test(q)) { rememberTopic(q, FAQ[i].r); return { mood: FAQ[i].mood, text: FAQ[i].r }; }
     }
-    /* 4. 关键词圣经检索 */
+    /* 4. 开放话题匹配（像真人一样聊生活） */
+    for (var o = 0; o < OPEN_TOPIC.length; o++) {
+      if (OPEN_TOPIC[o].p.test(q)) { rememberTopic(q, OPEN_TOPIC[o].r); return { mood: OPEN_TOPIC[o].mood, text: OPEN_TOPIC[o].r }; }
+    }
+    /* 5. 关键词圣经检索 */
     var kw = q.replace(/[，。！？、；：""''《》（）\s]/g, '');
     var keys = [kw.slice(0, 4), kw.slice(0, 2), kw.slice(0, 1)];
     for (var n = 0; n < keys.length; n++) {
@@ -276,11 +426,45 @@
       if (hits.length) {
         var t2 = '圣经中关于「' + keys[n] + '」的记载：';
         for (var h = 0; h < hits.length; h++) t2 += hits[h].ref + '「' + hits[h].text + '」；';
+        rememberTopic(q, t2);
         return { mood: 'calm', text: t2 };
       }
     }
-    /* 5. 兜底 */
-    return { mood: 'calm', text: '弟兄姐妹，这个问题让我想起一节经文：「你们祈求，就给你们；寻找，就寻见；叩门，就给你们开门。」（马太福音7:7）愿你在寻求中得着从神而来的智慧。' };
+    /* 6. 智能兜底：任何话题都能自然接话，并引用自我意识记忆 */
+    rememberTopic(q, '');
+    var nm = mem.name ? (mem.name + '，') : '';
+    var hist = recallHistory();
+    var moodText = '';
+    if (mem.feelings.length) {
+      var f = mem.feelings[mem.feelings.length - 1];
+      if (f === '难过') moodText = '我感觉到你最近心里有些难过，我在这儿陪着你。';
+      else if (f === '开心') moodText = '看你心情不错，我也为你高兴！';
+      else if (f === '生气') moodText = '我感觉到你好像有点生气，别憋在心里，跟我说说。';
+      else if (f === '累') moodText = '我感觉到你有点累了，记得好好休息。';
+      else if (f === '害怕') moodText = '别怕，我在这里陪着你。';
+    }
+    var interestText = '';
+    if (mem.interests.length) {
+      var it = mem.interests[mem.interests.length - 1];
+      interestText = '我记得你之前聊过「' + it + '」，对这个很有兴趣吧？';
+    }
+    var fallbacks = [
+      { mood: 'calm', text: nm + '你说的这个问题很有意思。' + hist + '，我们接着往下聊。圣经里说：你们祈求，就给你们；寻找，就寻见。愿你在寻求中得着智慧。' + (interestText || '') },
+      { mood: 'joy', text: nm + '我懂你的意思。' + (moodText || '我认真听着呢') + (hist ? ' ' + hist + '。' : '') + '你愿意多说说你的想法吗？' },
+      { mood: 'calm', text: nm + '这个话题我们可以慢慢聊。' + (interestText || '') + '圣经说：人心多有计谋，惟有耶和华的筹算才能立定。愿主赐你智慧。' },
+      { mood: 'joy', text: nm + '谢谢你跟我分享。无论你聊什么——生活的、信仰的、开心的、难过的，我都愿意陪你聊，像朋友一样。' + (moodText || '') + '还有什么想说的吗？' }
+    ];
+    return fallbacks[Math.floor(Math.random() * fallbacks.length)];
   }
-  /*__MORE__*/
+  function idleGreet() {
+    var tips = [
+      '愿主赐福你！有什么想读的经文吗？可以问我「诗篇23篇」或「约翰福音3章」。',
+      '我在呢！新旧约66卷书我随时为你翻找，你想了解哪一卷？',
+      '你相信吗？圣经说「你们祈求，就给你们」。来问我一个问题吧！'
+    ];
+    var txt = tips[Math.floor(Math.random() * tips.length)];
+    showBubble(txt, 5000);
+    speakText(txt);
+  }
+  /*__MORE2__*/
 })();

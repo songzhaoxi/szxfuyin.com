@@ -54,7 +54,7 @@ body::after{
   border-right:none;
   box-shadow:inset 0 0 80px rgba(212,175,55,.06);
 }
-.auth-stage #threeCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;}
+.auth-stage #avatarCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:contain;}
 .auth-stage::after{
   content:'';position:absolute;inset:0;pointer-events:none;
   background:
@@ -186,7 +186,7 @@ body::after{
 @media(max-width:860px){
   .auth-shell{padding:12px;flex-direction:column;}
   .auth-stage{
-    width:100%;min-height:0;height:280px;border-radius:22px 22px 0 0;
+    width:100%;min-height:0;height:420px;border-radius:22px 22px 0 0;
     border:1px solid rgba(212,175,55,.25);
     border-bottom:none;
   }
@@ -197,6 +197,7 @@ body::after{
   .speech-bubble{font-size:11px;padding:7px 12px;}
   .auth-head h1{font-size:22px;}
   .auth-head h1::before{width:34px;height:34px;font-size:17px;}
+  .stage-overlay{display:none;}
 }
 /* ===== 圣经AI数字人聊天框 v206 ===== */
 .ai-chat{
