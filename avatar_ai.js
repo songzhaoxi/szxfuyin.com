@@ -397,18 +397,52 @@
     mem.count++; mem.lastTopic = question.slice(0, 60); saveMem();
     st.mood = 'think'; st.nod = 1.2;
     setTimeout(function () {
-      var reply = genReply(question);
-      st.mood = reply.mood;
-      /* 每种情绪配专属肢体语言（真实生动） */
-      if (reply.mood === 'praise') { st.wave = 2.4; st.bow = 1.2; st.nod = 1.0; }
-      if (reply.mood === 'joy') { st.nod = 1.6; st.wave = 1.8; st.tilt = 0.03; }
-      if (reply.mood === 'comfort') { st.nod = 1.1; st.tilt = 0.07; st.bow = 0.5; }
-      if (reply.mood === 'think' || reply.mood === 'wonder') { st.nod = 0.6; st.tilt = 0.05; }
-      if (reply.mood === 'sad') { st.bow = 0.6; st.tilt = -0.03; }
-      showBubble(reply.text, reply.text.length * 90 + 2500);
-      if (window.onAISay) window.onAISay(reply.text);
-      speakText(reply.text);
-    }, 450);
+      remoteChat(question, function (remoteText) {
+        var reply;
+        if (remoteText) { reply = { mood: guessMood(remoteText), text: remoteText }; rememberTopic(question, remoteText); }
+        else { reply = genReply(question); }
+        deliver(reply);
+      });
+    }, 350);
+  }
+  function deliver(reply) {
+    st.mood = reply.mood;
+    /* 每种情绪配专属肢体语言（真实生动） */
+    if (reply.mood === 'praise') { st.wave = 2.4; st.bow = 1.2; st.nod = 1.0; }
+    if (reply.mood === 'joy') { st.nod = 1.6; st.wave = 1.8; st.tilt = 0.03; }
+    if (reply.mood === 'comfort') { st.nod = 1.1; st.tilt = 0.07; st.bow = 0.5; }
+    if (reply.mood === 'think' || reply.mood === 'wonder') { st.nod = 0.6; st.tilt = 0.05; }
+    if (reply.mood === 'sad') { st.bow = 0.6; st.tilt = -0.03; }
+    showBubble(reply.text, reply.text.length * 90 + 2500);
+    if (window.onAISay) window.onAISay(reply.text);
+    speakText(reply.text);
+  }
+  /* 远程真实 AI 对话（无限话题）：调用 Cloudflare Worker /api/ai/chat */
+  function remoteChat(q, cb) {
+    var base = (window.AUTH_API_BASE || '').replace(/\/$/, '');
+    if (!base) { cb(null); return; }
+    var hist = [];
+    var hs = mem.history.slice(-8);
+    for (var i = 0; i < hs.length; i++) {
+      hist.push({ role: 'user', content: hs[i].q });
+      if (hs[i].a) hist.push({ role: 'assistant', content: hs[i].a });
+    }
+    try {
+      fetch(base + '/api/ai/chat', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ q: q, history: hist })
+      }).then(function (r) { return r.json(); }).then(function (d) {
+        if (d && d.success && d.text) cb(d.text); else cb(null);
+      }).catch(function () { cb(null); });
+    } catch (e) { cb(null); }
+  }
+  /* 根据回复内容推测情绪，配合表情/动作 */
+  function guessMood(t) {
+    if (/爱|赞美|荣耀|哈利路亚|感谢主|神爱/.test(t)) return 'praise';
+    if (/难过|伤心|哭|别怕|安慰|陪|坚强|同在|不要害怕/.test(t)) return 'comfort';
+    if (/哈哈|开心|喜乐|高兴|太棒|祝福|平安/.test(t)) return 'joy';
+    if (/想想|思考|道理|其实|或许|也许|问题/.test(t)) return 'think';
+    return 'calm';
   }
   function genReply(q) {
     /* 0. 先记下这个话题（自我意识） */
@@ -466,15 +500,16 @@
       interestText = '我记得你之前聊过「' + it + '」，对这个很有兴趣吧？';
     }
     var anchor = q.replace(/[，。！？、；：""''《》（）\s~！@#￥%…&*()\-+=|]/g, '').slice(0, 12) || '这件事';
-    var asks = ['你愿意多说说吗？', '我很好奇你是怎么想的。', '可以再跟我讲讲吗？', '你觉得呢？', '还有什么想告诉我的吗？'];
+    var asks = ['你愿意多跟我讲讲吗？', '我很好奇你的想法。', '可以再多说一点吗？', '你觉得呢？', '后来怎么样了？', '我很想听你继续说下去。'];
     var ask = asks[Math.floor(Math.random() * asks.length)];
-    var fallbacks = [
-      { mood: 'calm', text: nm + '关于「' + anchor + '」，我认真听进去了。' + (moodText || '') + (hist ? ' ' + hist + '。' : '') + '圣经说：你们祈求，就给你们；寻找，就寻见。' + (interestText || '') + ' ' + ask },
-      { mood: 'joy', text: nm + '「' + anchor + '」这个话题挺有意思的。' + (moodText || '我认真听着呢') + (interestText ? ' ' + interestText + '。' : '') + ' ' + ask },
-      { mood: 'calm', text: nm + '我懂你说的「' + anchor + '」。' + (hist ? ' ' + hist + '。' : '') + (moodText || '') + '愿主赐你智慧与平安。' + ' ' + ask },
-      { mood: 'joy', text: nm + '谢谢你愿意跟我聊「' + anchor + '」。生活的、信仰的、开心的、难过的，我都愿意陪你，像朋友一样。' + (moodText || '') + ' ' + ask }
-    ];
-    return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+    var isQ = /[？?]$/.test(q) || /(是什么|什么是|为什么|怎么|如何|哪里|谁|多少|几|吗|呢|可以|能不能|是不是|有没有|会不会|如何做|怎么做)/.test(q);
+    var seed = (q.length * 7 + mem.count) % 100;
+    if (isQ) {
+      if (seed < 50) return { mood: 'calm', text: nm + '你问的「' + anchor + '」，是个好问题。' + (moodText || '') + (interestText ? ' ' + interestText : '') + (hist ? ' ' + hist + '。' : '') + '我们一起想想，' + ask };
+      return { mood: 'joy', text: nm + '「' + anchor + '」——这背后其实关乎我们如何看待生活与生命。' + (moodText || '我认真在听。') + (interestText ? ' ' + interestText : '') + ' ' + ask };
+    }
+    if (seed < 50) return { mood: 'joy', text: nm + '「' + anchor + '」这个话题挺有意思，我记住了。' + (moodText || '') + (interestText ? ' ' + interestText : '') + ' ' + ask };
+    return { mood: 'calm', text: nm + '我懂你说的「' + anchor + '」。' + (hist ? ' ' + hist + '。' : '') + (moodText || '') + '生活的、信仰的、开心的、难过的，我都愿意陪你，像朋友一样。' + ' ' + ask };
   }
   var idleTimer = null;
   function startIdle() {

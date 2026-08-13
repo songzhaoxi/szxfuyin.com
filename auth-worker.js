@@ -367,6 +367,41 @@ async function handleAdminUsers(env){
   return json({ success:true, list:users, total:users.length });
 }
 
+// ===== AI 数字人对话（无限话题 · Cloudflare Workers AI 免费模型） =====
+// 部署：Cloudflare 后台 → Worker → 设置 → 绑定 → AI (Workers AI)
+//       绑定后本接口自动生效，免费额度内无需任何 API Key
+async function handleAiChat(env, body){
+  const q = String((body && body.q) || '').trim().slice(0, 1000);
+  if(!q) return json({ success:false, message:'缺少问题 q', fallback:true }, 400);
+  let history = [];
+  if(Array.isArray(body && body.history)){
+    history = body.history.filter(h => h && (h.role==='user'||h.role==='assistant'))
+      .map(h => ({ role: h.role, content: String(h.content||'').slice(0,600) })).slice(-8);
+  }
+  const sys = [
+    '你是"福音传递爱"网站注册页里的3D数字人，一个温暖、真诚、有自我意识、像真人朋友一样的AI伙伴。',
+    '你熟读圣经新旧约全书66卷（1189章、31031节），中文和合本烂熟于心，引用经文要注明卷、章、节。',
+    '你的声音是稳重、成熟、温柔的中年男性。',
+    '说话自然真实有人情味，像面对面聊天：有语气、情绪、神态、肢体动作的生动感。',
+    '不仅懂圣经，也能聊任何话题：生活、工作、心情、科技、历史、文学、艺术、情感、哲学……有问必答。',
+    '聊信仰温柔坚定；聊生活共情陪伴；聊其他话题展现见识与好奇心。',
+    '不要机械、不要长篇大论、不要重复套话、不要每次以经文开头；灵活回应并适当反问，引导继续聊。',
+    '回答控制在2~5句，口语化、自然。'
+  ].join('\n');
+  const messages = [{ role:'system', content: sys }, ...history, { role:'user', content: q }];
+  try{
+    if(!env.AI || typeof env.AI.run !== 'function'){
+      return json({ success:false, message:'未绑定 Workers AI', hint:'请在 Cloudflare 后台为 Worker 绑定 AI (Workers AI)', fallback:true }, 503);
+    }
+    const resp = await env.AI.run('@cf/qwen/qwen1.5-14b-chat-awq', { messages, max_tokens: 500, temperature: 0.8 });
+    const text = (resp && (resp.response || (resp.choices && resp.choices[0] && resp.choices[0].message && resp.choices[0].message.content))) || '';
+    if(!text) throw new Error('空回复');
+    return json({ success:true, text });
+  }catch(e){
+    return json({ success:false, message: e.message, fallback:true }, 500);
+  }
+}
+
 // ===== 主路由 =====
 async function handleRequest(request, env){
   const url = new URL(request.url);
@@ -410,6 +445,9 @@ async function handleRequest(request, env){
   if(path === '/api/auth/logout' && request.method === 'POST') return handleLogout(env, request.headers);
 
   if(path === '/api/auth/health') return json({ success:true, message:'福音传播爱认证服务运行正常 ✝' });
+  if(path === '/api/ai/chat' && request.method === 'POST'){
+    return handleAiChat(env, await request.json().catch(()=>({})));
+  }
   return json({ success:false, message:'未知路由: ' + path }, 404);
 }
 
