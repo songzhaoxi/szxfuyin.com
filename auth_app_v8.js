@@ -87,7 +87,12 @@
   var anim = { shakeT: 0, jumpT: 0, waveT: 0, smile: 0, talk: 0, blinkT: 0 };
   function init3D() {
     var canvas = $('threeCanvas');
-    if (!canvas || typeof THREE === 'undefined') return;
+    if (!canvas) return;
+    /* three.js 加载失败：直接回退Canvas2D程序化人物（avatar_ai.js接管），绝不空白舞台 */
+    if (typeof THREE === 'undefined' || typeof THREE.GLTFLoader === 'undefined') {
+      try { showCanvasFallback(); } catch (e) {}
+      return;
+    }
     try {
       var pw = canvas.parentElement ? canvas.parentElement.clientWidth : window.innerWidth;
       var ph = canvas.parentElement ? canvas.parentElement.clientHeight : window.innerHeight;
@@ -107,13 +112,25 @@
       var rim = new THREE.DirectionalLight(0xffd9a0, 0.7); rim.position.set(0, 3, -3); scene.add(rim);
       var ring = new THREE.Mesh(new THREE.RingGeometry(1.1, 1.42, 48), new THREE.MeshBasicMaterial({ color: 0xC8973A, transparent: true, opacity: 0.28, side: THREE.DoubleSide }));
       ring.rotation.x = -0.35; ring.position.set(0, 1.0, -0.9); scene.add(ring);
-      loadModel();
+      /* GLB加载超时保护：8秒未成功自动回退Canvas2D（保证人物必显示） */
+      var glbTimer = setTimeout(function () {
+        if (!character) { try { showCanvasFallback(); } catch (e) {} }
+      }, 8000);
+      loadModel(glbTimer);
       clock = new THREE.Clock();
       animate();
       window.addEventListener('resize', onResize);
-    } catch (e) { console.error('3D init error', e); }
+    } catch (e) { console.error('3D init error', e); try { showCanvasFallback(); } catch (e2) {} }
   }
-  function loadModel() {
+  function showCanvasFallback() {
+    /* 隐藏threeCanvas，显示Canvas2D程序化全身人物（avatar_ai.js持续绘制） */
+    try {
+      var c3 = $('threeCanvas'); if (c3) c3.style.display = 'none';
+      var c2 = $('avatarCanvas'); if (c2) c2.style.display = 'block';
+      if (window.AvatarAI && AvatarAI.set3DReady) AvatarAI.set3DReady(false);
+    } catch (e) {}
+  }
+  function loadModel(glbTimer) {
     var loader = new THREE.GLTFLoader();
     /* 中年男性模型优先：XBot（男性，动画最丰富：走/跑/同意/摇头/伤心）→ Soldier（男性士兵）→ Michelle（女性兜底） */
     var tryUrls = ['js/xbot.glb', 'auth/js/xbot.glb', 'szxfuyin/js/xbot.glb', 'js/soldier.glb', 'auth/js/soldier.glb', 'szxfuyin/js/soldier.glb', 'js/michelle.glb', 'auth/js/michelle.glb', 'szxfuyin/js/michelle.glb'];
@@ -162,6 +179,7 @@
             try { window._avatarClipMap = clipMap; } catch (e) {}
           }
           /* 3D模型渲染成功：通知AvatarAI隐藏Canvas2D人物，只保留语音/AI/气泡 */
+          try { if (glbTimer) clearTimeout(glbTimer); } catch (e) {}
           try { if (window.AvatarAI && AvatarAI.set3DReady) AvatarAI.set3DReady(true); } catch (e) {}
           showBubble('欢迎来到兆西福音传递爱，愿你平安 🙏', 5000);
           /* 欢迎语只由AvatarAI统一播报一次（彻底杜绝双声音） */
