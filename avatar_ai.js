@@ -1,8 +1,8 @@
-/* avatar_ai.js — 全能真人化AI数字人 v223（纯程序化全身全貌·自动走路·表情情绪嘴型·中年男声·无限话题·自我意识·如实回答） */
+/* avatar_ai.js — 全能真人化AI数字人 v225（纯程序化全身全貌·自动走路·表情情绪嘴型·中年男声·无限话题·自我意识·如实回答） */
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
-  var CFG_KEY = 'avatar_ai_cfg_v223';
+  var CFG_KEY = 'avatar_ai_cfg_v225';
   var CFG = {
     img: 'avatar_3d.png?v=216',
     mouthX: 0.50, mouthY: 0.56, mouthW: 0.14, mouthH: 0.07,
