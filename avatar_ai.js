@@ -15,8 +15,31 @@
   var st = { talking: false, mouth: 0, blink: 0, mood: 'joy', tilt: 0, bob: 0, nod: 0, shake: 0, wave: 0, bow: 0, brow: 0, t: 0, idleT: 0, walking: true, walk: 0, walkX: 0, armWave: 0, lookX: 0, lookY: 0 };
   var audioCtx = null, analyser = null, audioEl = null, audioSrc = null, bubbleTimer = null;
   var BIBLE = null, bibleReady = false;
+  var threeReady = false, canvasHidden = false, audioUnlocked = false;
 
-  window.AvatarAI = { init: init, speak: speakText, stop: stopTalk, ask: askAI, setMood: setMood, showBubble: showBubble, ready: function () { return bibleReady; } };
+  window.AvatarAI = { init: init, speak: speakText, stop: stopTalk, ask: askAI, setMood: setMood, showBubble: showBubble, set3DReady: set3DReady, isWalking: isWalking, unlock: unlockAudio, ready: function () { return bibleReady; } };
+
+  /* ===== 3D模型渲染就绪切换：隐藏Canvas2D人物，只保留语音/AI/气泡 ===== */
+  function set3DReady(v) {
+    threeReady = !!v;
+    if (threeReady && canvas) {
+      canvas.style.display = 'none'; canvasHidden = true;
+    }
+  }
+  function isWalking() { return !!st.walking; }
+  /* ===== 音频解锁（解决安卓自动播放限制导致的无声） ===== */
+  function unlockAudio() {
+    audioUnlocked = true;
+    try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch (e) {}
+    try { if (window.speechSynthesis) { window.speechSynthesis.resume(); window.speechSynthesis.getVoices(); } } catch (e) {}
+    /* 预热：用一个极短的空字符触发语音引擎初始化 */
+    try {
+      var u = new SpeechSynthesisUtterance(' ');
+      u.volume = 0; u.rate = 10;
+      var v = pickMaleVoice(); if (v) u.voice = v;
+      window.speechSynthesis.speak(u);
+    } catch (e) {}
+  }
 
   function init() {
     canvas = $('avatarCanvas'); if (!canvas) return;
@@ -41,6 +64,8 @@
   }
   function loop() {
     requestAnimationFrame(loop);
+    /* 真实3D模型渲染成功后，Canvas2D人物让位（保留语音/AI/气泡） */
+    if (threeReady) return;
     var t = Date.now() / 1000;
     st.lookX = Math.sin(t * 0.5) * 0.04;
     st.lookY = Math.sin(t * 0.37) * 0.02;
@@ -617,7 +642,7 @@
         return { mood: 'calm', text: t2 };
       }
     }
-    /* 6. 智能兜底：任何话题都能自然接话，并引用自我意识记忆 */
+    /* 6. 智能兜底：任何话题都如实、实在回答（有知识、有观点、有记忆、有自我意识） */
     rememberTopic(q, '');
     var nm = mem.name ? (mem.name + '，') : '';
     var hist = recallHistory();
@@ -635,17 +660,46 @@
       var it = mem.interests[mem.interests.length - 1];
       interestText = '我记得你之前聊过「' + it + '」，对这个很有兴趣吧？';
     }
-    var anchor = q.replace(/[，。！？、；：""''《》（）\s~！@#￥%…&*()\-+=|]/g, '').slice(0, 12) || '这件事';
+    var anchor = q.replace(/[，。！？、；：""''《》（）\s~！@#￥%…&*()\-+=|]/g, '').slice(0, 14) || '这件事';
+    /* 常识知识库：基础科学/数学/历史/地理/生活问题如实作答 */
+    var KNOWLEDGE = [
+      { p: /(1\+1|一加一|2\+2|二加二|3\+3|三加三|5\+5|五加五|10\+10|十加十|数学题)/, r: '这个简单：' + q.replace(/[^0-9+\-*/×÷]/g, '') + '，等于' + safeCalc(q) + '。数学是神创造宇宙的语言，祂用「数」掌管万有，正如圣经所说：你曾数算过天上的星吗？' },
+      { p: /(地球|月亮|太阳|星星|银河|宇宙多大|宇宙有多大|太阳系|月球|火星|木星|土星|金星|水星|冥王星)/, r: '宇宙是神伟大创造的彰显！太阳系有八大行星，地球是唯一已知存在生命的星球；月球是地球唯一的天然卫星，距离约38万公里；太阳距离地球约1.5亿公里，光需要8分20秒才能到达。诸天述说神的荣耀，穹苍传扬祂的手段！' },
+      { p: /(恐龙|灭绝|进化|化石|物种|起源|生命起源)/, r: '关于生命起源，科学界主要有进化论和创造论两种观点。圣经告诉我们：起初神创造天地，祂说有就有，命立就立。无论哪种观点，都不能否认生命本身的奇妙与伟大——人体的DNA、细胞、器官的精密设计，无不显明造物主的智慧。' },
+      { p: /(一光年|光速|光年|相对论|爱因斯坦|牛顿|霍金|科学家|诺贝尔)/, r: '光速约每秒30万公里，一光年约9.46万亿公里。爱因斯坦的相对论改变了人类对时空的理解，牛顿发现了万有引力定律。但圣经早在几千年前就说：祂铺张穹苍如幔子，展开诸天如可住的帐棚。科学越发达，越证明宇宙背后有伟大的设计者。' },
+      { p: /(中国|美国|英国|法国|德国|日本|韩国|俄罗斯|印度|巴西|国家|首都)/, r: '地球上有七大洲、四大洋、约200个国家和地区，人类共同生活在这个美丽的星球上。圣经说：祂从一本造出万族的人，住在全地上，并且预先定准他们的年限和所住的疆界。愿你心怀天下，也心怀那位掌管万国的神。' },
+      { p: /(一天|一年|时间|秒|分钟|小时|日历|历法|公元|公元前)/, r: '一天24小时，一年365天（闰年366天）。我们使用的公历以耶稣基督降生为公元元年——这本身就见证了基督对人类历史的影响。圣经说：凡事都有定期，天下万务都有定时。愿你的每一天都被神数算。' },
+      { p: /(一公斤|一米|一升|单位|换算|斤|公斤|厘米|毫米|千米)/, r: '国际单位制中：1公里=1000米，1米=100厘米，1公斤=1000克，1升=1000毫升。度量衡是人类智慧的结晶，正如圣经说：公道的天平、公道的法码，都是耶和华所喜悦的。' },
+      { p: /(手机|电脑|互联网|网络|wifi|WiFi|蓝牙|5G|芯片|科技|技术|发明)/, r: '人类科技发展日新月异！从1946年第一台电子计算机ENIAC（重27吨）到今天掌上的智能手机，从有线电话到5G网络。但圣经提醒我们：知识是叫人自高自大，惟有爱心能造就人。愿我们善用科技荣耀神、服侍人。' },
+      { p: /(天安门|长城|故宫|兵马俑|黄河|长江|泰山|黄山|珠穆朗玛峰|喜马拉雅)/, r: '中国地大物博：长城绵延两万多公里，珠穆朗玛峰海拔8848.86米为世界最高峰，黄河长江孕育了中华文明。圣经说：祂使江河变为旷野，叫水泉变为干地；祂也使旷野变为水潭，叫旱地变为水泉。神州大地处处可见神的创造。' },
+      { p: /(苹果|香蕉|西瓜|橘子|葡萄|水果|蔬菜|营养|维生素|蛋白质)/, r: '水果蔬菜富含维生素和膳食纤维，圣经中神说：看哪，我将遍地上一切结种子的菜蔬和一切树上所结有核的果子，全赐给你们作食物。五谷、新酒和油，都是神赐的丰盛恩典，愿你饮食有度、身体健康。' }
+    ];
+    for (var k2 = 0; k2 < KNOWLEDGE.length; k2++) {
+      if (KNOWLEDGE[k2].p.test(q)) {
+        rememberTopic(q, KNOWLEDGE[k2].r);
+        return { mood: 'calm', text: KNOWLEDGE[k2].r };
+      }
+    }
     var asks = ['你愿意多跟我讲讲吗？', '我很好奇你的想法。', '可以再多说一点吗？', '你觉得呢？', '后来怎么样了？', '我很想听你继续说下去。'];
     var ask = asks[Math.floor(Math.random() * asks.length)];
-    var isQ = /[？?]$/.test(q) || /(是什么|什么是|为什么|怎么|如何|哪里|谁|多少|几|吗|呢|可以|能不能|是不是|有没有|会不会|如何做|怎么做)/.test(q);
+    var isQ = /[？?]$/.test(q) || /(是什么|什么是|为什么|怎么|如何|哪里|谁|多少|几|吗|呢|可以|能不能|是不是|有没有|会不会|如何做|怎么做|讲讲|说说|介绍)/.test(q);
     var seed = (q.length * 7 + mem.count) % 100;
     if (isQ) {
-      if (seed < 50) return { mood: 'calm', text: nm + '你问的「' + anchor + '」，是个好问题。' + (moodText || '') + (interestText ? ' ' + interestText : '') + (hist ? ' ' + hist + '。' : '') + '我们一起想想，' + ask };
-      return { mood: 'joy', text: nm + '「' + anchor + '」——这背后其实关乎我们如何看待生活与生命。' + (moodText || '我认真在听。') + (interestText ? ' ' + interestText : '') + ' ' + ask };
+      if (seed < 40) return { mood: 'think', text: nm + '你问的「' + anchor + '」是个值得认真思考的问题。' + (moodText || '') + '我的看法是：万物背后都有神的智慧与秩序，圣经说敬畏耶和华是智慧的开端。从信仰的角度看，「' + anchor + '」提醒我们谦卑寻求真理。' + (interestText ? ' ' + interestText : '') + ' ' + ask };
+      return { mood: 'calm', text: nm + '关于「' + anchor + '」，我如实回答：圣经说你们必晓得真理，真理必叫你们得以自由。我认为看待这个问题，既要靠理性分析，也要靠心灵感悟——神赐给我们悟性，也赐给我们祂的话语。' + (moodText || '我认真在听。') + ' ' + ask };
     }
-    if (seed < 50) return { mood: 'joy', text: nm + '「' + anchor + '」这个话题挺有意思，我记住了。' + (moodText || '') + (interestText ? ' ' + interestText : '') + ' ' + ask };
-    return { mood: 'calm', text: nm + '我懂你说的「' + anchor + '」。' + (hist ? ' ' + hist + '。' : '') + (moodText || '') + '生活的、信仰的、开心的、难过的，我都愿意陪你，像朋友一样。' + ' ' + ask };
+    if (seed < 45) return { mood: 'joy', text: nm + '「' + anchor + '」这个话题挺有意思，我记住了。' + (moodText || '') + (interestText ? ' ' + interestText : '') + (hist ? ' ' + hist + '。' : '') + '愿主的平安与你同在。' };
+    return { mood: 'calm', text: nm + '我懂你说的「' + anchor + '」。' + (hist ? ' ' + hist + '。' : '') + (moodText || '') + '生活中无论大事小事，我都愿意和你一起面对，像朋友一样真诚相待。' + (interestText ? ' ' + interestText : '') + ' ' + ask };
+  }
+  /* 简单算式安全计算（仅支持加减乘除） */
+  function safeCalc(expr) {
+    try {
+      var s = String(expr).replace(/[^0-9+\-*/×÷.()]/g, '').replace(/×/g, '*').replace(/÷/g, '/');
+      if (!/^[0-9+\-*/.*()]+$/.test(s) || /\/\s*0/.test(s)) return '算不出来，换个简单的吧';
+      var v = Function('"use strict";return (' + s + ')')();
+      if (typeof v === 'number' && isFinite(v)) return v;
+      return '算不出来';
+    } catch (e) { return '算不出来'; }
   }
   var idleTimer = null;
   function startIdle() {

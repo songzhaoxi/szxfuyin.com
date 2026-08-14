@@ -83,16 +83,21 @@
   }
   /* ========== 真实3D人物（GLB模型+表情融合+语音口型） ========== */
   var renderer, scene, camera, character, morphMesh = null, morphDict = {}, clock, avatarMixer = null;
+  var walkClip = null, walkAction = null, idleAction = null, isWalkingAnim = false;
   var anim = { shakeT: 0, jumpT: 0, waveT: 0, smile: 0, talk: 0, blinkT: 0 };
   function init3D() {
     var canvas = $('threeCanvas');
     if (!canvas || typeof THREE === 'undefined') return;
     try {
+      var pw = canvas.parentElement ? canvas.parentElement.clientWidth : window.innerWidth;
+      var ph = canvas.parentElement ? canvas.parentElement.clientHeight : window.innerHeight;
+      canvas.width = Math.max(10, pw * (window.devicePixelRatio || 1));
+      canvas.height = Math.max(10, ph * (window.devicePixelRatio || 1));
       renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       if (THREE.sRGBEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
       if (THREE.ACESFilmicToneMapping !== undefined) renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+      renderer.setSize(pw, ph);
       scene = new THREE.Scene();
       camera = new THREE.PerspectiveCamera(40, canvas.clientWidth / canvas.clientHeight, 0.1, 100);
       camera.position.set(0, 0.85, 3.2); camera.lookAt(0, 1.0, 0);
@@ -110,7 +115,8 @@
   }
   function loadModel() {
     var loader = new THREE.GLTFLoader();
-    var tryUrls = ['js/michelle.glb', 'auth/js/michelle.glb', 'szxfuyin/js/michelle.glb', 'js/xbot.glb'];
+    /* 中年男性模型优先：Soldier（男性士兵）→ XBot（男性）→ Michelle（女性兜底） */
+    var tryUrls = ['js/soldier.glb', 'auth/js/soldier.glb', 'szxfuyin/js/soldier.glb', 'js/xbot.glb', 'auth/js/xbot.glb', 'szxfuyin/js/xbot.glb', 'js/michelle.glb', 'auth/js/michelle.glb', 'szxfuyin/js/michelle.glb'];
     var tried = 0;
     function tryLoad() {
       var u = tryUrls[tried++];
@@ -139,16 +145,27 @@
             avatarMixer = new THREE.AnimationMixer(character);
             var idle = gltf.animations.filter(function (a) { return /idle|pose|talk|wave|hello/i.test(a.name); });
             var clip = idle[0] || gltf.animations[0];
-            if (clip) avatarMixer.clipAction(clip).play();
+            if (clip) { idleAction = avatarMixer.clipAction(clip); idleAction.play(); }
+            /* 预载走路/跑步动画（AvatarAI走路时切换） */
+            var walkAnim = gltf.animations.filter(function (a) { return /walk|run/i.test(a.name); });
+            if (walkAnim.length) { walkClip = walkAnim[0]; try { walkAction = avatarMixer.clipAction(walkClip); walkAction.setLoop(THREE.LoopRepeat); walkAction.stop(); } catch (e2) { walkAction = null; } }
           }
+          /* 3D模型渲染成功：通知AvatarAI隐藏Canvas2D人物，只保留语音/AI/气泡 */
+          try { if (window.AvatarAI && AvatarAI.set3DReady) AvatarAI.set3DReady(true); } catch (e) {}
           showBubble('欢迎来到兆西福音传递爱，愿你平安 🙏', 5000);
-          speak('欢迎来到兆西福音传递爱，愿你平安');
+          /* 欢迎语只由AvatarAI统一播报一次（彻底杜绝双声音） */
         } catch (e) { console.error('model setup err', e); tryLoad(); }
       }, undefined, function () { tryLoad(); });
     }
     tryLoad();
   }
   function buildFallback() {
+    /* 3D模型全部加载失败：隐藏threeCanvas，交还Canvas2D程序化人物接管 */
+    try {
+      var c3 = $('threeCanvas'); if (c3) c3.style.display = 'none';
+      if (window.AvatarAI && AvatarAI.set3DReady) AvatarAI.set3DReady(false);
+      var c2 = $('avatarCanvas'); if (c2) c2.style.display = 'block';
+    } catch (e) {}
     var g = new THREE.Group();
     var mat = new THREE.MeshBasicMaterial({ color: 0xE8B96A, transparent: true, opacity: 0.16 });
     var sphere = new THREE.Mesh(new THREE.SphereGeometry(0.9, 32, 32), mat);
@@ -173,10 +190,28 @@
     requestAnimationFrame(animate);
     if (!clock) return;
     var t = clock.getElapsedTime();
-    if (avatarMixer) avatarMixer.update(0.016);
+    /* 走路动画自动切换：AvatarAI空闲时走动（walking=true），说话时站定（idle） */
+    if (avatarMixer && character) {
+      var walkingNow = false;
+      try { if (window.AvatarAI && AvatarAI.isWalking) walkingNow = !!AvatarAI.isWalking(); } catch (e) {}
+      if (walkingNow !== isWalkingAnim) {
+        isWalkingAnim = walkingNow;
+        if (walkAction || idleAction) {
+          var from = walkingNow ? idleAction : walkAction;
+          var to = walkingNow ? walkAction : idleAction;
+          if (from) { from.fadeOut(0.35); }
+          if (to) { to.reset(); to.fadeIn(0.35); to.play(); }
+        }
+      }
+      if (isWalkingAnim && character) {
+        character.position.x = Math.sin(t * 0.9) * 0.55;
+        character.rotation.y = Math.sin(t * 0.9) * 0.22;
+      }
+      avatarMixer.update(0.016);
+    }
     if (!character) return;
     character.position.y = 0.02 + Math.sin(t * 1.6) * 0.008;
-    character.rotation.y = Math.sin(t * 0.6) * 0.05;
+    if (!isWalkingAnim) character.rotation.y = Math.sin(t * 0.6) * 0.05;
     if (anim.shakeT > 0) {
       anim.shakeT -= 0.016;
       character.rotation.z = Math.sin(anim.shakeT * 20) * 0.18;

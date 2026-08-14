@@ -46,7 +46,7 @@ body::after{
   min-height:100vh;padding:24px;
 }
 .auth-stage{
-  width:50%;min-height:700px;position:relative;
+  width:50%;min-height:820px;position:relative;
   background:linear-gradient(180deg,#0d1533 0%,#17214e 100%);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   border:1px solid rgba(212,175,55,.25);
@@ -54,6 +54,7 @@ body::after{
   box-shadow:inset 0 0 80px rgba(212,175,55,.06);
 }
 .auth-stage #avatarCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:contain;}
+.auth-stage #threeCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1;}
 .auth-stage::after{
   content:'';position:absolute;inset:0;pointer-events:none;
   background:
@@ -185,7 +186,7 @@ body::after{
 @media(max-width:860px){
   .auth-shell{padding:12px;flex-direction:column;}
   .auth-stage{
-    width:100%;min-height:0;height:68vh;min-height:520px;border-radius:22px 22px 0 0;
+    width:100%;min-height:0;height:76vh;min-height:600px;border-radius:22px 22px 0 0;
     border:1px solid rgba(212,175,55,.25);
     border-bottom:none;
   }
