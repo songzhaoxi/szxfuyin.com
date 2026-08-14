@@ -132,8 +132,8 @@
   }
   function loadModel(glbTimer) {
     var loader = new THREE.GLTFLoader();
-    /* 中年男性模型优先：XBot（男性，动画最丰富：走/跑/同意/摇头/伤心）→ Soldier（男性士兵）→ Michelle（女性兜底） */
-    var tryUrls = ['js/xbot.glb', 'auth/js/xbot.glb', 'szxfuyin/js/xbot.glb', 'js/soldier.glb', 'auth/js/soldier.glb', 'szxfuyin/js/soldier.glb', 'js/michelle.glb', 'auth/js/michelle.glb', 'szxfuyin/js/michelle.glb'];
+    /* 中年男性模型优先：XBot（男性，动画最丰富：走/跑/同意/摇头/伤心）→ Soldier（男性士兵）→ CesiumMan（人形）→ Michelle（女性兜底） */
+    var tryUrls = ['js/xbot.glb', 'auth/js/xbot.glb', 'szxfuyin/js/xbot.glb', './js/xbot.glb', 'js/soldier.glb', 'auth/js/soldier.glb', 'szxfuyin/js/soldier.glb', './js/soldier.glb', 'js/cesium_man.glb', 'auth/js/cesium_man.glb', 'szxfuyin/js/cesium_man.glb', './js/cesium_man.glb', 'js/michelle.glb', 'auth/js/michelle.glb', 'szxfuyin/js/michelle.glb', './js/michelle.glb'];
     var tried = 0;
     function tryLoad() {
       var u = tryUrls[tried++];
