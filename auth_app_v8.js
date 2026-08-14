@@ -112,10 +112,10 @@
       var rim = new THREE.DirectionalLight(0xffd9a0, 0.7); rim.position.set(0, 3, -3); scene.add(rim);
       var ring = new THREE.Mesh(new THREE.RingGeometry(1.1, 1.42, 48), new THREE.MeshBasicMaterial({ color: 0xC8973A, transparent: true, opacity: 0.28, side: THREE.DoubleSide }));
       ring.rotation.x = -0.35; ring.position.set(0, 1.0, -0.9); scene.add(ring);
-      /* GLB加载超时保护：8秒未成功自动回退Canvas2D（保证人物必显示） */
+      /* GLB加载超时保护：30秒未成功才回退Canvas2D（手机网络慢，8秒太短会导致3D模型未加载完就被误判失败） */
       var glbTimer = setTimeout(function () {
         if (!character) { try { showCanvasFallback(); } catch (e) {} }
-      }, 8000);
+      }, 30000);
       loadModel(glbTimer);
       clock = new THREE.Clock();
       animate();
@@ -135,17 +135,18 @@
     /* 中年男性模型优先：XBot（男性，动画最丰富：走/跑/同意/摇头/伤心）→ Soldier（男性士兵）→ CesiumMan（人形）→ Michelle（女性兜底）
        本地模型加载失败时，自动切换网上CDN备用源（three.js官方GitHub托管，确保任何网络环境下都能加载全身模型） */
     var tryUrls = [
-      'js/xbot.glb', 'auth/js/xbot.glb', 'szxfuyin/js/xbot.glb', './js/xbot.glb',
-      'js/soldier.glb', 'auth/js/soldier.glb', 'szxfuyin/js/soldier.glb', './js/soldier.glb',
+      /* ===== 优先加载小体积模型：cesium_man仅438KB，手机网络秒开（之前把2.8MB的xbot放第一导致加载超时回退2D） ===== */
       'js/cesium_man.glb', 'auth/js/cesium_man.glb', 'szxfuyin/js/cesium_man.glb', './js/cesium_man.glb',
+      'js/soldier.glb', 'auth/js/soldier.glb', 'szxfuyin/js/soldier.glb', './js/soldier.glb',
+      'js/xbot.glb', 'auth/js/xbot.glb', 'szxfuyin/js/xbot.glb', './js/xbot.glb',
       'js/michelle.glb', 'auth/js/michelle.glb', 'szxfuyin/js/michelle.glb', './js/michelle.glb',
-      /* ===== 网上备用源：three.js官方GitHub托管GLB全身模型（本地失败自动联网加载） ===== */
-      'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb',
-      'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Xbot.glb',
-      'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Michelle.glb',
+      /* ===== 网上备用源：国内可达的jsdelivr优先（raw.githubusercontent.com在国内经常超时） ===== */
       'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/models/gltf/Soldier.glb',
       'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/models/gltf/Xbot.glb',
-      'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/models/gltf/Michelle.glb'
+      'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/models/gltf/Michelle.glb',
+      'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb',
+      'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Xbot.glb',
+      'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Michelle.glb'
     ];
     var tried = 0;
     function tryLoad() {

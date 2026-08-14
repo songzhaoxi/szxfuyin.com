@@ -347,6 +347,8 @@
     /* 延迟一帧确保旧语音彻底停止，再统一播放中年男声 */
     setTimeout(function () {
       try { speechSynthesis.cancel(); } catch (e) {}
+      /* 兼容性保护：OPPO等浏览器可能不支持speechSynthesis，此时静默降级（只显示气泡），绝不报错中断AI回复 */
+      if (typeof SpeechSynthesisUtterance === 'undefined') { st.talking = false; speakLock = false; if (opts.onEnd) opts.onEnd(); return; }
       var u = new SpeechSynthesisUtterance(String(text));
       u.lang = 'zh-CN'; u.rate = CFG.voiceRate; u.pitch = CFG.voicePitch;
       var pick = pickMaleVoice();
