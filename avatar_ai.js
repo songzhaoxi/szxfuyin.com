@@ -1,8 +1,8 @@
-/* avatar_ai.js — 会说话的圣经AI数字人 v212（全身形态 · 自我意识 · 自由对话 · 表情情绪嘴型 · 真实男声 · 智能接话） */
+/* avatar_ai.js — 全能真人化AI数字人 v221（纯程序化全身全貌·自动走路·表情情绪嘴型·中年男声·无限话题·自我意识） */
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
-  var CFG_KEY = 'avatar_ai_cfg_v209';
+  var CFG_KEY = 'avatar_ai_cfg_v221';
   var CFG = {
     img: 'avatar_3d.png?v=216',
     mouthX: 0.50, mouthY: 0.56, mouthW: 0.14, mouthH: 0.07,
@@ -12,7 +12,7 @@
   };
   try { var _c = JSON.parse(localStorage.getItem(CFG_KEY) || '{}'); for (var k in _c) CFG[k] = _c[k]; } catch (e) {}
   var canvas, ctx, img = null, imgW = 0, imgH = 0;
-  var st = { talking: false, mouth: 0, blink: 0, mood: 'joy', tilt: 0, bob: 0, nod: 0, shake: 0, wave: 0, bow: 0, brow: 0, t: 0, idleT: 0, walking: true, walk: 0, walkX: 0, armWave: 0 };
+  var st = { talking: false, mouth: 0, blink: 0, mood: 'joy', tilt: 0, bob: 0, nod: 0, shake: 0, wave: 0, bow: 0, brow: 0, t: 0, idleT: 0, walking: true, walk: 0, walkX: 0, armWave: 0, lookX: 0, lookY: 0 };
   var audioCtx = null, analyser = null, audioEl = null, audioSrc = null, bubbleTimer = null;
   var BIBLE = null, bibleReady = false;
 
@@ -32,9 +32,6 @@
     requestAnimationFrame(loop);
     setTimeout(function () { greeting(); }, 1600);
     startIdle();
-    updateClock();
-    setInterval(updateClock, 1000);
-    fetchWeather();
   }
   function fit() {
     if (!canvas) return;
@@ -45,7 +42,8 @@
   function loop() {
     requestAnimationFrame(loop);
     var t = Date.now() / 1000;
-    if (!img) return;
+    st.lookX = Math.sin(t * 0.5) * 0.04;
+    st.lookY = Math.sin(t * 0.37) * 0.02;
     st.bob = Math.sin(t * 1.3) * 8 * (st.talking ? 1.6 : 1);
     if (st.blink <= 0 && Math.random() < 0.02) st.blink = 1;
     if (st.blink > 0) st.blink -= 0.055;
@@ -80,99 +78,187 @@
   }
   function draw() {
     var cw = canvas.width, ch = canvas.height;
-    ctx.clearRect(0, 0, cw, ch); if (!img) return;
-    /* 全身布局：上半身图片 + 下方程序化双腿，整体垂直居中，完整展示全身全貌 */
-    var scale = Math.min(cw * 0.85 / imgW, ch * 0.50 / imgH);
-    var dw = imgW * scale, dh = imgH * scale;
-    var legLen = Math.max(dh * 0.55, dw * 0.14);
-    var totalH = dh + legLen;
-    var dx = (cw - dw) / 2 + st.walkX;
-    var dy = Math.max(ch * 0.02, (ch - totalH) / 2) + st.bob;
-    /* 先画双腿（在身体后方下方，走路时前后摆动） */
-    drawLegs(dx, dw, dy + dh, legLen);
-    /* 身体旋转（点头/摇头/鞠躬/挥手/走路摇摆） */
+    ctx.clearRect(0, 0, cw, ch);
+    var H = Math.min(cw * 0.52, ch * 0.70);
+    var cx = cw / 2 + st.walkX;
+    var groundY = ch * 0.84;
     ctx.save();
-    var rcx = cw / 2 + st.walkX, rcy = dy + dh / 2;
+    ctx.globalAlpha = 0.28; ctx.fillStyle = '#000';
+    ctx.beginPath(); ctx.ellipse(cx, groundY + 6, H * 0.30, H * 0.045, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    ctx.save();
+    var rcx = cx, rcy = groundY - H * 0.75;
     ctx.translate(rcx, rcy);
     var rot = st.tilt;
     if (st.shake > 0) rot += Math.sin(st.shake * 14) * 0.16 * Math.min(1, st.shake * 3);
     if (st.nod > 0) rot += Math.sin(st.nod * 9) * 0.10 * Math.min(1, st.nod * 3);
-    if (st.bow > 0) rot += 0.22 * Math.min(1, st.bow * 2.5);
+    if (st.bow > 0) rot += 0.24 * Math.min(1, st.bow * 2.5);
     if (st.wave > 0) rot += Math.sin(st.wave * 9) * 0.07 * Math.min(1, st.wave);
-    if (st.walking) rot += Math.sin(st.walk * 1.4) * 0.03;
+    if (st.walking) rot += Math.sin(st.walk * 1.5) * 0.025;
     ctx.rotate(rot);
     ctx.translate(-rcx, -rcy);
-    var glow = st.mood === 'praise' ? 'rgba(255,215,90,0.5)' : st.mood === 'comfort' ? 'rgba(120,180,255,0.4)' : 'rgba(212,175,55,0.32)';
-    ctx.shadowColor = glow; ctx.shadowBlur = 46;
-    ctx.drawImage(img, dx, dy, dw, dh);
+    var glow = st.mood === 'praise' ? 'rgba(255,215,90,0.45)' : st.mood === 'comfort' ? 'rgba(120,180,255,0.35)' : 'rgba(212,175,55,0.28)';
+    ctx.shadowColor = glow; ctx.shadowBlur = 42;
+    drawLegs(cx, groundY, H);
+    drawBody(cx, groundY, H);
+    drawArms(cx, groundY, H);
     ctx.shadowBlur = 0;
-    drawMouth(dx, dy, dw, dh);
-    if (st.blink > 0.02) drawEyes(dx, dy, dw, dh);
-    if (st.mood === 'think' || st.mood === 'wonder' || st.mood === 'sad' || st.mood === 'comfort' || st.brow > 0.15) drawBrows(dx, dy, dw, dh);
+    drawHead(cx, groundY, H);
     ctx.restore();
   }
   /* 程序化绘制双腿（补全全身形态 + 自动走路摆动） */
-  function drawLegs(dx, dw, hipY, legLen) {
-    var cx = dx + dw * 0.5;
-    var legW = Math.max(7, dw * 0.085);
-    var swing = st.walking ? Math.sin(st.walk * 1.5) * legW * 1.7 : 0;
-    var hip = Math.max(0, legLen * 0.12);
+  function drawLegs(cx, groundY, H) {
+    var hipY = groundY - H * 0.26;
+    var legW = H * 0.075;
+    var swing = st.walking ? Math.sin(st.walk * 2.1) * H * 0.10 : 0;
     ctx.save();
     ctx.lineCap = 'round';
-    ctx.strokeStyle = '#3b2f27'; ctx.lineWidth = legW;
-    /* 左腿 */
-    ctx.beginPath(); ctx.moveTo(cx - legW * 0.8, hipY + hip);
-    ctx.lineTo(cx - legW * 0.8 + swing, hipY + legLen); ctx.stroke();
-    /* 右腿 */
-    ctx.beginPath(); ctx.moveTo(cx + legW * 0.8, hipY + hip);
-    ctx.lineTo(cx + legW * 0.8 - swing, hipY + legLen); ctx.stroke();
-    /* 鞋子 */
-    ctx.fillStyle = '#241c17';
-    ctx.beginPath(); ctx.ellipse(cx - legW * 0.8 + swing, hipY + legLen, legW * 0.72, legW * 0.42, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(cx + legW * 0.8 - swing, hipY + legLen, legW * 0.72, legW * 0.42, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#2c2733'; ctx.lineWidth = legW;
+    ctx.beginPath(); ctx.moveTo(cx - legW * 0.9, hipY);
+    ctx.quadraticCurveTo(cx - legW * 0.9 - swing * 0.3, groundY - H * 0.13, cx - legW * 0.9 + swing, groundY);
+    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx + legW * 0.9, hipY);
+    ctx.quadraticCurveTo(cx + legW * 0.9 - swing * 0.3, groundY - H * 0.13, cx + legW * 0.9 - swing, groundY);
+    ctx.stroke();
+    ctx.fillStyle = '#1a1519';
+    ctx.beginPath(); ctx.ellipse(cx - legW * 0.9 + swing, groundY, legW * 0.85, legW * 0.38, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + legW * 0.9 - swing, groundY, legW * 0.85, legW * 0.38, 0, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
-  function drawMouth(dx, dy, dw, dh) {
-    var mx = dx + CFG.mouthX * dw, my = dy + CFG.mouthY * dh;
-    var mw = CFG.mouthW * dw * (0.8 + st.mouth * 0.5), mh = CFG.mouthH * dh * (0.25 + st.mouth * 1.5);
+  function drawBody(cx, groundY, H) {
+    var shoulderY = groundY - H * 0.54;
+    var hipY = groundY - H * 0.26;
+    var shoulderW = H * 0.205;
+    var hipW = H * 0.145;
     ctx.save();
-    if (st.mood === 'think' || st.mood === 'wonder') {
-      ctx.strokeStyle = 'rgba(60,30,20,0.95)'; ctx.lineWidth = Math.max(2, mw * 0.08);
-      ctx.beginPath(); ctx.ellipse(mx, my, mw * 0.4, mh * 0.35, 0, 0, Math.PI * 2); ctx.stroke();
-    } else if (st.mood === 'joy' || st.mood === 'smile' || st.mood === 'praise') {
-      ctx.strokeStyle = 'rgba(60,30,20,0.95)'; ctx.lineWidth = Math.max(2, mw * 0.1);
-      ctx.beginPath(); ctx.quadraticCurveTo(mx, my + mh * 0.5, mx + mw * 0.55, my - mh * 0.15); ctx.stroke();
-      if (st.mouth > 0.12) { ctx.fillStyle = 'rgba(90,45,30,0.9)'; ctx.beginPath(); ctx.ellipse(mx, my + mh * 0.2, mw * 0.3, mh * 0.4 * st.mouth, 0, 0, Math.PI * 2); ctx.fill(); }
-    } else if (st.mood === 'sad' || st.mood === 'comfort') {
-      ctx.strokeStyle = 'rgba(60,30,20,0.95)'; ctx.lineWidth = Math.max(2, mw * 0.1);
-      ctx.beginPath(); ctx.quadraticCurveTo(mx, my + mh * 0.3, mx + mw * 0.5, my + mh * 0.35); ctx.stroke();
-      if (st.mouth > 0.12) { ctx.fillStyle = 'rgba(90,45,30,0.8)'; ctx.beginPath(); ctx.ellipse(mx, my + mh * 0.25, mw * 0.28, mh * 0.3 * st.mouth, 0, 0, Math.PI * 2); ctx.fill(); }
+    var grad = ctx.createLinearGradient(cx, shoulderY, cx, hipY);
+    grad.addColorStop(0, '#24344d');
+    grad.addColorStop(1, '#161f33');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(cx - shoulderW, shoulderY);
+    ctx.quadraticCurveTo(cx, shoulderY - H * 0.02, cx + shoulderW, shoulderY);
+    ctx.lineTo(cx + hipW, hipY);
+    ctx.quadraticCurveTo(cx, hipY - H * 0.015, cx - hipW, hipY);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#f4f6fb';
+    ctx.beginPath();
+    ctx.moveTo(cx - H * 0.055, shoulderY + H * 0.01);
+    ctx.lineTo(cx, shoulderY + H * 0.16);
+    ctx.lineTo(cx + H * 0.055, shoulderY + H * 0.01);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#b8862d';
+    ctx.beginPath();
+    ctx.moveTo(cx - H * 0.02, shoulderY + H * 0.012);
+    ctx.lineTo(cx + H * 0.02, shoulderY + H * 0.012);
+    ctx.lineTo(cx + H * 0.012, hipY - H * 0.03);
+    ctx.lineTo(cx - H * 0.012, hipY - H * 0.03);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#2f415e'; ctx.lineWidth = Math.max(1.5, H * 0.008);
+    ctx.beginPath(); ctx.moveTo(cx - H * 0.045, shoulderY + H * 0.015); ctx.lineTo(cx - H * 0.012, shoulderY + H * 0.13); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx + H * 0.045, shoulderY + H * 0.015); ctx.lineTo(cx + H * 0.012, shoulderY + H * 0.13); ctx.stroke();
+    ctx.restore();
+  }
+  function drawArms(cx, groundY, H) {
+    var shoulderY = groundY - H * 0.54;
+    var handY = groundY - H * 0.26 + H * 0.10;
+    var armW = H * 0.055;
+    var swing = st.walking ? Math.sin(st.walk * 2.1 + Math.PI) * H * 0.075 : 0;
+    var waveR = 0;
+    if (st.wave > 0) { waveR = Math.sin(st.wave * 9) * 0.35 * Math.min(1, st.wave); }
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#24344d'; ctx.lineWidth = armW;
+    ctx.beginPath();
+    ctx.moveTo(cx - H * 0.195, shoulderY + H * 0.02);
+    ctx.quadraticCurveTo(cx - H * 0.24 + swing, groundY - H * 0.36, cx - H * 0.2 + swing, handY);
+    ctx.stroke();
+    var rEndX = cx + H * 0.2 - swing, rEndY = handY;
+    if (waveR > 0) { rEndX = cx + H * 0.2 + Math.sin(waveR) * H * 0.14; rEndY = handY - H * 0.34; }
+    ctx.beginPath();
+    ctx.moveTo(cx + H * 0.195, shoulderY + H * 0.02);
+    ctx.quadraticCurveTo(cx + H * 0.24 - swing, groundY - H * 0.38, rEndX, rEndY);
+    ctx.stroke();
+    ctx.fillStyle = '#d9a878';
+    ctx.beginPath(); ctx.arc(cx - H * 0.2 + swing, handY, armW * 0.55, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(rEndX, rEndY, armW * 0.55, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  function drawHead(cx, groundY, H) {
+    var headR = H * 0.085;
+    var hy = groundY - H * 0.62;
+    var nodRot = st.nod > 0 ? Math.sin(st.nod * 9) * 0.12 * Math.min(1, st.nod * 3) : 0;
+    var shakeX = st.shake > 0 ? Math.sin(st.shake * 14) * H * 0.03 * Math.min(1, st.shake * 3) : 0;
+    ctx.save();
+    ctx.translate(cx + shakeX, hy);
+    ctx.rotate(nodRot + st.tilt * 0.4 + st.lookX * 0.3);
+    ctx.fillStyle = '#4a3826';
+    ctx.beginPath(); ctx.arc(0, 0, headR * 1.02, 0, Math.PI * 2); ctx.fill();
+    var skin = '#e0ac78';
+    ctx.fillStyle = skin;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, headR, headR * 1.08, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#3b2d1d';
+    ctx.beginPath();
+    ctx.arc(0, -headR * 0.18, headR * 1.0, Math.PI * 0.95, Math.PI * 2.05);
+    ctx.fill();
+    ctx.fillRect(-headR * 0.92, -headR * 0.30, headR * 1.84, headR * 0.30);
+    ctx.fillStyle = skin;
+    ctx.beginPath(); ctx.ellipse(-headR * 0.98, 0, headR * 0.16, headR * 0.26, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(headR * 0.98, 0, headR * 0.16, headR * 0.26, 0, 0, Math.PI * 2); ctx.fill();
+    var ey = -headR * 0.06 + st.lookY * headR;
+    var ex = st.lookX * headR;
+    var ew = headR * 0.34, eh = headR * 0.18;
+    var bh = Math.max(0.04, eh * (1 - st.blink));
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.ellipse(-headR * 0.36 + ex, ey, ew, bh * 1.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(headR * 0.36 + ex, ey, ew, bh * 1.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#3a2a1e';
+    ctx.beginPath(); ctx.arc(-headR * 0.36 + ex, ey, ew * 0.42, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(headR * 0.36 + ex, ey, ew * 0.42, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#1a1a1a';
+    ctx.beginPath(); ctx.arc(-headR * 0.36 + ex, ey, ew * 0.22, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(headR * 0.36 + ex, ey, ew * 0.22, 0, Math.PI * 2); ctx.fill();
+    var browY = ey - headR * 0.34;
+    var browLift = (st.mood === 'think' || st.mood === 'wonder') ? headR * 0.08 : st.mood === 'sad' || st.mood === 'comfort' ? -headR * 0.04 : 0;
+    ctx.strokeStyle = '#3b2d1d'; ctx.lineWidth = Math.max(1.5, headR * 0.09); ctx.lineCap = 'round';
+    if (st.mood === 'sad' || st.mood === 'comfort') {
+      ctx.beginPath(); ctx.moveTo(-headR * 0.52, browY + headR * 0.05); ctx.quadraticCurveTo(-headR * 0.36, browY - headR * 0.10, -headR * 0.20, browY + headR * 0.05); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(headR * 0.20, browY + headR * 0.05); ctx.quadraticCurveTo(headR * 0.36, browY - headR * 0.10, headR * 0.52, browY + headR * 0.05); ctx.stroke();
     } else {
-      ctx.fillStyle = 'rgba(60,30,20,0.92)';
+      ctx.beginPath(); ctx.moveTo(-headR * 0.52, browY - browLift); ctx.quadraticCurveTo(-headR * 0.36, browY - browLift - headR * 0.06, -headR * 0.20, browY - browLift); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(headR * 0.20, browY - browLift); ctx.quadraticCurveTo(headR * 0.36, browY - browLift - headR * 0.06, headR * 0.52, browY - browLift); ctx.stroke();
+    }
+    ctx.fillStyle = 'rgba(180,120,80,0.5)';
+    ctx.beginPath(); ctx.ellipse(0, headR * 0.10, headR * 0.10, headR * 0.16, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(90,70,50,0.55)';
+    ctx.beginPath();
+    ctx.ellipse(0, headR * 0.62, headR * 0.40, headR * 0.18, 0, 0, Math.PI);
+    ctx.fill();
+    var mx = 0, my = headR * 0.42;
+    var mw = headR * 0.42 * (0.7 + st.mouth * 0.5);
+    var mh = headR * 0.20 * (0.3 + st.mouth * 1.6);
+    if (st.mood === 'think' || st.mood === 'wonder') {
+      ctx.strokeStyle = 'rgba(90,50,30,0.95)'; ctx.lineWidth = Math.max(1.5, headR * 0.05);
+      ctx.beginPath(); ctx.ellipse(mx, my, mw * 0.35, mh * 0.3, 0, 0, Math.PI * 2); ctx.stroke();
+    } else if (st.mood === 'joy' || st.mood === 'smile' || st.mood === 'praise') {
+      ctx.strokeStyle = 'rgba(90,50,30,0.95)'; ctx.lineWidth = Math.max(1.5, headR * 0.06);
+      ctx.beginPath(); ctx.quadraticCurveTo(mx, my + mh * 0.6, mx + mw * 0.55, my - mh * 0.2); ctx.stroke();
+      if (st.mouth > 0.12) { ctx.fillStyle = 'rgba(120,60,40,0.9)'; ctx.beginPath(); ctx.ellipse(mx, my + mh * 0.25, mw * 0.3, mh * 0.5 * st.mouth, 0, 0, Math.PI * 2); ctx.fill(); }
+    } else if (st.mood === 'sad' || st.mood === 'comfort') {
+      ctx.strokeStyle = 'rgba(90,50,30,0.95)'; ctx.lineWidth = Math.max(1.5, headR * 0.06);
+      ctx.beginPath(); ctx.quadraticCurveTo(mx, my + mh * 0.3, mx + mw * 0.5, my + mh * 0.4); ctx.stroke();
+    } else {
+      ctx.fillStyle = 'rgba(90,50,30,0.92)';
       ctx.beginPath(); ctx.ellipse(mx, my, mw * 0.5, mh, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = 'rgba(150,80,50,0.7)';
+      ctx.fillStyle = 'rgba(180,100,70,0.7)';
       ctx.beginPath(); ctx.ellipse(mx, my + mh * 0.15, mw * 0.3, mh * 0.4, 0, 0, Math.PI * 2); ctx.fill();
     }
     ctx.restore();
-  }
-  function drawEyes(dx, dy, dw, dh) {
-    var ey = dy + CFG.eyeY * dh, gap = CFG.eyeGap * dw, ew = CFG.eyeW * dw, eh = CFG.eyeH * dh;
-    var cx = dx + dw * 0.5, bh = Math.max(0.5, eh * (1 - st.blink));
-    ctx.fillStyle = 'rgba(180,140,110,0.95)';
-    ctx.fillRect(cx - gap / 2 - ew / 2, ey - bh / 2, ew, bh);
-    ctx.fillRect(cx + gap / 2 - ew / 2, ey - bh / 2, ew, bh);
-  }
-  function drawBrows(dx, dy, dw, dh) {
-    var by = dy + CFG.browY * dh, gap = CFG.browGap * dw, bw = CFG.browW * dw;
-    var cx = dx + dw * 0.5, lift = (st.mood === 'think' || st.mood === 'wonder') ? 0.012 * dh : 0.006 * dh;
-    ctx.strokeStyle = 'rgba(60,30,20,0.85)'; ctx.lineWidth = Math.max(2, bw * 0.12);
-    if (st.mood === 'sad' || st.mood === 'comfort') {
-      ctx.beginPath(); ctx.moveTo(cx - gap / 2 - bw / 2, by + lift); ctx.quadraticCurveTo(cx - gap / 2, by - lift * 1.6, cx - gap / 2 + bw / 2, by - lift * 0.8); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(cx + gap / 2 - bw / 2, by - lift * 0.8); ctx.quadraticCurveTo(cx + gap / 2, by - lift * 1.6, cx + gap / 2 + bw / 2, by + lift); ctx.stroke();
-    } else {
-      ctx.beginPath(); ctx.moveTo(cx - gap / 2 - bw / 2, by - lift); ctx.quadraticCurveTo(cx - gap / 2, by - lift * 1.8, cx - gap / 2 + bw / 2, by - lift); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(cx + gap / 2 - bw / 2, by - lift); ctx.quadraticCurveTo(cx + gap / 2, by - lift * 1.8, cx + gap / 2 + bw / 2, by - lift); ctx.stroke();
-    }
   }
   function showBubble(text, ms) {
     var b = $('speechBubble'); if (!b) return;
@@ -580,51 +666,4 @@
     showBubble(txt, 5000);
     speakText(txt);
   }
-  /* ============ 实时日期时间 + 天气（自动更新） ============ */
-  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
-  function updateClock() {
-    var el = $('dateWeather'); if (!el) return;
-    var now = new Date();
-    var week = ['日', '一', '二', '三', '四', '五', '六'][now.getDay()];
-    var dateStr = now.getFullYear() + '年' + (now.getMonth() + 1) + '月' + now.getDate() + '日 星期' + week + ' ' + pad2(now.getHours()) + ':' + pad2(now.getMinutes()) + ':' + pad2(now.getSeconds());
-    el.textContent = '📅 ' + dateStr + (window._weatherStr ? '　' + window._weatherStr : '');
-  }
-  function weatherDesc(code) {
-    if (code === 0) return '晴 ☀';
-    if (code === 1) return '大部晴 🌤';
-    if (code === 2) return '多云 ⛅';
-    if (code === 3) return '阴天 ☁';
-    if (code <= 48) return '有雾 🌫';
-    if (code <= 57) return '毛毛雨 🌦';
-    if (code <= 67) return '有雨 🌧';
-    if (code <= 77) return '有雪 ❄';
-    if (code <= 82) return '阵雨 🌦';
-    if (code <= 86) return '阵雪 🌨';
-    if (code <= 99) return '雷雨 ⛈';
-    return '天气';
-  }
-  function loadWeather(lat, lon) {
-    var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current_weather=true&timezone=auto';
-    try {
-      fetch(url).then(function (r) { return r.json(); }).then(function (d) {
-        if (d && d.current_weather) {
-          var w = d.current_weather;
-          window._weatherStr = '🌡 ' + Math.round(w.temperature) + '°C ' + weatherDesc(w.weathercode);
-        } else {
-          window._weatherStr = '';
-        }
-        updateClock();
-      }).catch(function () { window._weatherStr = ''; updateClock(); });
-    } catch (e) { window._weatherStr = ''; updateClock(); }
-  }
-  function fetchWeather() {
-    var lat = 39.9042, lon = 116.4074; /* 默认北京 */
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function (pos) {
-        loadWeather(pos.coords.latitude, pos.coords.longitude);
-      }, function () { loadWeather(lat, lon); }, { timeout: 5000 });
-    } else {
-      loadWeather(lat, lon);
-    }
-  }
-})();
+})

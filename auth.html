@@ -8,7 +8,7 @@
 <title>登录注册 - 福音传播爱 ✝</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="auth_style_v205.css?v=207">
+<link rel="stylesheet" href="auth_style_v205.css?v=221">
 </head>
 <body>
 <div class="auth-shell">
@@ -17,8 +17,6 @@
     <canvas id="avatarCanvas"></canvas>
     <!-- 语音气泡（顶部，不遮挡人物全身） -->
     <div class="speech-bubble" id="speechBubble">欢迎来到兆西福音传递爱，愿你平安 🙏</div>
-    <!-- 实时日期天气（顶部角，自动更新） -->
-    <div class="date-weather" id="dateWeather">📅 加载日期天气中…</div>
   </div>
 
   <!-- ===== 右侧：账号表单 + 全能AI聊天（左右分开，互不遮挡） ===== -->
@@ -119,8 +117,8 @@
 <script src="js/three.min.js"></script>
 <script src="js/GLTFLoader-r128.js"></script>
 <script src="auth_api_config.js?v=9"></script>
-<script src="auth_app_v8.js?v=10"></script>
-<script src="avatar_ai.js?v=216"></script>
+<script src="auth_app_v8.js?v=12"></script>
+<script src="avatar_ai.js?v=221"></script>
 <script>
 /* ===== 圣经AI聊天交互 ===== */
 function escH(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'"',"'":'&#39;'}[c];});}
