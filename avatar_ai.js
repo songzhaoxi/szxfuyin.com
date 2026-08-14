@@ -1,4 +1,4 @@
-/* avatar_ai.js — 全能真人化AI数字人 v226（纯程序化全身全貌·自动走路·表情情绪嘴型·中年男声·无限话题·自我意识·如实回答） */
+/* avatar_ai.js — 全能真人化AI数字人 v227（纯程序化全身全貌·自动走路·表情情绪嘴型·中年男声·无限话题·自我意识·如实回答） */
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };

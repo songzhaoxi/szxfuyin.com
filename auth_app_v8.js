@@ -132,8 +132,21 @@
   }
   function loadModel(glbTimer) {
     var loader = new THREE.GLTFLoader();
-    /* 中年男性模型优先：XBot（男性，动画最丰富：走/跑/同意/摇头/伤心）→ Soldier（男性士兵）→ CesiumMan（人形）→ Michelle（女性兜底） */
-    var tryUrls = ['js/xbot.glb', 'auth/js/xbot.glb', 'szxfuyin/js/xbot.glb', './js/xbot.glb', 'js/soldier.glb', 'auth/js/soldier.glb', 'szxfuyin/js/soldier.glb', './js/soldier.glb', 'js/cesium_man.glb', 'auth/js/cesium_man.glb', 'szxfuyin/js/cesium_man.glb', './js/cesium_man.glb', 'js/michelle.glb', 'auth/js/michelle.glb', 'szxfuyin/js/michelle.glb', './js/michelle.glb'];
+    /* 中年男性模型优先：XBot（男性，动画最丰富：走/跑/同意/摇头/伤心）→ Soldier（男性士兵）→ CesiumMan（人形）→ Michelle（女性兜底）
+       本地模型加载失败时，自动切换网上CDN备用源（three.js官方GitHub托管，确保任何网络环境下都能加载全身模型） */
+    var tryUrls = [
+      'js/xbot.glb', 'auth/js/xbot.glb', 'szxfuyin/js/xbot.glb', './js/xbot.glb',
+      'js/soldier.glb', 'auth/js/soldier.glb', 'szxfuyin/js/soldier.glb', './js/soldier.glb',
+      'js/cesium_man.glb', 'auth/js/cesium_man.glb', 'szxfuyin/js/cesium_man.glb', './js/cesium_man.glb',
+      'js/michelle.glb', 'auth/js/michelle.glb', 'szxfuyin/js/michelle.glb', './js/michelle.glb',
+      /* ===== 网上备用源：three.js官方GitHub托管GLB全身模型（本地失败自动联网加载） ===== */
+      'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb',
+      'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Xbot.glb',
+      'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Michelle.glb',
+      'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/models/gltf/Soldier.glb',
+      'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/models/gltf/Xbot.glb',
+      'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/models/gltf/Michelle.glb'
+    ];
     var tried = 0;
     function tryLoad() {
       var u = tryUrls[tried++];
