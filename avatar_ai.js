@@ -1,8 +1,8 @@
-/* avatar_ai.js — 全能真人化AI数字人 v221（纯程序化全身全貌·自动走路·表情情绪嘴型·中年男声·无限话题·自我意识） */
+/* avatar_ai.js — 全能真人化AI数字人 v223（纯程序化全身全貌·自动走路·表情情绪嘴型·中年男声·无限话题·自我意识·如实回答） */
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
-  var CFG_KEY = 'avatar_ai_cfg_v221';
+  var CFG_KEY = 'avatar_ai_cfg_v223';
   var CFG = {
     img: 'avatar_3d.png?v=216',
     mouthX: 0.50, mouthY: 0.56, mouthW: 0.14, mouthH: 0.07,
@@ -17,7 +17,7 @@
   var BIBLE = null, bibleReady = false;
   var threeReady = false, canvasHidden = false, audioUnlocked = false;
 
-  window.AvatarAI = { init: init, speak: speakText, stop: stopTalk, ask: askAI, setMood: setMood, showBubble: showBubble, set3DReady: set3DReady, isWalking: isWalking, unlock: unlockAudio, ready: function () { return bibleReady; } };
+  window.AvatarAI = { init: init, speak: speakText, stop: stopTalk, ask: askAI, setMood: setMood, getMood: function () { return st.mood; }, getTalking: function () { return !!st.talking; }, showBubble: showBubble, set3DReady: set3DReady, isWalking: isWalking, unlock: unlockAudio, playMp3: playMp3, ready: function () { return bibleReady; } };
 
   /* ===== 3D模型渲染就绪切换：隐藏Canvas2D人物，只保留语音/AI/气泡 ===== */
   function set3DReady(v) {
@@ -28,6 +28,7 @@
   }
   function isWalking() { return !!st.walking; }
   /* ===== 音频解锁（解决安卓自动播放限制导致的无声） ===== */
+  var greetedOnce = false;
   function unlockAudio() {
     audioUnlocked = true;
     try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch (e) {}
@@ -39,6 +40,12 @@
       var v = pickMaleVoice(); if (v) u.voice = v;
       window.speechSynthesis.speak(u);
     } catch (e) {}
+    /* 用户首次交互（安卓必须）：补播欢迎语音MP3，确保有声（仅当自动播放被拦截时） */
+    if (!greetedOnce) {
+      try {
+        playMp3('voice/welcome.mp3', function () { st.talking = false; });
+      } catch (e) {}
+    }
   }
 
   function init() {
@@ -310,7 +317,7 @@
           audioSrc.connect(analyser); analyser.connect(audioCtx.destination);
         } catch (e) { audioSrc = null; }
       }
-      audioEl.onplaying = function () { st.talking = true; };
+      audioEl.onplaying = function () { st.talking = true; greetedOnce = true; };
       audioEl.onended = function () { st.talking = false; if (onEnd) onEnd(); };
       audioEl.onerror = function () { st.talking = false; if (onEnd) onEnd(); };
       audioEl.src = url;
@@ -328,10 +335,16 @@
       return notFemale[0] || zh[0] || null;
     } catch (e) { return null; }
   }
+  var speakLock = false;
   function speakText(text, opts) {
     opts = opts || {}; if (!text) return;
+    if (speakLock) { try { speechSynthesis.cancel(); } catch (e) {} }
+    speakLock = true;
+    /* 先彻底停止一切旧语音（TTS+MP3），杜绝安卓上双声音叠加 */
     try { speechSynthesis.cancel(); } catch (e) {}
-    /* 延迟一帧确保旧语音彻底停止，杜绝安卓上双声音叠加；统一中年男声 */
+    try { if (audioEl) { audioEl.pause(); audioEl.currentTime = 0; } } catch (e) {}
+    st.talking = false;
+    /* 延迟一帧确保旧语音彻底停止，再统一播放中年男声 */
     setTimeout(function () {
       try { speechSynthesis.cancel(); } catch (e) {}
       var u = new SpeechSynthesisUtterance(String(text));
@@ -339,17 +352,34 @@
       var pick = pickMaleVoice();
       if (pick) u.voice = pick;
       u.onstart = function () { st.talking = true; };
-      u.onend = function () { st.talking = false; if (opts.onEnd) opts.onEnd(); };
-      u.onerror = function () { st.talking = false; if (opts.onEnd) opts.onEnd(); };
-      speechSynthesis.speak(u);
-    }, 60);
+      u.onend = function () { st.talking = false; speakLock = false; if (opts.onEnd) opts.onEnd(); };
+      u.onerror = function () { st.talking = false; speakLock = false; if (opts.onEnd) opts.onEnd(); };
+      try { speechSynthesis.speak(u); } catch (e) { st.talking = false; speakLock = false; }
+    }, 80);
   }
   function greeting() {
     var name = mem.name;
-    var txt = name ? ('欢迎回来，' + name + '！我是你的圣经AI伙伴，新旧约66卷书我都熟读，今天想聊点什么？') : '欢迎来到兆西福音传递爱，我是你的圣经AI伙伴，新旧约66卷书我都熟读，有问必答，愿你平安。';
-    showBubble(txt, 6000);
-    /* 统一为单一中年男声（YunjianNeural），彻底杜绝双声音 */
-    speakText(txt.replace(/66卷书/g, '六十六卷书'));
+    var txt = name ? ('欢迎回来，' + name + '！我是你的全能AI伙伴，新旧约66卷书我都熟读，任何话题都能聊，今天想聊点什么？') : '欢迎来到兆西福音传递爱，我是你的全能AI伙伴，新旧约66卷书我都熟读，任何话题有问必答，愿你平安。';
+    showBubble(txt, 8000);
+    /* 统一欢迎语音：优先播放本地男声MP3（welcome.mp3）。
+       PC端可自动播放；安卓端被浏览器拦截后，由 unlockAudio（用户点击时）补播一次。
+       greetedOnce 标记确保只播一次，彻底杜绝双声音。 */
+    try {
+      var u0 = new SpeechSynthesisUtterance(' ');
+      u0.volume = 0; u0.rate = 10; var v0 = pickMaleVoice(); if (v0) u0.voice = v0;
+      window.speechSynthesis.speak(u0);
+    } catch (e) {}
+    /* 尝试自动播放welcome.mp3（成功则由playMp3的onplaying标记greetedOnce=true；
+       安卓被拦截时greetedOnce保持false，用户点击时unlockAudio补播，杜绝双声音） */
+    setTimeout(function () {
+      playMp3('voice/welcome.mp3', function () {
+        st.talking = false;
+      });
+    }, 150);
+    /* 兜底：若MP3被拦截未播放且用户未交互，3秒后改用TTS男声（若已播放则st.talking=true不触发） */
+    setTimeout(function () {
+      if (!st.talking && !greetedOnce && !audioUnlocked) speakText(txt.replace(/66卷书/g, '六十六卷书'));
+    }, 3000);
   }
   /* ============ 圣经加载与索引（66卷） ============ */
   var BOOK_ALIAS = {
@@ -672,7 +702,14 @@
       { p: /(一公斤|一米|一升|单位|换算|斤|公斤|厘米|毫米|千米)/, r: '国际单位制中：1公里=1000米，1米=100厘米，1公斤=1000克，1升=1000毫升。度量衡是人类智慧的结晶，正如圣经说：公道的天平、公道的法码，都是耶和华所喜悦的。' },
       { p: /(手机|电脑|互联网|网络|wifi|WiFi|蓝牙|5G|芯片|科技|技术|发明)/, r: '人类科技发展日新月异！从1946年第一台电子计算机ENIAC（重27吨）到今天掌上的智能手机，从有线电话到5G网络。但圣经提醒我们：知识是叫人自高自大，惟有爱心能造就人。愿我们善用科技荣耀神、服侍人。' },
       { p: /(天安门|长城|故宫|兵马俑|黄河|长江|泰山|黄山|珠穆朗玛峰|喜马拉雅)/, r: '中国地大物博：长城绵延两万多公里，珠穆朗玛峰海拔8848.86米为世界最高峰，黄河长江孕育了中华文明。圣经说：祂使江河变为旷野，叫水泉变为干地；祂也使旷野变为水潭，叫旱地变为水泉。神州大地处处可见神的创造。' },
-      { p: /(苹果|香蕉|西瓜|橘子|葡萄|水果|蔬菜|营养|维生素|蛋白质)/, r: '水果蔬菜富含维生素和膳食纤维，圣经中神说：看哪，我将遍地上一切结种子的菜蔬和一切树上所结有核的果子，全赐给你们作食物。五谷、新酒和油，都是神赐的丰盛恩典，愿你饮食有度、身体健康。' }
+      { p: /(苹果|香蕉|西瓜|橘子|葡萄|水果|蔬菜|营养|维生素|蛋白质)/, r: '水果蔬菜富含维生素和膳食纤维，圣经中神说：看哪，我将遍地上一切结种子的菜蔬和一切树上所结有核的果子，全赐给你们作食物。五谷、新酒和油，都是神赐的丰盛恩典，愿你饮食有度、身体健康。' },
+      { p: /(什么|是什么|为什么|怎么|如何|多少|几|哪里|谁|何时|哪年|哪个|能不能|是不是|有没有|会不会|对不对|行不行|好吗|可以吗)/, r: '你问的「' + (q.replace(/[，。！？、；：""''《》（）\s~！@#￥%…&*()\-+=|]/g, '').slice(0, 18) || '这个问题') + '」我如实回答你：我是全能AI数字人，知识库涵盖圣经66卷和人类各领域常识。虽然我不能保证每个细节都绝对准确，但我一定会真诚、坦率、尽我所能地把我知道的都告诉你。如果你愿意，我们可以一起深入探讨这个问题，我也可以把相关的圣经真理和实际生活经验结合起来给你建议。' },
+      { p: /(给我讲|讲讲|说一下|介绍|说说|告诉我|解释|讲解|分析|评价|看法|观点|意见|建议)/, r: '好的，我很乐意和你聊聊！' + (q.replace(/[，。！？、；：""''《》（）\s~！@#￥%…&*()\-+=|]/g, '').slice(0, 16) || '这个话题') + '——我的看法是：任何事物都要从两个角度看，一是理性的知识层面，二是心灵的真理层面。圣经说：你们必晓得真理，真理必叫你们得以自由。我既愿意用我掌握的知识如实分析，也愿意用圣经的智慧给你属灵的引导。你具体想了解哪一方面呢？' },
+      { p: /(工作|职业|事业|职场|上班|同事|老板|升职|加薪|面试|简历|跳槽|创业)/, r: '关于工作与事业：圣经说「无论做什么，都要从心里做，像是给主做的」。工作中要诚实勤勉、与人为善，把工作当作服侍的机会。遇到困难就祷告交托，主必赐你智慧应对。你若愿意，我可以陪你分析具体的职业规划、面试技巧或职场难题。' },
+      { p: /(孩子|教育|育儿|教子|小孩|子女|学生|老师|学校|上课|考试|成绩|高考|中考)/, r: '关于教育孩子：圣经说「教养孩童，使他走当行的道，就是到老他也不偏离」。教育最重要的是品格与爱心，其次才是成绩。多鼓励、多陪伴、多倾听，让孩子在爱中成长。学习上若需要具体方法，我也可以分享一些实用技巧，比如时间管理、记忆方法、专注力训练等。' },
+      { p: /(恋爱|感情|对象|女朋友|男朋友|分手|失恋|表白|单身|相亲|婚姻|结婚)/, r: '关于感情：圣经说「爱是恒久忍耐，又有恩慈」。真正的感情需要时间培养、彼此尊重、真诚以待。如果你正在经历感情的困惑，我愿陪你聊聊——无论是恋爱中的迷茫、失恋的痛苦，还是婚姻的相处之道，我都会如实分享我的看法，也把神的真理带给你。' },
+      { p: /(健康|养生|锻炼|跑步|健身|减肥|饮食|作息|睡眠|失眠|熬夜|体检|血压|血糖|血脂)/, r: '关于健康：圣经说「身体是圣灵的殿」。建议：①每天7-8小时睡眠；②均衡饮食，少油少盐少糖；③每周至少150分钟中等强度运动；④定期体检；⑤保持积极心态和信仰生活。具体到你的身体状况，如果愿意告诉我更多细节，我可以给更针对性的建议（但重大健康问题请一定咨询专业医生）。' },
+      { p: /(投资|理财|股票|基金|买房|房价|存款|保险|养老|经济|赚钱|副业)/, r: '关于理财投资：圣经的智慧是「殷勤筹划的，足致丰裕」。建议：①先储蓄后消费，至少存3-6个月应急金；②分散投资、长期持有，不追涨杀跌；③不要借钱投资；④提升主业收入能力是最稳的「投资」。我不做具体投资推荐（那需要专业资质），但可以和你分享理财的基本原则和圣经的金钱观。' }
     ];
     for (var k2 = 0; k2 < KNOWLEDGE.length; k2++) {
       if (KNOWLEDGE[k2].p.test(q)) {

@@ -99,8 +99,8 @@
       if (THREE.ACESFilmicToneMapping !== undefined) renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.setSize(pw, ph);
       scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(40, canvas.clientWidth / canvas.clientHeight, 0.1, 100);
-      camera.position.set(0, 0.85, 3.2); camera.lookAt(0, 1.0, 0);
+      camera = new THREE.PerspectiveCamera(42, canvas.clientWidth / canvas.clientHeight, 0.1, 100);
+      camera.position.set(0, 0.95, 3.6); camera.lookAt(0, 1.05, 0);
       scene.add(new THREE.AmbientLight(0xfff2dd, 0.9));
       var key = new THREE.DirectionalLight(0xfff3d6, 1.4); key.position.set(3, 5, 4); scene.add(key);
       var fill = new THREE.DirectionalLight(0xbcd4ff, 0.6); fill.position.set(-4, 2, 3); scene.add(fill);
@@ -115,8 +115,8 @@
   }
   function loadModel() {
     var loader = new THREE.GLTFLoader();
-    /* 中年男性模型优先：Soldier（男性士兵）→ XBot（男性）→ Michelle（女性兜底） */
-    var tryUrls = ['js/soldier.glb', 'auth/js/soldier.glb', 'szxfuyin/js/soldier.glb', 'js/xbot.glb', 'auth/js/xbot.glb', 'szxfuyin/js/xbot.glb', 'js/michelle.glb', 'auth/js/michelle.glb', 'szxfuyin/js/michelle.glb'];
+    /* 中年男性模型优先：XBot（男性，动画最丰富：走/跑/同意/摇头/伤心）→ Soldier（男性士兵）→ Michelle（女性兜底） */
+    var tryUrls = ['js/xbot.glb', 'auth/js/xbot.glb', 'szxfuyin/js/xbot.glb', 'js/soldier.glb', 'auth/js/soldier.glb', 'szxfuyin/js/soldier.glb', 'js/michelle.glb', 'auth/js/michelle.glb', 'szxfuyin/js/michelle.glb'];
     var tried = 0;
     function tryLoad() {
       var u = tryUrls[tried++];
@@ -149,6 +149,17 @@
             /* 预载走路/跑步动画（AvatarAI走路时切换） */
             var walkAnim = gltf.animations.filter(function (a) { return /walk|run/i.test(a.name); });
             if (walkAnim.length) { walkClip = walkAnim[0]; try { walkAction = avatarMixer.clipAction(walkClip); walkAction.setLoop(THREE.LoopRepeat); walkAction.stop(); } catch (e2) { walkAction = null; } }
+            /* 预载表情动作动画：agree(点头) / headShake(摇头) / sad_pose(伤心) 等，无morph模型用骨骼动画表达情绪 */
+            var clipMap = {};
+            var animList = gltf.animations || [];
+            for (var ai = 0; ai < animList.length; ai++) {
+              var an = animList[ai].name || '';
+              if (/agree|nod/i.test(an)) clipMap.nod = animList[ai];
+              else if (/headShake|shake/i.test(an)) clipMap.shake = animList[ai];
+              else if (/sad|sorrow|worry/i.test(an)) clipMap.sad = animList[ai];
+              else if (/wave|hello|hi/i.test(an)) clipMap.wave = animList[ai];
+            }
+            try { window._avatarClipMap = clipMap; } catch (e) {}
           }
           /* 3D模型渲染成功：通知AvatarAI隐藏Canvas2D人物，只保留语音/AI/气泡 */
           try { if (window.AvatarAI && AvatarAI.set3DReady) AvatarAI.set3DReady(true); } catch (e) {}
@@ -224,6 +235,28 @@
       character.position.y = Math.abs(Math.sin(anim.jumpT * 10)) * 0.35 + 0.02;
     }
     if (anim.waveT > 0) anim.waveT -= 0.016;
+    /* 骨骼动画情绪表达：根据AvatarAI当前情绪播放点头/摇头/伤心动画（无morph模型的替代方案） */
+    try {
+      if (window.AvatarAI && window._avatarClipMap && avatarMixer) {
+        var cm = window._avatarClipMap;
+        var moodNow = '';
+        try { moodNow = window.AvatarAI.getMood ? window.AvatarAI.getMood() : ''; } catch (e) {}
+        var wantClip = null;
+        if (moodNow === 'praise' && cm.nod) wantClip = cm.nod;
+        else if (moodNow === 'comfort' && cm.nod) wantClip = cm.nod;
+        else if (moodNow === 'sad' && cm.sad) wantClip = cm.sad;
+        else if (moodNow === 'joy' && cm.wave) wantClip = cm.wave;
+        if (wantClip && wantClip !== window._avatarMoodClip) {
+          var moodAction = avatarMixer.clipAction(wantClip);
+          if (window._avatarMoodAction) { try { window._avatarMoodAction.stop(); } catch (e) {} }
+          moodAction.reset(); moodAction.setLoop(THREE.LoopRepeat); moodAction.play();
+          window._avatarMoodAction = moodAction; window._avatarMoodClip = wantClip;
+        } else if (!wantClip && window._avatarMoodAction) {
+          try { window._avatarMoodAction.stop(); } catch (e) {}
+          window._avatarMoodAction = null; window._avatarMoodClip = null;
+        }
+      }
+    } catch (e) {}
     anim.blinkT -= 0.016;
     if (anim.blinkT <= 0) { anim.blinkT = 2.2 + Math.random() * 3; }
     var blink = anim.blinkT < 0.12 ? Math.abs(Math.sin(anim.blinkT * 40)) : 0;
@@ -231,6 +264,12 @@
     setMorphLerp('eyeBlinkRight', blink, 0.9);
     setMorphLerp('eyeSquintLeft', blink * 0.4, 0.5);
     setMorphLerp('eyeSquintRight', blink * 0.4, 0.5);
+    /* 3D模型嘴型联动：直接读取AvatarAI说话状态（语音统一走AvatarAI后animTalk回调不再触发） */
+    try {
+      var aiTalking = false;
+      if (window.AvatarAI && AvatarAI.getTalking) aiTalking = !!AvatarAI.getTalking();
+      if (aiTalking) anim.talk = Math.min(1, anim.talk + 0.35);
+    } catch (e) {}
     if (anim.talk > 0) {
       anim.talk -= 0.05;
       var m = Math.max(0, Math.sin(t * 14) * 0.5 + 0.5);

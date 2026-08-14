@@ -46,7 +46,7 @@ body::after{
   min-height:100vh;padding:24px;
 }
 .auth-stage{
-  width:50%;min-height:820px;position:relative;
+  width:58%;min-height:820px;position:relative;
   background:linear-gradient(180deg,#0d1533 0%,#17214e 100%);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   border:1px solid rgba(212,175,55,.25);
@@ -199,13 +199,14 @@ body::after{
   .auth-head h1::before{width:34px;height:34px;font-size:17px;}
   .stage-overlay{display:none;}
 }
-/* ===== 全能AI数字人聊天框（右侧面板内，不遮挡3D人物） v214 ===== */
+/* ===== 全能AI数字人聊天框（右侧面板内，不遮挡3D人物） v223 ===== */
 .ai-chat{
   position:relative;width:100%;margin-bottom:16px;z-index:6;
   background:rgba(10,16,40,.72);border:1px solid rgba(246,226,122,.3);
   border-radius:14px;backdrop-filter:blur(14px);box-shadow:0 10px 34px rgba(0,0,0,.45);
   overflow:hidden;display:flex;flex-direction:column;
-  max-height:260px;transition:max-height .35s;
+  max-height:280px;transition:max-height .35s;
+}
 .ai-chat-head{
   padding:7px 12px;font-size:12px;font-weight:600;color:var(--gold2);
   background:linear-gradient(90deg,rgba(212,175,55,.16),rgba(212,175,55,.04));
