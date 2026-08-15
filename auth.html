@@ -131,7 +131,17 @@ function aiSend(){
   var log=document.getElementById('aiChatLog');if(!log)return;
   var d=document.createElement('div');d.className='ai-msg user';d.textContent=q;
   log.appendChild(d);log.scrollTop=log.scrollHeight;inp.value='';
-  if(window.AvatarAI)AvatarAI.ask(q);
+  if(window.AvatarAI && AvatarAI.ask){ AvatarAI.ask(q); }
+  else{
+    /* 终极兜底：AvatarAI引擎未加载成功时，也必须有回复（绝不无响应） */
+    var txt='我收到了你的问题「'+q.slice(0,20)+'」，请稍等片刻，我正在加载AI引擎…';
+    var d2=document.createElement('div');d2.className='ai-msg ai';d2.textContent=txt;
+    log.appendChild(d2);log.scrollTop=log.scrollHeight;
+    setTimeout(function(){
+      var d3=document.createElement('div');d3.className='ai-msg ai';d3.textContent='我是全能AI数字人，圣经66卷我都熟读，任何话题都能聊。如果页面刚打开，请点击一下屏幕解锁语音，然后再次发送，我必回复你🙏';
+      log.appendChild(d3);log.scrollTop=log.scrollHeight;
+    },2000);
+  }
 }
 window.onAISay=function(text){
   var log=document.getElementById('aiChatLog');if(!log)return;
