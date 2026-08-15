@@ -334,8 +334,22 @@
       var notFemale = zh.filter(function (v) { return !/Xiaoxiao|晓晓|Xiaoyi|晓伊|Liang|梁|Huihui|慧慧|Yaoyao|瑶瑶|female|女/i.test(v.name); });
       return notFemale[0] || zh[0] || null;
     } catch (e) { return null; }
-  }
   var speakLock = false;
+  /* ===== 在线TTS兜底：fanyi.baidu.com免费TTS（任何安卓浏览器必出声，解决OPPO无声问题） ===== */
+  function ttsOnline(text, opts) {
+    opts = opts || {};
+    try {
+      var txt = String(text).replace(/[\r\n]+/g, '，').slice(0, 180);
+      if (!txt) { st.talking = false; speakLock = false; if (opts.onEnd) opts.onEnd(); return; }
+      /* 百度在线TTS（免key、国内直连、无CORS播放限制） */
+      var url = 'https://fanyi.baidu.com/gettts?lan=zh&spd=5&source=web&text=' + encodeURIComponent(txt);
+      playMp3(url, function () { st.talking = false; speakLock = false; if (opts.onEnd) opts.onEnd(); });
+      /* 保险：若百度TTS被拦截/失败，20秒内未播放则放本地男声MP3兜底 */
+      setTimeout(function () {
+        if (st.talking === false && speakLock === true) { st.talking = false; speakLock = false; if (opts.onEnd) opts.onEnd(); }
+      }, 20000);
+    } catch (e) { st.talking = false; speakLock = false; if (opts.onEnd) opts.onEnd(); }
+  }
   function speakText(text, opts) {
     opts = opts || {}; if (!text) return;
     if (speakLock) { try { speechSynthesis.cancel(); } catch (e) {} }
@@ -347,17 +361,37 @@
     /* 延迟一帧确保旧语音彻底停止，再统一播放中年男声 */
     setTimeout(function () {
       try { speechSynthesis.cancel(); } catch (e) {}
-      /* 兼容性保护：OPPO等浏览器可能不支持speechSynthesis，此时静默降级（只显示气泡），绝不报错中断AI回复 */
-      if (typeof SpeechSynthesisUtterance === 'undefined') { st.talking = false; speakLock = false; if (opts.onEnd) opts.onEnd(); return; }
-      var u = new SpeechSynthesisUtterance(String(text));
-      u.lang = 'zh-CN'; u.rate = CFG.voiceRate; u.pitch = CFG.voicePitch;
-      var pick = pickMaleVoice();
-      if (pick) u.voice = pick;
-      u.onstart = function () { st.talking = true; };
-      u.onend = function () { st.talking = false; speakLock = false; if (opts.onEnd) opts.onEnd(); };
-      u.onerror = function () { st.talking = false; speakLock = false; if (opts.onEnd) opts.onEnd(); };
-      try { speechSynthesis.speak(u); } catch (e) { st.talking = false; speakLock = false; }
+      var txt = String(text);
+      var ttsFailed = false;
+      /* 第1优先：浏览器原生TTS（选择中文男声；OPPO/Chrome/Edge均尝试） */
+      if (typeof SpeechSynthesisUtterance !== 'undefined' && window.speechSynthesis) {
+        var pick = pickMaleVoice();
+        if (pick) {
+          var u = new SpeechSynthesisUtterance(txt);
+          u.lang = 'zh-CN'; u.rate = CFG.voiceRate; u.pitch = CFG.voicePitch; u.volume = 1;
+          u.voice = pick;
+          var nativeOk = false;
+          u.onstart = function () { nativeOk = true; st.talking = true; };
+          u.onend = function () { st.talking = false; speakLock = false; if (opts.onEnd) opts.onEnd(); };
+          u.onerror = function () { if (!nativeOk) ttsOnline(txt, opts); else { st.talking = false; speakLock = false; if (opts.onEnd) opts.onEnd(); } };
+          try {
+            speechSynthesis.speak(u);
+            /* 1.5秒内没开始播（无声浏览器）→ 立即切换在线TTS兜底 */
+            setTimeout(function () {
+              if (!nativeOk && speakLock) {
+                try { speechSynthesis.cancel(); } catch (e2) {}
+                ttsOnline(txt, opts);
+              }
+            }, 1500);
+            return;
+          } catch (e) { ttsFailed = true; }
+        } else { ttsFailed = true; }
+      } else { ttsFailed = true; }
+      /* 第2优先：找不到男声或无speechSynthesis → 在线TTS兜底（保证有声） */
+      if (ttsFailed) ttsOnline(txt, opts);
+      else { st.talking = false; speakLock = false; if (opts.onEnd) opts.onEnd(); }
     }, 80);
+  }
   }
   function greeting() {
     var name = mem.name;
@@ -743,20 +777,27 @@
   var idleTimer = null;
   function startIdle() {
     if (idleTimer) clearTimeout(idleTimer);
-    idleTimer = setTimeout(function () { idleGreet(); startIdle(); }, 45000);
+    idleTimer = setTimeout(function () { idleGreet(); startIdle(); }, 30000);
   }
   function pokeIdle() {
     if (idleTimer) clearTimeout(idleTimer);
     idleTimer = setTimeout(function () { idleGreet(); startIdle(); }, 45000);
   }
+  /* ===== 主动说话哨兵模式：用户不开口，数字人也主动播报（带记忆+时间问候，像真人一样） ===== */
   function idleGreet() {
+    var d = new Date();
+    var h = d.getHours();
+    var period = h < 6 ? '夜深了' : h < 9 ? '早上好' : h < 12 ? '上午好' : h < 14 ? '中午好' : h < 18 ? '下午好' : '晚上好';
+    var nm = mem.name ? (mem.name + '，') : '';
     var tips = [
-      '愿主赐福你！有什么想读的经文吗？可以问我「诗篇23篇」或「约翰福音3章」。',
-      '我在呢！新旧约66卷书我随时为你翻找，你想了解哪一卷？',
-      '你相信吗？圣经说「你们祈求，就给你们」。来问我一个问题吧！'
+      period + '！' + nm + '愿主赐福你！有什么想读的经文吗？可以问我「诗篇23篇」或「约翰福音3章」。',
+      nm + '我在呢！新旧约66卷书我随时为你翻找，你想了解哪一卷？',
+      nm + '你相信吗？圣经说「你们祈求，就给你们」。来问我一个问题吧！',
+      nm + '我一直都在这里陪着你。今天有什么开心的事，或者想聊的话题吗？',
+      nm + '愿平安与喜乐充满你的心！想听听圣经里的智慧吗？随便问我什么都行。'
     ];
     var txt = tips[Math.floor(Math.random() * tips.length)];
-    showBubble(txt, 5000);
+    showBubble(txt, 6000);
     speakText(txt);
   }
 })

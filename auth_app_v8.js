@@ -167,6 +167,8 @@
           character.scale.setScalar(s);
           character.position.y = 0.02;
           scene.add(character);
+          /* 给模型头部添加五官（眼睛/眉毛/鼻子/嘴）——解决用户反馈的"没五官"问题 */
+          addFaceFeatures(character);
           character.traverse(function (o) {
             if (o.isMesh && o.morphTargetDictionary) {
               morphMesh = o; morphDict = o.morphTargetDictionary;
@@ -214,6 +216,61 @@
     var sphere = new THREE.Mesh(new THREE.SphereGeometry(0.9, 32, 32), mat);
     sphere.position.set(0, 1.0, 0); g.add(sphere);
     scene.add(g); character = g;
+  }
+  /* ===== 给3D模型添加五官（眼睛/眉毛/鼻子/嘴）：任何GLB模型都有清晰人脸 ===== */
+  function addFaceFeatures(gltfScene) {
+    try {
+      if (!THREE || !THREE.CanvasTexture || !THREE.SpriteMaterial || !THREE.Sprite) return;
+      /* 用包围盒定位头部（模型最高处偏下一点=脸部区域） */
+      var box = new THREE.Box3().setFromObject(gltfScene);
+      var size = box.getSize(new THREE.Vector3());
+      var center = box.getCenter(new THREE.Vector3());
+      if (!size.y || size.y < 0.3) return;
+      var headY = box.max.y - size.y * 0.10;   // 头顶略下方=脸
+      var headW = Math.max(size.x * 0.55, size.z * 0.45, 0.12); // 头部宽度估算
+      var headH = size.y * 0.16;
+      /* 生成五官贴图（透明背景，只画眼/眉/鼻/嘴） */
+      var cv = document.createElement('canvas');
+      cv.width = 512; cv.height = 256;
+      var c = cv.getContext('2d');
+      c.clearRect(0, 0, 512, 256);
+      /* 脸型底色（半透明肤色，贴合模型头部） */
+      c.fillStyle = 'rgba(224,172,120,0.55)';
+      c.beginPath(); c.ellipse(256, 150, 225, 100, 0, 0, Math.PI * 2); c.fill();
+      /* 眉毛 */
+      c.strokeStyle = '#4a3220'; c.lineWidth = 12; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(160, 86); c.quadraticCurveTo(200, 76, 240, 86); c.stroke();
+      c.beginPath(); c.moveTo(272, 86); c.quadraticCurveTo(312, 76, 352, 86); c.stroke();
+      /* 眼睛（白眼球+黑瞳孔+高光） */
+      c.fillStyle = '#ffffff';
+      c.beginPath(); c.ellipse(200, 112, 40, 26, 0, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.ellipse(312, 112, 40, 26, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#241a12';
+      c.beginPath(); c.ellipse(200, 112, 19, 17, 0, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.ellipse(312, 112, 19, 17, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#ffffff';
+      c.beginPath(); c.arc(194, 105, 6, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(306, 105, 6, 0, Math.PI * 2); c.fill();
+      /* 鼻子（柔和阴影） */
+      c.fillStyle = 'rgba(120,80,50,0.45)';
+      c.beginPath(); c.ellipse(256, 148, 16, 22, 0, 0, Math.PI * 2); c.fill();
+      /* 嘴巴（微笑） */
+      c.strokeStyle = '#8a4a32'; c.lineWidth = 10; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(208, 190); c.quadraticCurveTo(256, 216, 304, 190); c.stroke();
+      /* 耳朵 */
+      c.fillStyle = 'rgba(200,150,105,0.6)';
+      c.beginPath(); c.ellipse(42, 140, 20, 34, 0, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.ellipse(470, 140, 20, 34, 0, 0, Math.PI * 2); c.fill();
+      var tex = new THREE.CanvasTexture(cv);
+      tex.needsUpdate = true;
+      var mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false, depthWrite: false });
+      var sprite = new THREE.Sprite(mat);
+      sprite.scale.set(headW * 0.92, headH * 1.05, 1);
+      sprite.position.set(center.x, headY, box.max.z + (size.z * 0.05) + 0.01);
+      gltfScene.add(sprite);
+      /* 记录到window，供动画微调使用 */
+      try { window._faceSprite = sprite; window._faceBox = box; } catch (e) {}
+    } catch (e) { /* 五官贴图失败不影响3D主体 */ }
   }
   function setMorph(name, v) {
     if (!morphMesh || !morphDict) return;
