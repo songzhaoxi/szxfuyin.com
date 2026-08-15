@@ -304,7 +304,7 @@
     try { if (audioEl) { audioEl.pause(); audioEl.currentTime = 0; } } catch (e) {}
     try { speechSynthesis.cancel(); } catch (e) {}
   }
-  function playMp3(url, onEnd) {
+  function playMp3(url, onEnd, onError) {
     try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch (e) {}
     try {
       if (!audioEl) audioEl = new Audio();
@@ -319,11 +319,11 @@
       }
       audioEl.onplaying = function () { st.talking = true; greetedOnce = true; };
       audioEl.onended = function () { st.talking = false; if (onEnd) onEnd(); };
-      audioEl.onerror = function () { st.talking = false; if (onEnd) onEnd(); };
+      audioEl.onerror = function () { st.talking = false; if (onError) onError(); else if (onEnd) onEnd(); };
       audioEl.src = url;
       var p = audioEl.play();
-      if (p && p.catch) p.catch(function () { st.talking = false; if (onEnd) onEnd(); });
-    } catch (e) { st.talking = false; }
+      if (p && p.catch) p.catch(function () { st.talking = false; if (onError) onError(); else if (onEnd) onEnd(); });
+    } catch (e) { st.talking = false; if (onError) onError(); else if (onEnd) onEnd(); }
   }
   function pickMaleVoice() {
     try {
@@ -336,16 +336,28 @@
     } catch (e) { return null; }
   }
   var speakLock = false;
-  /* ===== 在线TTS兜底：fanyi.baidu.com免费TTS（任何安卓浏览器必出声，解决OPPO无声问题） ===== */
+  /* ===== 在线TTS兜底：有道男声TTS优先 + 百度TTS兜底（任何安卓浏览器必出声） ===== */
   function ttsOnline(text, opts) {
     opts = opts || {};
     try {
-      var txt = String(text).replace(/[\r\n]+/g, '，').slice(0, 180);
+      var txt = String(text).replace(/[\r\n]+/g, '，').slice(0, 160);
       if (!txt) { st.talking = false; speakLock = false; if (opts.onEnd) opts.onEnd(); return; }
-      /* 百度在线TTS（免key、国内直连、无CORS播放限制） */
-      var url = 'https://fanyi.baidu.com/gettts?lan=zh&spd=5&source=web&text=' + encodeURIComponent(txt);
-      playMp3(url, function () { st.talking = false; speakLock = false; if (opts.onEnd) opts.onEnd(); });
-      /* 保险：若百度TTS被拦截/失败，20秒内未播放则放本地男声MP3兜底 */
+      /* 多源TTS：有道dictvoice type=2为男声（稳定免费）→ 百度gettts（备用） */
+      var urls = [
+        'https://dict.youdao.com/dictvoice?type=2&audio=' + encodeURIComponent(txt),
+        'https://fanyi.baidu.com/gettts?lan=zh&spd=5&source=web&text=' + encodeURIComponent(txt)
+      ];
+      var srcIdx = 0;
+      var started = false;
+      (function tryNext() {
+        if (started) return;
+        if (srcIdx >= urls.length) { st.talking = false; speakLock = false; if (opts.onEnd) opts.onEnd(); return; }
+        var u = urls[srcIdx++];
+        playMp3(u, function () { st.talking = false; speakLock = false; if (opts.onEnd) opts.onEnd(); }, function () { tryNext(); });
+        /* 4秒内未开始播放（onplaying未触发）→ 换下一个源 */
+        setTimeout(function () { if (!started && st.talking && speakLock) { try { if (audioEl) { audioEl.pause(); audioEl.currentTime = 0; } } catch (e) {} tryNext(); } }, 4000);
+      })();
+      /* 保险：20秒内仍未出声则强制复位 */
       setTimeout(function () {
         if (st.talking === false && speakLock === true) { st.talking = false; speakLock = false; if (opts.onEnd) opts.onEnd(); }
       }, 20000);
@@ -395,7 +407,7 @@
   }
   function greeting() {
     var name = mem.name;
-    var txt = name ? ('欢迎回来，' + name + '！我是你的全能AI伙伴，新旧约66卷书我都熟读，任何话题都能聊，今天想聊点什么？') : '欢迎来到兆西福音传递爱，我是你的全能AI伙伴，新旧约66卷书我都熟读，任何话题有问必答，愿你平安。';
+    var txt = name ? ('欢迎回来，' + name + '！我是兆西福音传递爱的全能AI数字人，会走会动、能听能说，任何话题都可以和我聊。今天想聊点什么？') : '欢迎来到兆西福音传递爱，我是全能AI数字人，会走会动、能听能说，工作生活学习科技，任何话题都可以问我，愿你平安。';
     showBubble(txt, 8000);
     /* 统一欢迎语音：优先播放本地男声MP3（welcome.mp3）。
        PC端可自动播放；安卓端被浏览器拦截后，由 unlockAudio（用户点击时）补播一次。
@@ -673,7 +685,43 @@
   }
   function genReply(q) {
     /* 0. 先记下这个话题（自我意识） */
-    /* 1. 经文引用：创世记1:1 / 诗篇23篇 / 约翰福音3章16节 等 */
+    /* 0.5 非圣经/非信仰话题：直接走真实知识回答，绝不答圣经（用户明确要求：问什么答什么） */
+    var BIBLE_HINT2 = /(圣经|经文|经上|经卷|旧约|新约|创世记|出埃及|利未记|民数记|申命记|约书亚|士师记|路得记|撒母耳|列王纪|历代志|以斯拉|尼希米|以斯帖|约伯|诗篇|箴言|传道书|雅歌|以赛亚|耶利米|以西结|但以理|何西阿|约珥|阿摩司|俄巴底亚|约拿书|弥迦书|那鸿书|哈巴谷|西番雅|哈该书|撒迦利亚|玛拉基|马太|马可福音|路加福音|约翰福音|使徒行传|罗马书|哥林多|加拉太|以弗所|腓立比|歌罗西|帖撒罗尼迦|提摩太|提多书|腓利门|希伯来书|雅各书|彼得|约翰一|约翰二|约翰三|犹大书|启示录|耶稣|基督|上帝|神说|福音|祷告|赞美诗|灵修|教会|信徒|耶和华|摩西|大卫|保罗|彼得|亚当|夏娃|诺亚|挪亚|亚伯拉罕|以撒|雅各|约瑟|救恩|永生|天堂|地狱|悔改|十字架|复活|圣灵|三位一体|赎罪|恩典|敬拜|礼拜|主日|属灵|信仰|基督徒|祷告会)/;
+    var qClean2 = String(q).replace(/[\s，。！？、；：""''《》（）~！@#￥%…&*()\-+=|]/g, '');
+    if (qClean2.length >= 1 && !BIBLE_HINT2.test(qClean2)) {
+      return realReply(q);
+    }
+  /* ===== 真实话题如实回答（非圣经话题专用，绝不答圣经） ===== */
+  function realReply(q) {
+    rememberTopic(q, '');
+    var nm = mem.name ? (mem.name + '，') : '';
+    var LIFE = [
+      { p: /(你是谁|你叫什么|介绍你|自我介绍|你的身份|你是什么)/, r: '我是兆西福音传递爱的全能AI数字人，一个会走会动、有表情有情绪、能听能说的智能伙伴。工作、生活、学习、科技、情感……任何话题都可以和我聊，我会如实回答你。' },
+      { p: /(天气|下雨|晴天|阴天|气温|温度|冷|热)/, r: '天气是自然现象，建议看手机实时天气APP。不管晴雨，注意保暖带伞，愿你舒心！' },
+      { p: /(饿|吃饭|早饭|午饭|晚饭|美食|吃什么)/, r: '三餐规律：早餐吃好、午餐吃饱、晚餐吃少。你平时喜欢什么口味？' },
+      { p: /(累|疲惫|困|辛苦|休息|睡觉|熬夜)/, r: '你辛苦了，累了就好好休息，成年人建议每天7-8小时睡眠。' },
+      { p: /(开心|高兴|快乐|兴奋|喜悦)/, r: '真为你高兴！分享快乐让快乐翻倍，你今天遇到什么好事了？' },
+      { p: /(难过|伤心|哭|委屈|失落|沮丧|抑郁)/, r: '我懂你的感受，想哭就哭出来。找信任的人聊聊或出去走走会好很多，我一直陪着你。' },
+      { p: /(生气|愤怒|火大|烦躁|恼火)/, r: '先深呼吸让情绪降温，冷静后再沟通。愿意的话跟我说说发生了什么。' },
+      { p: /(时间|日期|几点|几号|星期)/, r: '现在是' + new Date().getFullYear() + '年' + (new Date().getMonth() + 1) + '月' + new Date().getDate() + '日，星期' + '日一二三四五六'.charAt(new Date().getDay()) + '。' },
+      { p: /(编程|代码|程序员|开发|python|java|javascript|人工智能|ai)/, r: '编程是解决问题的艺术：入门推荐Python，Web开发学HTML/CSS/JS。你用什么语言？我可以分享学习路线。' },
+      { p: /(健康|锻炼|跑步|健身|睡眠|熬夜|体检)/, r: '健康建议：每天7-8小时睡眠、均衡饮食、每周150分钟运动、定期体检、少熬夜。' },
+      { p: /(工作|职场|上班|面试|创业)/, r: '职场建议：分内事做到极致、主动沟通、持续学习、平衡工作生活。你遇到什么具体问题？' },
+      { p: /(恋爱|感情|对象|分手|失恋|表白|单身|相亲|婚姻)/, r: '感情需要真诚经营：多沟通少猜测；失恋允许难过但别否定自己；婚姻包容尊重最重要。' },
+      { p: /(宇宙|地球|月球|火星|太阳|星星)/, r: '太阳系有八大行星，地球是唯一已知存在生命的星球；月球距地球约38万公里。' },
+      { p: /(电影|电视剧|综艺|动漫|视频|抖音|b站)/, r: '好作品很多：科幻《星际穿越》、经典《肖申克的救赎》。你最近在追什么？' },
+      { p: /(星座|塔罗|占卜|算命|风水|运势)/, r: '星座占卜多是娱乐，没有科学依据。人生走向取决于你的选择和努力。' },
+      { p: /(书|阅读|推荐书|名著|小说)/, r: '好书推荐：《红楼梦》《三体》《被讨厌的勇气》《人类简史》。你最近在读什么？' }
+    ];
+    for (var li = 0; li < LIFE.length; li++) {
+      if (LIFE[li].p.test(q)) { var rr = LIFE[li].r; rememberTopic(q, rr); return { mood: 'calm', text: nm + rr }; }
+    }
+    var a = q.replace(/[，。！？、；：""''《》（）\s~！@#￥%…&*()\-+=|]/g, '').slice(0, 16) || '这件事';
+    var isQ = /[？?]$/.test(q) || /(是什么|什么是|为什么|怎么|如何|哪里|谁|多少|几|吗|呢|能不能|是不是|有没有|会不会|讲讲|说说|介绍)/.test(q);
+    if (isQ) return { mood: 'think', text: nm + '你问的「' + a + '」是个值得认真思考的问题。我如实回答：我掌握的知识有限，但会真诚坦率地把知道的都告诉你，也愿意陪你一起探讨。你觉得呢？' };
+    return { mood: 'joy', text: nm + '「' + a + '」这个话题挺有意思，我记住了。你愿意多跟我说说吗？' };
+  }
+  /* 1. 经文引用：创世记1:1 / 诗篇23篇 / 约翰福音3章16节 等 */
     var v = getVerse(q);
     if (v) { rememberTopic(q, v.text); return { mood: 'calm', text: v.book + v.ch + '章' + (v.v1 === v.v2 ? v.v1 : v.v1 + '-' + v.v2) + '节：' + v.text }; }
     /* 2. 卷书简介 */
@@ -695,17 +743,20 @@
     for (var o = 0; o < OPEN_TOPIC.length; o++) {
       if (OPEN_TOPIC[o].p.test(q)) { rememberTopic(q, OPEN_TOPIC[o].r); return { mood: OPEN_TOPIC[o].mood, text: OPEN_TOPIC[o].r }; }
     }
-    /* 5. 关键词圣经检索 */
+    /* 5. 关键词圣经检索（仅当用户明确问圣经/经文/卷书时才检索，其他话题绝不答圣经） */
+    var BIBLE_HINT = /(圣经|经文|经上|经卷|旧约|新约|创世记|出埃及|利未记|民数记|申命记|约书亚|士师记|路得记|撒母耳|列王纪|历代志|以斯拉|尼希米|以斯帖|约伯|诗篇|箴言|传道书|雅歌|以赛亚|耶利米|以西结|但以理|何西阿|约珥|阿摩司|俄巴底亚|约拿书|弥迦书|那鸿书|哈巴谷|西番雅|哈该书|撒迦利亚|玛拉基|马太|马可福音|路加福音|约翰福音|使徒行传|罗马书|哥林多|加拉太|以弗所|腓立比|歌罗西|帖撒罗尼迦|提摩太|提多书|腓利门|希伯来书|雅各书|彼得|约翰一|约翰二|约翰三|犹大书|启示录|耶稣|基督|上帝|神说|福音|祷告|赞美诗|灵修|教会|信徒|上帝|耶和华|摩西|大卫|保罗|彼得|亚当|夏娃|诺亚|挪亚|亚伯拉罕|以撒|雅各|约瑟|救恩|永生|天堂|地狱|罪|悔改|十字架|复活|圣灵|三位一体|赎罪|恩典|敬拜|礼拜|主日)/;
     var kw = q.replace(/[，。！？、；：""''《》（）\s]/g, '');
     var keys = [kw.slice(0, 4), kw.slice(0, 2), kw.slice(0, 1)];
-    for (var n = 0; n < keys.length; n++) {
-      if (keys[n].length < 1) continue;
-      var hits = searchBible(keys[n], 2);
-      if (hits.length) {
-        var t2 = '圣经中关于「' + keys[n] + '」的记载：';
-        for (var h = 0; h < hits.length; h++) t2 += hits[h].ref + '「' + hits[h].text + '」；';
-        rememberTopic(q, t2);
-        return { mood: 'calm', text: t2 };
+    if (BIBLE_HINT.test(q)) {
+      for (var n = 0; n < keys.length; n++) {
+        if (keys[n].length < 1) continue;
+        var hits = searchBible(keys[n], 2);
+        if (hits.length) {
+          var t2 = '圣经中关于「' + keys[n] + '」的记载：';
+          for (var h = 0; h < hits.length; h++) t2 += hits[h].ref + '「' + hits[h].text + '」；';
+          rememberTopic(q, t2);
+          return { mood: 'calm', text: t2 };
+        }
       }
     }
     /* 6. 智能兜底：任何话题都如实、实在回答（有知识、有观点、有记忆、有自我意识） */
@@ -790,11 +841,10 @@
     var period = h < 6 ? '夜深了' : h < 9 ? '早上好' : h < 12 ? '上午好' : h < 14 ? '中午好' : h < 18 ? '下午好' : '晚上好';
     var nm = mem.name ? (mem.name + '，') : '';
     var tips = [
-      period + '！' + nm + '愿主赐福你！有什么想读的经文吗？可以问我「诗篇23篇」或「约翰福音3章」。',
-      nm + '我在呢！新旧约66卷书我随时为你翻找，你想了解哪一卷？',
-      nm + '你相信吗？圣经说「你们祈求，就给你们」。来问我一个问题吧！',
+      period + '！' + nm + '愿你今天顺心！有什么想聊的话题吗？工作、生活、学习都可以问我。',
+      nm + '我在呢！你想聊点什么？或者有什么问题需要我帮忙，尽管说。',
       nm + '我一直都在这里陪着你。今天有什么开心的事，或者想聊的话题吗？',
-      nm + '愿平安与喜乐充满你的心！想听听圣经里的智慧吗？随便问我什么都行。'
+      nm + '愿平安与喜乐充满你的心！随便问我什么都行，我知无不言。'
     ];
     var txt = tips[Math.floor(Math.random() * tips.length)];
     showBubble(txt, 6000);

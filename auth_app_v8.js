@@ -135,10 +135,11 @@
     /* 中年男性模型优先：XBot（男性，动画最丰富：走/跑/同意/摇头/伤心）→ Soldier（男性士兵）→ CesiumMan（人形）→ Michelle（女性兜底）
        本地模型加载失败时，自动切换网上CDN备用源（three.js官方GitHub托管，确保任何网络环境下都能加载全身模型） */
     var tryUrls = [
-      /* ===== 优先加载小体积模型：cesium_man仅438KB，手机网络秒开（之前把2.8MB的xbot放第一导致加载超时回退2D） ===== */
-      'js/cesium_man.glb', 'auth/js/cesium_man.glb', 'szxfuyin/js/cesium_man.glb', './js/cesium_man.glb',
-      'js/soldier.glb', 'auth/js/soldier.glb', 'szxfuyin/js/soldier.glb', './js/soldier.glb',
+      /* ===== 中年男性模型优先：xbot（男性+走路/跑/点头/摇头/挥手动画最丰富，真实自然走动行走） =====
+         本地xbot加载失败才依次降级 soldier（男性士兵，有走路动画）→ cesium_man（438KB人形无动画兜底）→ michelle（女性兜底） */
       'js/xbot.glb', 'auth/js/xbot.glb', 'szxfuyin/js/xbot.glb', './js/xbot.glb',
+      'js/soldier.glb', 'auth/js/soldier.glb', 'szxfuyin/js/soldier.glb', './js/soldier.glb',
+      'js/cesium_man.glb', 'auth/js/cesium_man.glb', 'szxfuyin/js/cesium_man.glb', './js/cesium_man.glb',
       'js/michelle.glb', 'auth/js/michelle.glb', 'szxfuyin/js/michelle.glb', './js/michelle.glb',
       /* ===== 网上备用源：国内可达的jsdelivr优先（raw.githubusercontent.com在国内经常超时） ===== */
       'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/models/gltf/Soldier.glb',
@@ -304,8 +305,16 @@
         }
       }
       if (isWalkingAnim && character) {
-        character.position.x = Math.sin(t * 0.9) * 0.55;
-        character.rotation.y = Math.sin(t * 0.9) * 0.22;
+        if (walkAction) {
+          /* 真实自然走动：播放走路骨骼动画 + 缓慢前行转身（不再左右平移） */
+          character.position.x = Math.sin(t * 0.35) * 0.5;
+          character.position.z = 0.12 + Math.sin(t * 0.35 - Math.PI / 2) * 0.32;
+          character.rotation.y = Math.sin(t * 0.35) * 0.45;
+        } else {
+          /* 无走路动画的模型（如cesium_man）：小幅左右踱步+转身兜底 */
+          character.position.x = Math.sin(t * 0.9) * 0.4;
+          character.rotation.y = Math.sin(t * 0.9) * 0.22;
+        }
       }
       avatarMixer.update(0.016);
     }
