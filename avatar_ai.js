@@ -334,6 +334,7 @@
       var notFemale = zh.filter(function (v) { return !/Xiaoxiao|晓晓|Xiaoyi|晓伊|Liang|梁|Huihui|慧慧|Yaoyao|瑶瑶|female|女/i.test(v.name); });
       return notFemale[0] || zh[0] || null;
     } catch (e) { return null; }
+  }
   var speakLock = false;
   /* ===== 在线TTS兜底：fanyi.baidu.com免费TTS（任何安卓浏览器必出声，解决OPPO无声问题） ===== */
   function ttsOnline(text, opts) {
@@ -391,7 +392,6 @@
       if (ttsFailed) ttsOnline(txt, opts);
       else { st.talking = false; speakLock = false; if (opts.onEnd) opts.onEnd(); }
     }, 80);
-  }
   }
   function greeting() {
     var name = mem.name;
@@ -800,4 +800,4 @@
     showBubble(txt, 6000);
     speakText(txt);
   }
-})
+})();
