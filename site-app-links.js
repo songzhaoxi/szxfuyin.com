@@ -1,15 +1,12 @@
 /*
  * 福音传递爱 · 独立应用入口配置
  *
- * 重要：博客项目当前仍运行在独立应用环境，尚未绑定到 szxfuyin.com。
- * 因此默认不写入 /blog/ 或 /potv/ 这类尚未部署的路径，避免主站产生 404。
- * 正式部署两个应用后，将下面的空字符串替换为真实 HTTPS 地址，例如：
- *   blog: 'https://blog.szxfuyin.com/'
- *   potv: 'https://potv.szxfuyin.com/'
+ * 已部署：博客 /blog/ 与 PoTV /potv/ 已上线到 szxfuyin.com（GitHub Pages 子目录），
+ * 与主站同域，无需跨域配置，直接跳转即可。
  */
 window.SZXF_APP_LINKS = Object.freeze({
-  blog: '',
-  potv: ''
+  blog: '/blog/',
+  potv: '/potv/'
 });
 
 window.SZXF_OPEN_APP = function (key) {

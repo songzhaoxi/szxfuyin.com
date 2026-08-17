@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>兆西福音博客 | 福音传递爱</title>
+<meta name="description" content="兆西福音博客——分享圣经真理、信仰见证、灵修心得与福音信息">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'Noto Sans SC','Microsoft YaHei',sans-serif;background:#f7f3ec;color:#2c1a08;min-height:100vh}
+a{text-decoration:none;color:inherit}
+.top{background:linear-gradient(135deg,#3d1f05,#7a4a1e);color:#fdf3e0;padding:32px 20px;text-align:center}
+.top h1{font-size:26px;letter-spacing:2px;margin-bottom:8px}
+.top p{font-size:14px;opacity:.85}
+.top a.home{display:inline-block;margin-top:14px;padding:8px 22px;border:1px solid #e8b96a;border-radius:20px;color:#e8b96a;font-size:13px}
+.top a.home:hover{background:#e8b96a;color:#3d1f05}
+.wrap{max-width:960px;margin:0 auto;padding:24px 16px 60px}
+.cat{font-size:15px;color:#7a4a1e;font-weight:700;margin:28px 0 12px;padding-left:10px;border-left:4px solid #c8973a}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.card{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 10px rgba(90,50,10,.08);transition:transform .2s;cursor:pointer}
+.card:hover{transform:translateY(-3px);box-shadow:0 6px 18px rgba(90,50,10,.15)}
+.card img{width:100%;height:120px;object-fit:cover;background:#eee}
+.card .info{padding:12px}
+.card .info h3{font-size:15px;margin-bottom:4px;color:#3d1f05}
+.card .info span{font-size:12px;color:#8a7a6a}
+.footer{text-align:center;padding:20px;color:#a89880;font-size:12px;border-top:1px solid #e6ddcd}
+@media(max-width:520px){.grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>📖 兆西福音博客</h1>
+  <p>分享圣经真理 · 信仰见证 · 灵修心得 · 福音信息</p>
+  <a class="home" href="/">← 返回福音传递爱首页</a>
+</div>
+<div class="wrap">
+  <div class="cat">📚 圣经学苑研读课程</div>
+  <div class="grid" id="blogGrid"></div>
+  <div class="cat">✝️ 最新福音信息</div>
+  <div class="grid" id="gospelGrid"></div>
+</div>
+<div class="footer">© 福音传递爱 szxfuyin.com · 兆西福音博客</div>
+<script>
+var COURSES = [
+  {id:1,img:'https://xue2.52fuyin.com/static/images/book/Mosessimply0803.png',title:'摩西五经',teacher:'赖建国博士'},
+  {id:2,img:'https://xue2.52fuyin.com/static/images/book/Old-Testamentsimply0803.png',title:'旧约历史',teacher:'吴献章博士'},
+  {id:3,img:'https://xue2.52fuyin.com/static/images/book/DanielInLionsDen-simply0803.png',title:'大先知书',teacher:'吴献章博士'},
+  {id:4,img:'https://xue2.52fuyin.com/static/images/book/Jonah-simply0803.png',title:'小先知书',teacher:'蔡筱枫师母'},
+  {id:5,img:'https://xue2.52fuyin.com/static/images/book/jobsimply0803.png',title:'约伯记',teacher:'刘幸枝博士'},
+  {id:6,img:'https://xue2.52fuyin.com/static/images/book/gospel-simply0803.png',title:'福音书',teacher:'孙宝玲博士'},
+  {id:7,img:'https://xue2.52fuyin.com/static/images/book/Paul-simply0803.png',title:'保罗书信',teacher:'黄子嘉博士'},
+  {id:8,img:'https://xue2.52fuyin.com/static/images/book/Peter-simply0803.png',title:'彼得书信',teacher:'张圣佳博士'},
+  {id:9,img:'https://xue2.52fuyin.com/static/images/book/Jeremiah-simply0502.png',title:'耶利米书',teacher:'蔡筱枫师母'},
+  {id:11,img:'https://xue2.52fuyin.com/static/images/book/psalmssimply0803.png',title:'诗篇',teacher:'吴献章博士'},
+  {id:12,img:'https://xue2.52fuyin.com/static/images/book/Proverbs-simply0502.png',title:'箴言',teacher:'刘幸枝博士'},
+  {id:13,img:'https://xue2.52fuyin.com/static/images/book/luke-simply0803.png',title:'路加福音',teacher:'孙宝玲博士'},
+  {id:14,img:'https://xue2.52fuyin.com/static/images/book/john-simply-0729.png',title:'约翰福音',teacher:'黄子嘉博士'},
+  {id:16,img:'https://xue2.52fuyin.com/static/images/book/romans-simply20160708.png',title:'罗马书',teacher:'陆大龄博士'},
+  {id:21,img:'https://xue2.52fuyin.com/static/images/book/bible-simply0803.png',title:'圣经概论',teacher:'吴献章博士'},
+  {id:23,img:'https://xue2.52fuyin.com/static/images/book/u65B0u589E-1-simply.png',title:'系统神学',teacher:'曾劭恺博士'}
+];
+var GOSPEL = [
+  {title:'什么是福音？——好消息的源头',cat:'福音信息'},
+  {title:'圣经都是神所默示的（提后3:16-17）',cat:'经文灵修'},
+  {title:'耶稣基督——唯一的道路、真理、生命',cat:'信仰见证'},
+  {title:'祷告的力量：与神建立亲密关系',cat:'灵修心得'},
+  {title:'从罗马书看因信称义的真理',cat:'圣经研读'},
+  {title:'爱的真谛——哥林多前书13章',cat:'经文灵修'}
+];
+function cardHtml(it, isCourse){
+  return '<div class="card" onclick="' + (isCourse ? 'location.href=\'/fuyin_course.html?id=' + it.id + '\'' : 'alert(\'' + it.title + '——即将发布全文，敬请期待！\')') + '">' +
+    (it.img ? '<img src="' + it.img + '" loading="lazy">' : '<img src="data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'120\'><rect width=\'100%25\' height=\'100%25\' fill=\'%23f0e8d8\'/><text x=\'50%25\' y=\'55%25\' font-size=\'30\' text-anchor=\'middle\'>✝️</text></svg>">') +
+    '<div class="info"><h3>' + it.title + '</h3><span>' + (isCourse ? it.teacher : it.cat) + '</span></div></div>';
+}
+document.getElementById('blogGrid').innerHTML = COURSES.map(function(c){return cardHtml(c,true)}).join('');
+document.getElementById('gospelGrid').innerHTML = GOSPEL.map(function(g){return cardHtml(g,false)}).join('');
+</script>
+</body>
+</html>
