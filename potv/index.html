@@ -2,101 +2,638 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>潼视 PoTV | 福音传递爱</title>
-<meta name="description" content="潼视 PoTV——福音视频社区，讲道视频、赞美诗歌、福音见证在线观看">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="description" content="潼视 PoTV —— 你的兴趣，在这里发光。番剧、国创、纪录片、生活、科技、游戏，年轻人的活力社区。">
+<title>潼视 PoTV | 你感兴趣的，都在这里</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,'Noto Sans SC','Microsoft YaHei',sans-serif;background:#0f1115;color:#e8e6e1;min-height:100vh}
-a{text-decoration:none;color:inherit}
-.top{background:linear-gradient(135deg,#101418,#1d2b3a);padding:32px 20px;text-align:center;border-bottom:1px solid #232a35}
-.top h1{font-size:26px;letter-spacing:2px;color:#5aa2e8;margin-bottom:8px}
-.top p{font-size:14px;opacity:.7}
-.top a.home{display:inline-block;margin-top:14px;padding:8px 22px;border:1px solid #5aa2e8;border-radius:20px;color:#5aa2e8;font-size:13px}
-.top a.home:hover{background:#5aa2e8;color:#0f1115}
-.wrap{max-width:1080px;margin:0 auto;padding:24px 16px 60px}
-.cat{font-size:15px;color:#5aa2e8;font-weight:700;margin:28px 0 12px;padding-left:10px;border-left:4px solid #5aa2e8}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
-.card{background:#171c26;border-radius:10px;overflow:hidden;border:1px solid #232a35;transition:transform .2s;cursor:pointer}
-.card:hover{transform:translateY(-3px);border-color:#5aa2e8}
-.card .thumb{width:100%;height:130px;object-fit:cover;background:#0f1115;display:flex;align-items:center;justify-content:center;font-size:40px}
-.card .info{padding:12px}
-.card .info h3{font-size:14px;margin-bottom:4px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.card .info span{font-size:12px;color:#8a95a5}
-.player-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99;padding:20px}
-.player-modal.show{display:flex;flex-direction:column}
-.player-modal .pm-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.player-modal .pm-top h2{font-size:16px;color:#fff;flex:1;padding-right:12px}
-.player-modal .pm-close{font-size:28px;cursor:pointer;color:#8a95a5;padding:0 8px}
-.player-modal iframe{flex:1;width:100%;border:0;border-radius:8px;background:#000}
-.footer{text-align:center;padding:20px;color:#5c6570;font-size:12px;border-top:1px solid #232a35}
-@media(max-width:520px){.grid{grid-template-columns:repeat(2,1fr)}}
+/* ============================================================
+   潼视 PoTV · Design tokens
+   一个原创视频社区品牌，功能与版式高度对标主流长视频/弹幕站，
+   但采用独立的名称与配色（青蓝×电光紫），避免与任何真实品牌
+   的商标名称、Logo、专属配色完全一致。
+   Signature: 弹幕漂浮动效 + "潮" 波纹按钮反馈
+   ============================================================ */
+:root{
+  --bg:        #F4F6F9;
+  --bg-deep:   #E9EDF3;
+  --surface:   #FFFFFF;
+  --ink:       #17181C;
+  --text:      #18191C;
+  --text-2:    #61666D;
+  --text-3:    #9499A0;
+  --line:      rgba(23,24,28,0.08);
+  --brand:     #00B4D8;
+  --brand-2:   #7C4DFF;
+  --brand-grad: linear-gradient(120deg,#00B4D8 0%,#7C4DFF 100%);
+  --accent-pink: #FF5C8A;
+  --danger:    #FF5C5C;
+  --radius:    10px;
+  --radius-lg: 14px;
+  --shadow:    0 1px 2px rgba(23,24,28,.06), 0 4px 16px rgba(23,24,28,.05);
+  --shadow-lg: 0 10px 34px rgba(23,24,28,.14);
+  --top-h:     64px;
+  --sub-h:     44px;
+  --trans:     all .2s cubic-bezier(.4,0,.2,1);
+}
+body.dark{
+  --bg:        #101115;
+  --bg-deep:   #17181D;
+  --surface:   #1B1D23;
+  --ink:       #F1F2F4;
+  --text:      #F1F2F4;
+  --text-2:    #A6ABB4;
+  --text-3:    #6C7078;
+  --line:      rgba(255,255,255,0.08);
+  --shadow:    0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.28);
+  --shadow-lg: 0 10px 34px rgba(0,0,0,.5);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .25s,color .25s;}
+a{text-decoration:none;color:inherit;}
+img{display:block;width:100%;object-fit:cover;}
+button{cursor:pointer;font-family:inherit;border:none;background:none;color:inherit;}
+ul{list-style:none;}
+::-webkit-scrollbar{width:7px;height:7px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--text-3);border-radius:4px;}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px;}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important;}}
+
+/* ===== 潮 · 波纹点击反馈（签名交互） ===== */
+.ripple{position:relative;overflow:hidden;}
+.ripple-dot{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(0,180,216,.45),transparent 70%);transform:scale(0);animation:rippleAnim .6s ease-out forwards;pointer-events:none;}
+@keyframes rippleAnim{to{transform:scale(3);opacity:0;}}
+
+/* ===== 顶栏 ===== */
+.topbar{position:sticky;top:0;z-index:1000;height:var(--top-h);background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 24px;gap:22px;}
+.logo{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.logo-mark{width:34px;height:34px;border-radius:10px;background:var(--brand-grad);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:15px;letter-spacing:-1px;box-shadow:0 4px 14px rgba(124,77,255,.28);}
+.logo-text{font-size:19px;font-weight:900;background:var(--brand-grad);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.5px;}
+.logo-text span{font-size:10px;font-weight:600;color:var(--text-3);display:block;letter-spacing:2px;-webkit-text-fill-color:var(--text-3);}
+.top-nav{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.top-nav a{font-size:14px;color:var(--text-2);padding:8px 12px;border-radius:8px;font-weight:500;transition:var(--trans);white-space:nowrap;}
+.top-nav a:hover{color:var(--text);background:var(--bg-deep);}
+.top-nav a.active{color:var(--brand-2);font-weight:700;}
+.topbar-search{flex:1;max-width:520px;position:relative;}
+.search-box{display:flex;align-items:center;background:var(--bg-deep);border:1.5px solid transparent;border-radius:20px;padding:0 6px 0 16px;height:38px;transition:var(--trans);}
+.search-box:focus-within{border-color:var(--brand);background:var(--surface);}
+.search-box input{flex:1;border:none;background:none;outline:none;font-size:13.5px;color:var(--text);font-family:inherit;}
+.search-box input::placeholder{color:var(--text-3);}
+.search-box button{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text-2);font-size:14px;transition:var(--trans);}
+.search-box button:hover{background:var(--brand);color:#fff;}
+.search-drop{position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:14px;opacity:0;visibility:hidden;transform:translateY(-6px);transition:var(--trans);z-index:60;border:1px solid var(--line);}
+.search-drop.show{opacity:1;visibility:visible;transform:translateY(0);}
+.search-drop .label{font-size:11px;color:var(--text-3);letter-spacing:1px;margin-bottom:9px;}
+.hot-words{display:flex;flex-wrap:wrap;gap:8px;}
+.hot-word{font-size:12.5px;color:var(--text-2);background:var(--bg-deep);padding:6px 12px;border-radius:14px;transition:var(--trans);display:flex;align-items:center;gap:5px;}
+.hot-word .rk{color:var(--accent-pink);font-weight:800;font-size:11px;}
+.hot-word:hover{background:var(--brand);color:#fff;}
+.hot-word:hover .rk{color:#fff;}
+.topbar-right{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;}
+.icon-btn{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text-2);font-size:16px;transition:var(--trans);position:relative;}
+.icon-btn:hover{background:var(--bg-deep);color:var(--text);}
+.icon-btn .badge{position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:var(--danger);border:2px solid var(--surface);}
+.upload-btn{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--text);border:1.5px solid var(--line);padding:7px 14px;border-radius:18px;transition:var(--trans);}
+.upload-btn:hover{border-color:var(--brand);color:var(--brand);}
+.avatar-btn{width:34px;height:34px;border-radius:50%;background:var(--brand-grad);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0;}
+.menu-toggle{display:none;font-size:20px;color:var(--text-2);}
+
+/* ===== 分区次导航 ===== */
+.subnav{height:var(--sub-h);background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 24px;gap:26px;overflow-x:auto;position:sticky;top:var(--top-h);z-index:900;}
+.subnav::-webkit-scrollbar{display:none;}
+.subnav a{font-size:13px;color:var(--text-2);white-space:nowrap;display:flex;align-items:center;gap:6px;transition:var(--trans);padding:4px 0;position:relative;}
+.subnav a .sn-icon{font-size:15px;}
+.subnav a:hover,.subnav a.active{color:var(--brand-2);}
+.subnav a.active::after{content:'';position:absolute;left:0;right:0;bottom:-13px;height:2.5px;background:var(--brand-grad);border-radius:2px;}
+
+/* ===== 主容器 ===== */
+.main{max-width:1560px;margin:0 auto;padding:20px 24px 50px;}
+
+/* ===== Hero 区：轮播 + 排行/直播卡 ===== */
+.hero-grid{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:26px;}
+.hero-banner{border-radius:var(--radius-lg);overflow:hidden;position:relative;height:340px;box-shadow:var(--shadow);}
+.hero-slide{width:100%;height:100%;position:relative;}
+.hero-slide img{position:absolute;inset:0;width:100%;height:100%;}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.75) 0%,rgba(0,0,0,.05) 55%,transparent 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:24px 26px;}
+.hero-overlay .tag{display:inline-flex;align-self:flex-start;font-size:11px;font-weight:700;color:#fff;background:var(--brand-grad);padding:3px 10px;border-radius:10px;margin-bottom:10px;letter-spacing:1px;}
+.hero-overlay h2{color:#fff;font-size:23px;font-weight:800;margin-bottom:6px;}
+.hero-overlay p{color:rgba(255,255,255,.75);font-size:12.5px;max-width:70%;}
+.hero-dots{position:absolute;bottom:16px;right:20px;display:flex;gap:6px;}
+.hero-dots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4);cursor:pointer;transition:var(--trans);}
+.hero-dots span.active{background:#fff;width:18px;border-radius:4px;}
+.hero-arrow{position:absolute;top:50%;translate:0 -50%;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.3);color:#fff;display:flex;align-items:center;justify-content:center;z-index:3;transition:var(--trans);}
+.hero-arrow:hover{background:var(--brand);}
+.hero-arrow.prev{left:12px;}
+.hero-arrow.next{right:12px;}
+
+.hero-side{display:flex;flex-direction:column;gap:14px;}
+.rank-card,.live-card{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:16px;flex:1;display:flex;flex-direction:column;}
+.side-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.side-title h4{font-size:14.5px;font-weight:800;display:flex;align-items:center;gap:6px;}
+.side-title .more{font-size:11.5px;color:var(--text-3);}
+.rank-item{display:flex;align-items:center;gap:9px;padding:6px 0;}
+.rank-num{width:16px;font-size:13px;font-weight:900;color:var(--text-3);flex-shrink:0;}
+.rank-item:nth-child(-n+3) .rank-num{color:var(--accent-pink);}
+.rank-title{flex:1;font-size:12.5px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rank-title:hover{color:var(--brand-2);}
+.rank-heat{font-size:10.5px;color:var(--text-3);flex-shrink:0;}
+
+/* ===== 通用区块 ===== */
+.section{margin-bottom:30px;}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.section-head h3{font-size:19px;font-weight:800;display:flex;align-items:center;gap:8px;}
+.section-head .dot{width:7px;height:7px;border-radius:50%;background:var(--brand-grad);}
+.section-tabs{display:flex;gap:16px;}
+.section-tabs button{font-size:13.5px;color:var(--text-3);font-weight:600;padding:4px 0;position:relative;transition:var(--trans);}
+.section-tabs button.active{color:var(--text);}
+.section-tabs button.active::after{content:'';position:absolute;left:0;right:0;bottom:-6px;height:2.5px;background:var(--brand-grad);border-radius:2px;}
+.section-more{font-size:12.5px;color:var(--text-3);display:flex;align-items:center;gap:2px;transition:var(--trans);}
+.section-more:hover{color:var(--brand-2);}
+
+/* ===== 视频卡片网格 ===== */
+.video-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:16px 14px;}
+.video-card{cursor:pointer;}
+.v-thumb{position:relative;border-radius:var(--radius);overflow:hidden;aspect-ratio:16/10;background:var(--bg-deep);}
+.v-thumb img{width:100%;height:100%;transition:transform .35s;}
+.video-card:hover .v-thumb img{transform:scale(1.08);}
+.v-duration{position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.65);color:#fff;font-size:10.5px;padding:1px 6px;border-radius:4px;font-weight:600;}
+.v-playcount{position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;padding:1px 6px;border-radius:4px;display:flex;align-items:center;gap:3px;}
+.real-tag{position:absolute;top:6px;left:6px;background:var(--brand-grad);color:#fff;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:8px;letter-spacing:.5px;z-index:2;}
+.danmaku-layer{position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:0;transition:opacity .2s;}
+.video-card:hover .danmaku-layer{opacity:1;}
+.dm{position:absolute;white-space:nowrap;color:#fff;font-size:11px;font-weight:600;text-shadow:0 1px 3px rgba(0,0,0,.8);animation:dmFly linear infinite;}
+@keyframes dmFly{from{transform:translateX(0);}to{transform:translateX(-320%);}}
+.v-play-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:var(--trans);background:rgba(0,0,0,0);}
+.video-card:hover .v-play-icon{opacity:1;background:rgba(0,0,0,.18);}
+.v-play-circle{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.94);display:flex;align-items:center;justify-content:center;color:var(--ink);font-size:14px;padding-left:2px;transform:scale(.7);transition:var(--trans);}
+.video-card:hover .v-play-circle{transform:scale(1);}
+.v-meta{padding-top:8px;display:flex;gap:8px;}
+.v-avatar{width:26px;height:26px;border-radius:50%;background:var(--brand-grad);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10.5px;font-weight:700;}
+.v-info{flex:1;min-width:0;}
+.v-title{font-size:13px;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;height:2.8em;margin-bottom:4px;}
+.v-up{font-size:11.5px;color:var(--text-3);}
+
+/* ===== 分区专区（番剧/直播/生活） ===== */
+.zone-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
+.zone-card{background:var(--surface);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);transition:var(--trans);}
+.zone-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);}
+.zone-thumb{position:relative;aspect-ratio:3/4;overflow:hidden;}
+.zone-thumb img{width:100%;height:100%;}
+.zone-badge{position:absolute;top:6px;right:6px;background:rgba(255,92,138,.92);color:#fff;font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:6px;}
+.zone-body{padding:8px 10px 10px;}
+.zone-title{font-size:12px;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;height:2.8em;}
+
+.live-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
+.live-card{padding:0;overflow:hidden;}
+.live-thumb{position:relative;aspect-ratio:16/10;}
+.live-thumb img{width:100%;height:100%;}
+.live-dot{position:absolute;top:8px;left:8px;background:var(--danger);color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:9px;display:flex;align-items:center;gap:4px;}
+.live-dot::before{content:'';width:5px;height:5px;border-radius:50%;background:#fff;animation:blink 1.4s infinite;}
+@keyframes blink{50%{opacity:.3;}}
+.live-viewers{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;padding:2px 7px;border-radius:8px;}
+.live-info{padding:9px 10px 11px;}
+.live-title{font-size:12px;font-weight:600;line-height:1.4;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.live-up{font-size:11px;color:var(--text-3);}
+
+/* ===== 播放器弹窗 ===== */
+.player-modal{position:fixed;inset:0;z-index:1300;background:rgba(10,10,14,.82);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:var(--trans);padding:20px;}
+.player-modal.show{opacity:1;visibility:visible;}
+.player-box{width:100%;max-width:900px;background:var(--surface);border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.5);}
+.player-screen{aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.4);font-size:14px;position:relative;}
+.player-screen iframe{position:absolute;inset:0;width:100%;height:100%;border:none;}
+.player-screen .no-source{padding:0 30px;text-align:center;line-height:1.8;color:rgba(255,255,255,.55);}
+.player-close{position:absolute;top:12px;right:14px;color:#fff;font-size:18px;z-index:2;background:rgba(0,0,0,.4);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.player-info{padding:16px 20px;}
+.player-info h3{font-size:16px;font-weight:700;margin-bottom:6px;}
+.player-info .p-up{font-size:12px;color:var(--text-3);margin-bottom:10px;}
+.player-tag{display:inline-block;font-size:10.5px;color:var(--brand-2);border:1px solid var(--brand-2);padding:2px 9px;border-radius:10px;margin-right:6px;}
+
+/* ===== 页脚 ===== */
+.footer{background:var(--surface);border-top:1px solid var(--line);padding:30px 24px;margin-top:10px;}
+.footer-inner{max-width:1560px;margin:0 auto;text-align:center;}
+.footer-links{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;font-size:12px;color:var(--text-2);margin-bottom:14px;}
+.footer-links a:hover{color:var(--brand-2);}
+.footer-copy{font-size:11px;color:var(--text-3);}
+
+.fade-in{animation:fadeIn .4s ease both;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:850;opacity:0;visibility:hidden;transition:var(--trans);}
+.sidebar-overlay.show{opacity:1;visibility:visible;}
+
+/* ===== 响应式 ===== */
+@media(max-width:1300px){.video-grid{grid-template-columns:repeat(4,1fr);}.zone-grid,.live-grid{grid-template-columns:repeat(4,1fr);}}
+@media(max-width:1000px){
+  .top-nav,.hero-side .live-card{display:none;}
+  .hero-grid{grid-template-columns:1fr;}
+  .menu-toggle{display:block;}
+}
+@media(max-width:760px){
+  .video-grid{grid-template-columns:repeat(3,1fr);}
+  .zone-grid,.live-grid{grid-template-columns:repeat(2,1fr);}
+  .hero-banner{height:200px;}
+  .topbar{padding:0 14px;gap:12px;}
+  .subnav{padding:0 14px;}
+}
+@media(max-width:480px){
+  .video-grid{grid-template-columns:repeat(2,1fr);}
+}
 </style>
 </head>
 <body>
-<div class="top">
-  <h1>🎬 潼视 PoTV</h1>
-  <p>福音视频社区 · 讲道 · 诗歌 · 见证 · 直播</p>
-  <a class="home" href="/">← 返回福音传递爱首页</a>
+
+<header class="topbar">
+  <button class="menu-toggle" aria-label="菜单" onclick="alert('移动端分区菜单（示例）')">☰</button>
+  <a class="logo" href="#top">
+    <span class="logo-mark">潼</span>
+    <span class="logo-text">潼视<span>PoTV · 你感兴趣的都在这</span></span>
+  </a>
+  <nav class="top-nav">
+    <a href="#top" class="active" onclick="setActive(this,'.top-nav a')">首页</a>
+    <a href="#anime" onclick="setActive(this,'.top-nav a')">番剧</a>
+    <a href="#guochuang" onclick="setActive(this,'.top-nav a')">国创</a>
+    <a href="#doc" onclick="setActive(this,'.top-nav a')">纪录片</a>
+    <a href="#live" onclick="setActive(this,'.top-nav a')">直播</a>
+    <a href="#game" onclick="setActive(this,'.top-nav a')">游戏中心</a>
+  </nav>
+  <div class="topbar-search">
+    <div class="search-box">
+      <input id="searchInput" type="text" placeholder="搜索你感兴趣的视频、UP主…" onfocus="showDrop()" onblur="hideDrop()" onkeyup="if(event.key==='Enter')doSearch()">
+      <button onclick="doSearch()" aria-label="搜索">🔍</button>
+    </div>
+    <div class="search-drop" id="searchDrop">
+      <div class="label">热搜</div>
+      <div class="hot-words" id="hotWords"></div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <button class="upload-btn ripple" onclick="rippleEffect(event);alert('投稿功能（示例）')">⬆ 投稿</button>
+    <button class="icon-btn" onclick="alert('消息中心（示例）')" aria-label="消息"><span class="badge"></span>✉</button>
+    <button class="icon-btn" id="darkBtn" onclick="toggleDark()" aria-label="夜间模式">🌙</button>
+    <div class="avatar-btn" onclick="alert('个人中心（示例）')">我</div>
+  </div>
+</header>
+
+<nav class="subnav" id="subnav"></nav>
+
+<div class="main" id="top">
+
+  <!-- Hero -->
+  <div class="hero-grid">
+    <div class="hero-banner" id="heroBanner">
+      <div class="hero-slide">
+        <img id="heroImg" src="" alt="">
+        <div class="hero-overlay">
+          <span class="tag" id="heroTag">今日推荐</span>
+          <h2 id="heroTitle">加载中…</h2>
+          <p id="heroSub"></p>
+        </div>
+      </div>
+      <button class="hero-arrow prev" onclick="prevHero()" aria-label="上一张">‹</button>
+      <button class="hero-arrow next" onclick="nextHero()" aria-label="下一张">›</button>
+      <div class="hero-dots" id="heroDots"></div>
+    </div>
+    <div class="hero-side">
+      <div class="rank-card">
+        <div class="side-title"><h4>🔥 热门排行</h4><span class="more">更多 ›</span></div>
+        <div id="rankList"></div>
+      </div>
+      <div class="live-card">
+        <div class="side-title"><h4>📡 正在直播</h4><span class="more">更多 ›</span></div>
+        <div id="liveMini"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 推荐 -->
+  <section class="section" id="recommend">
+    <div class="section-head">
+      <h3><span class="dot"></span>为你推荐</h3>
+      <div class="section-tabs">
+        <button class="active" onclick="switchRecTab('rec',this)">综合</button>
+        <button onclick="switchRecTab('new',this)">最新</button>
+        <button onclick="switchRecTab('follow',this)">关注</button>
+      </div>
+      <a class="section-more" href="#">换一批 ↻</a>
+    </div>
+    <div class="video-grid" id="recGrid"></div>
+  </section>
+
+  <!-- 番剧 -->
+  <section class="section" id="anime">
+    <div class="section-head">
+      <h3><span class="dot"></span>番剧 · 国创</h3>
+      <a class="section-more" href="#">追番列表 ›</a>
+    </div>
+    <div class="zone-grid" id="animeGrid"></div>
+  </section>
+
+  <!-- 直播 -->
+  <section class="section" id="live">
+    <div class="section-head">
+      <h3><span class="dot"></span>热门直播</h3>
+      <a class="section-more" href="#">进入直播广场 ›</a>
+    </div>
+    <div class="live-grid" id="liveGrid"></div>
+  </section>
+
+  <!-- 分区视频 -->
+  <section class="section" id="game">
+    <div class="section-head">
+      <h3><span class="dot"></span>分区精选</h3>
+      <div class="section-tabs">
+        <button class="active" onclick="switchZoneTab(0,this)">游戏</button>
+        <button onclick="switchZoneTab(1,this)">生活</button>
+        <button onclick="switchZoneTab(2,this)">科技</button>
+        <button onclick="switchZoneTab(3,this)">纪录片</button>
+      </div>
+    </div>
+    <div class="video-grid" id="zoneGrid"></div>
+  </section>
+
 </div>
-<div class="wrap">
-  <div class="cat">🔥 热播推荐</div>
-  <div class="grid" id="hotGrid"></div>
-  <div class="cat">📺 讲道信息</div>
-  <div class="grid" id="sermonGrid"></div>
-  <div class="cat">🎵 赞美诗歌</div>
-  <div class="grid" id="songGrid"></div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-links">
+      <a href="#">关于潼视</a><a href="#">创作者中心</a><a href="#">商务合作</a>
+      <a href="#">帮助中心</a><a href="#">隐私政策</a><a href="#">用户协议</a>
+    </div>
+    <p class="footer-copy">© 潼视 PoTV · 原创虚构演示站点，与任何现实平台无关 · 版权归各视频权利方所有</p>
+  </div>
+</footer>
+
+<div class="player-modal" id="playerModal" onclick="closePlayer(event)">
+  <div class="player-box" onclick="event.stopPropagation()">
+    <div class="player-screen" id="playerScreen">
+      <button class="player-close" onclick="closePlayer()" aria-label="关闭">✕</button>
+      <span>🎬 视频将在此播放</span>
+    </div>
+    <div class="player-info">
+      <h3 id="playerTitle"></h3>
+      <div class="p-up" id="playerUp"></div>
+      <div id="playerMeta"></div>
+    </div>
+  </div>
 </div>
-<div class="player-modal" id="playerModal">
-  <div class="pm-top"><h2 id="pmTitle"></h2><span class="pm-close" onclick="closePlayer()">✕</span></div>
-  <iframe id="pmFrame" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-</div>
-<div class="footer">© 福音传递爱 szxfuyin.com · 潼视 PoTV</div>
+
 <script>
-var VIDEOS = {
-  hot: [
-    {title:'观念的后果 - 史普罗',movid:3952},
-    {title:'福音慕道 #1',movid:2942},
-    {title:'新约神学 - 孙宝玲',movid:3951},
-    {title:'信心是什么 - 冯秉诚',movid:3063},
-    {title:'唐崇荣 - 归正福音解经',movid:3950},
-    {title:'罗马书 - 陆大龄',movid:3949}
-  ],
-  sermon: [
-    {title:'摩西五经 - 赖建国',movid:3948},
-    {title:'诗篇 - 吴献章',movid:3947},
-    {title:'箴言 - 刘幸枝',movid:3946},
-    {title:'路加福音 - 孙宝玲',movid:3945},
-    {title:'约翰福音 - 黄子嘉',movid:3944},
-    {title:'使徒行传 - 张圣佳',movid:3943}
-  ],
-  song: [
-    {title:'赞美之泉 - 精选MTV',movid:3942},
-    {title:'迦南诗歌专辑',movid:3941},
-    {title:'天韵诗歌MTV',movid:3940},
-    {title:'奚秀兰圣诗',movid:3939},
-    {title:'新篇赞美诗选集',movid:3938},
-    {title:'选本诗歌大全',movid:3937}
-  ]
-};
-function play(movid,title){
-  document.getElementById('pmTitle').textContent = title;
-  document.getElementById('pmFrame').src = 'https://www.fuyin.tv/content/view/movid/' + movid + '/index.html';
+/* ===================== 示例数据（真实部署时对接后端接口） ===================== */
+const SUBNAV=["全部","动画","国创相关","游戏","娱乐","知识","科技","运动","汽车","生活","美食","动物圈","鬼畜","时尚","资讯","法律","出行","三农","家居"];
+
+const HERO=[
+  {img:"https://picsum.photos/seed/potv1/1100/500",tag:"真实片源",title:"《耶稣传》1979 · 中文版全片",sub:"经典福音影片，点击立即观看真实内容",bvid:"BV1iN4y1r7V4"},
+  {img:"https://picsum.photos/seed/potv2/1100/500",tag:"今日推荐",title:"跨越山海的旅行日记 · 第12集",sub:"一个人的公路旅行，记录路上的风景与人"},
+  {img:"https://picsum.photos/seed/potv3/1100/500",tag:"生活区",title:"从零开始的家庭菜园",sub:"阳台三平米，也能种出四季蔬菜"},
+  {img:"https://picsum.photos/seed/potv4/1100/500",tag:"科技区",title:"年度旗舰评测：值不值得买",sub:"深度拆解与真实体验，理性种草"},
+];
+
+const HOT_WORDS=["露营装备","AI绘画教程","City Walk","毕业设计","考研上岸","露天电影"];
+
+function mkVideos(prefix,n,titles,ups){
+  return Array.from({length:n},(_,i)=>({
+    id:prefix+i,
+    title:titles[i%titles.length],
+    up:ups[i%ups.length],
+    play:(Math.random()*200+5).toFixed(1)+"万",
+    dm:(Math.random()*3+0.2).toFixed(1)+"万",
+    dur:`${Math.floor(Math.random()*20+2)}:${String(Math.floor(Math.random()*59)).padStart(2,'0')}`,
+    bvid: i===0 && prefix==='rec' ? "BV1iN4y1r7V4" : null,
+  }));
+}
+const REC_TITLES=["三分钟看懂黑洞到底是什么","独居青年的周末生活记录","这个手作教程也太治愈了吧","被低估的宝藏纪录片推荐","新手健身房攻略｜避坑指南","一镜到底！城市夜景漫游","猫咪的一天究竟有多离谱","开学第一课：时间管理术"];
+const UPS=["深夜实验室","阿May的日常","匠心制造所","纪录片放映室","力量与自律","漫游者小陈","猫奴日记","高效学习社"];
+const REC=mkVideos('rec',12,REC_TITLES,UPS);
+
+const ANIME=[
+  {title:"星海回响 第二季",img:"anime1"},{title:"墨色江湖",img:"anime2"},
+  {title:"元气部活日记",img:"anime3"},{title:"少年与龙",img:"anime4"},
+  {title:"云端之城",img:"anime5"},
+];
+
+const LIVE=[
+  {title:"深夜画室 · 手绘直播中",up:"阿May的日常",viewers:"3.2万"},
+  {title:"新手村速通挑战",up:"力量与自律",viewers:"1.8万"},
+  {title:"城市夜跑 Vlog 直播",up:"漫游者小陈","viewers":"9421"},
+  {title:"编程自习室",up:"高效学习社",viewers:"6733"},
+  {title:"厨房实验室现场",up:"匠心制造所",viewers:"1.1万"},
+];
+
+const ZONE_TABS=[
+  mkVideos('game',6,["新赛季天梯上分攻略","独立游戏周报第38期","主机游戏年度盘点","联机趣味挑战合集","游戏原声音乐赏析","复古游戏考古"],UPS),
+  mkVideos('life',6,["城市漫步：老街新记","一人食·家常菜谱","极简生活体验一周","手作皮具入门教程","阳台种菜实录","周末市集探店"],UPS),
+  mkVideos('tech',6,["新机开箱与体验","软件效率工具推荐","智能家居搭建全记录","编程语言该怎么选","数码好物年度榜单","硬件拆解科普"],UPS),
+  mkVideos('doc',6,["深海秘境探索","候鸟迁徙纪实","古城修复者","手艺人的坚守","极地科考日记","城市考古笔记"],UPS),
+];
+
+/* ===================== 弹幕 · 签名交互 ===================== */
+const DM_POOL=["哈哈哈哈笑死","这也太真实了","前排围观","BGM是什么","泪目了","学到了学到了","这剪辑绝了","催更催更"];
+function spawnDanmaku(layer){
+  layer.innerHTML='';
+  for(let i=0;i<5;i++){
+    const d=document.createElement('span');
+    d.className='dm';
+    d.textContent=DM_POOL[Math.floor(Math.random()*DM_POOL.length)];
+    d.style.top=(10+Math.random()*70)+'%';
+    d.style.left='100%';
+    d.style.animationDuration=(3+Math.random()*2)+'s';
+    d.style.animationDelay=(Math.random()*1.5)+'s';
+    layer.appendChild(d);
+  }
+}
+
+/* ===================== 波纹点击效果 ===================== */
+function rippleEffect(e){
+  const btn=e.currentTarget;
+  const rect=btn.getBoundingClientRect();
+  const dot=document.createElement('span');
+  const size=Math.max(rect.width,rect.height);
+  dot.className='ripple-dot';
+  dot.style.width=dot.style.height=size+'px';
+  dot.style.left=(e.clientX-rect.left-size/2)+'px';
+  dot.style.top=(e.clientY-rect.top-size/2)+'px';
+  btn.appendChild(dot);
+  setTimeout(()=>dot.remove(),650);
+}
+
+/* ===================== 渲染：分区导航 ===================== */
+function renderSubnav(){
+  document.getElementById('subnav').innerHTML=SUBNAV.map((s,i)=>
+    `<a href="#" class="${i===0?'active':''}" onclick="setActive(this,'.subnav a');return false"><span class="sn-icon">${['🏠','🎬','⛩','🎮','🎪','💡','🔬','⚽','🚗','☕','🍜','🐾','🎭','👗','📰','⚖','✈','🌾','🏡'][i]||'▫'}</span>${s}</a>`
+  ).join('');
+}
+function setActive(el,sel){document.querySelectorAll(sel).forEach(a=>a.classList.remove('active'));el.classList.add('active');}
+
+/* ===================== Hero 轮播 ===================== */
+let heroIdx=0,heroTimer;
+function renderHero(){
+  const h=HERO[heroIdx];
+  document.getElementById('heroImg').src=h.img;
+  document.getElementById('heroTag').textContent=h.tag;
+  document.getElementById('heroTitle').textContent=h.title;
+  document.getElementById('heroSub').textContent=h.sub;
+  const slide=document.querySelector('.hero-slide');
+  slide.style.cursor=h.bvid?'pointer':'default';
+  slide.onclick=h.bvid?()=>openPlayer(h.title,'官方片源',h.bvid):null;
+  document.querySelectorAll('.hero-dots span').forEach((s,i)=>s.classList.toggle('active',i===heroIdx));
+}
+function initHero(){
+  const dots=document.getElementById('heroDots');
+  HERO.forEach((_,i)=>{
+    const s=document.createElement('span');
+    if(i===0)s.classList.add('active');
+    s.onclick=()=>{heroIdx=i;renderHero();resetHeroTimer();};
+    dots.appendChild(s);
+  });
+  renderHero();resetHeroTimer();
+}
+function prevHero(){heroIdx=(heroIdx-1+HERO.length)%HERO.length;renderHero();resetHeroTimer();}
+function nextHero(){heroIdx=(heroIdx+1)%HERO.length;renderHero();resetHeroTimer();}
+function resetHeroTimer(){clearInterval(heroTimer);heroTimer=setInterval(nextHero,5000);}
+
+/* ===================== 热搜 ===================== */
+function renderHotWords(){
+  document.getElementById('hotWords').innerHTML=HOT_WORDS.map((w,i)=>
+    `<div class="hot-word" onmousedown="document.getElementById('searchInput').value='${w}'"><span class="rk">${i+1}</span>${w}</div>`).join('');
+}
+function showDrop(){document.getElementById('searchDrop').classList.add('show');}
+function hideDrop(){setTimeout(()=>document.getElementById('searchDrop').classList.remove('show'),200);}
+function doSearch(){const v=document.getElementById('searchInput').value.trim();if(v)alert('搜索：'+v);}
+
+/* ===================== 视频网格渲染 ===================== */
+function videoCard(v){
+  return `<div class="video-card fade-in" onclick="openPlayer('${v.title}','${v.up}','${v.bvid||''}')">
+    <div class="v-thumb">
+      ${v.bvid?'<span class="real-tag">真实可播放</span>':''}
+      <img src="https://picsum.photos/seed/${v.id}/320/200" alt="${v.title}" loading="lazy">
+      <div class="danmaku-layer"></div>
+      <span class="v-duration">${v.dur}</span>
+      <span class="v-playcount">▶ ${v.play}</span>
+      <div class="v-play-icon"><div class="v-play-circle">▶</div></div>
+    </div>
+    <div class="v-meta">
+      <div class="v-avatar">${v.up[0]}</div>
+      <div class="v-info">
+        <div class="v-title">${v.title}</div>
+        <div class="v-up">${v.up}</div>
+      </div>
+    </div>
+  </div>`;
+}
+function renderVideoGrid(elId,videos){
+  const el=document.getElementById(elId);
+  el.innerHTML=videos.map(videoCard).join('');
+  el.querySelectorAll('.video-card').forEach(card=>{
+    card.addEventListener('mouseenter',()=>spawnDanmaku(card.querySelector('.danmaku-layer')));
+  });
+}
+
+/* ===================== 排行榜 & 迷你直播 ===================== */
+function renderRank(){
+  document.getElementById('rankList').innerHTML=REC.slice(0,6).map((v,i)=>`
+    <div class="rank-item" onclick="openPlayer('${v.title}','${v.up}','${v.bvid||''}')">
+      <span class="rank-num">${i+1}</span>
+      <span class="rank-title">${v.title}</span>
+      <span class="rank-heat">${v.play}</span>
+    </div>`).join('');
+}
+function renderLiveMini(){
+  document.getElementById('liveMini').innerHTML=LIVE.slice(0,4).map(l=>`
+    <div class="rank-item" onclick="alert('进入直播间：${l.title}')">
+      <span class="rank-num">🔴</span>
+      <span class="rank-title">${l.title}</span>
+      <span class="rank-heat">${l.viewers}</span>
+    </div>`).join('');
+}
+
+/* ===================== 番剧专区 ===================== */
+function renderAnime(){
+  document.getElementById('animeGrid').innerHTML=ANIME.map((a,i)=>`
+    <div class="zone-card fade-in" onclick="alert('番剧：${a.title}')">
+      <div class="zone-thumb">
+        <img src="https://picsum.photos/seed/${a.img}/240/320" alt="${a.title}" loading="lazy">
+        <span class="zone-badge">更新至${i+8}集</span>
+      </div>
+      <div class="zone-body"><div class="zone-title">${a.title}</div></div>
+    </div>`).join('');
+}
+
+/* ===================== 直播网格 ===================== */
+function renderLiveGrid(){
+  document.getElementById('liveGrid').innerHTML=LIVE.map((l,i)=>`
+    <div class="video-card fade-in" onclick="alert('进入直播间：${l.title}')">
+      <div class="v-thumb">
+        <img src="https://picsum.photos/seed/live${i}/320/200" alt="${l.title}" loading="lazy">
+        <span class="live-dot">LIVE</span>
+        <span class="live-viewers">${l.viewers}人观看</span>
+      </div>
+      <div class="v-meta">
+        <div class="v-avatar">${l.up[0]}</div>
+        <div class="v-info"><div class="v-title">${l.title}</div><div class="v-up">${l.up}</div></div>
+      </div>
+    </div>`).join('');
+}
+
+/* ===================== Tab 切换 ===================== */
+function switchRecTab(type,el){
+  el.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderVideoGrid('recGrid',REC);
+}
+function switchZoneTab(idx,el){
+  el.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderVideoGrid('zoneGrid',ZONE_TABS[idx]);
+}
+
+/* ===================== 播放器 =====================
+   有真实bvid（如《耶稣传》BV1iN4y1r7V4）时，通过B站官方iframe真实嵌入播放；
+   其余为演示数据，点击会诚实提示暂无真实片源，不会伪装成可播放。 */
+function openPlayer(title,up,bvid){
+  document.getElementById('playerTitle').textContent=title;
+  document.getElementById('playerUp').textContent='UP主 / 来源：'+up;
+  const screen=document.getElementById('playerScreen');
+  if(bvid){
+    document.getElementById('playerMeta').innerHTML=`<span class="player-tag">真实片源</span><span class="player-tag">${bvid}</span>`;
+    screen.innerHTML=`<button class="player-close" onclick="closePlayer()" aria-label="关闭">✕</button>
+      <iframe src="https://player.bilibili.com/player.html?bvid=${bvid}&page=1&high_quality=1&danmaku=0&autoplay=1" allowfullscreen scrolling="no" frameborder="0"></iframe>`;
+  }else{
+    document.getElementById('playerMeta').innerHTML=`<span class="player-tag">演示数据</span>`;
+    screen.innerHTML=`<button class="player-close" onclick="closePlayer()" aria-label="关闭">✕</button>
+      <div class="no-source">🎬 该内容为演示数据，暂未接入真实视频源<br><span style="font-size:12px;opacity:.7">真实部署时替换为你拥有播放权的视频地址</span></div>`;
+  }
   document.getElementById('playerModal').classList.add('show');
+  document.body.style.overflow='hidden';
 }
-function closePlayer(){
-  document.getElementById('playerModal').classList.remove('show');
-  document.getElementById('pmFrame').src = '';
+function closePlayer(e){
+  if(!e||e.target===document.getElementById('playerModal')||e===undefined){
+    document.getElementById('playerModal').classList.remove('show');
+    document.body.style.overflow='';
+    document.getElementById('playerScreen').innerHTML='<button class="player-close" onclick="closePlayer()" aria-label="关闭">✕</button><span>🎬 视频将在此播放</span>';
+  }
 }
-function cardHtml(it){
-  return '<div class="card" onclick="play(' + it.movid + ',\'' + it.title + '\')">' +
-    '<div class="thumb">▶️</div>' +
-    '<div class="info"><h3>' + it.title + '</h3><span>点击播放 · 福音TV源</span></div></div>';
+
+/* ===================== 暗色模式 ===================== */
+function toggleDark(){
+  document.body.classList.toggle('dark');
+  document.getElementById('darkBtn').textContent=document.body.classList.contains('dark')?'☀️':'🌙';
 }
-document.getElementById('hotGrid').innerHTML = VIDEOS.hot.map(cardHtml).join('');
-document.getElementById('sermonGrid').innerHTML = VIDEOS.sermon.map(cardHtml).join('');
-document.getElementById('songGrid').innerHTML = VIDEOS.song.map(cardHtml).join('');
-document.addEventListener('keydown',function(e){if(e.key==='Escape')closePlayer()});
+
+/* ===================== 初始化 ===================== */
+document.addEventListener('DOMContentLoaded',()=>{
+  renderSubnav();
+  initHero();
+  renderHotWords();
+  renderVideoGrid('recGrid',REC);
+  renderRank();
+  renderLiveMini();
+  renderAnime();
+  renderLiveGrid();
+  renderVideoGrid('zoneGrid',ZONE_TABS[0]);
+});
 </script>
 </body>
 </html>

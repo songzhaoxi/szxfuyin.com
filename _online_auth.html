@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="referrer" content="unsafe-url">
+<title>登录注册 - 福音传播爱 ✝</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="auth_style_v205.css?v=229">
+</head>
+<body>
+<div class="auth-shell">
+  <!-- ===== 左侧：3D数字人（真实GLB全身模型 + Canvas2D兜底） ===== -->
+  <div class="auth-stage" id="authStage">
+    <!-- 真实3D模型渲染画布（three.js GLB 中年男性全身模型） -->
+    <canvas id="threeCanvas"></canvas>
+    <!-- Canvas2D程序化人物（仅当3D模型加载失败时显示） -->
+    <canvas id="avatarCanvas" style="display:none"></canvas>
+    <!-- 语音气泡（顶部，不遮挡人物全身） -->
+    <div class="speech-bubble" id="speechBubble">欢迎来到兆西福音传递爱，愿你平安 🙏</div>
+  </div>
+
+  <!-- ===== 右侧：账号表单 + 全能AI聊天（左右分开，互不遮挡） ===== -->
+  <div class="auth-panel">
+    <!-- 圣经AI聊天问答 -->
+    <div class="ai-chat" id="aiChat">
+      <div class="ai-chat-head">✝ 全能AI数字人 · 圣经66卷 + 任何话题</div>
+      <div class="ai-chat-body" id="aiChatLog"><div class="ai-msg ai">欢迎！我是全能AI数字人，圣经66卷我熟读，任何话题也能聊，问我什么都可以…</div></div>
+      <div class="ai-chat-row">
+        <input id="aiChatInput" maxlength="80" placeholder="和我聊任何话题…" onkeydown="if(event.key==='Enter')aiSend()">
+        <button class="ai-chat-btn" onclick="aiSend()">问 ➤</button>
+      </div>
+    </div>
+    <div class="auth-head">
+      <h1>账号登录</h1>
+      <p>真实注册 · 手机验证 · 邮箱验证 · 安全登录</p>
+    </div>
+
+    <!-- 登录/注册切换 -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchMode('login')">登 录</button>
+      <button class="auth-tab" id="tabReg" onclick="switchMode('register')">注 册</button>
+    </div>
+
+    <!-- ===== 登录表单 ===== -->
+    <form id="loginForm" class="auth-form" onsubmit="return doLogin(event)">
+      <div class="field">
+        <label>账号（邮箱 / 手机号）</label>
+        <input type="text" id="loginAccount" placeholder="请输入邮箱或手机号" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label>密码</label>
+        <div class="pwd-wrap">
+          <input type="password" id="loginPassword" placeholder="请输入密码" autocomplete="current-password" required>
+          <button type="button" class="eye-btn" onclick="togglePwd('loginPassword',this)">👁</button>
+        </div>
+      </div>
+      <button type="submit" class="submit-btn" id="loginBtn">登 录</button>
+      <div class="form-tip">还没有账号？<a href="#" onclick="switchMode('register');return false;">立即注册</a></div>
+    </form>
+
+    <!-- ===== 注册表单 ===== -->
+    <form id="regForm" class="auth-form hidden" onsubmit="return doRegister(event)">
+      <div class="field">
+        <label>注册方式</label>
+        <div class="type-switch">
+          <button type="button" class="type-btn active" id="typeEmail" onclick="switchAccType('email')">📧 邮箱注册</button>
+          <button type="button" class="type-btn" id="typePhone" onclick="switchAccType('phone')">📱 手机注册</button>
+        </div>
+      </div>
+      <div class="field">
+        <label id="accLabel">邮箱地址</label>
+        <div class="code-row">
+          <input type="text" id="regAccount" placeholder="请输入邮箱" autocomplete="email">
+          <button type="button" class="code-btn" id="sendCodeBtn" onclick="sendVerifyCode()">获取验证码</button>
+        </div>
+        <div class="captcha-row" id="captchaRow">
+          <input type="text" id="captchaInput" placeholder="图形验证码（不区分大小写）">
+          <div class="captcha-img" id="captchaImg" title="点击刷新" onclick="loadCaptcha()">加载中...</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>短信/邮件验证码</label>
+        <input type="text" id="regCode" placeholder="请输入6位验证码" maxlength="6">
+        <div id="devCodeTip" style="display:none;margin-top:8px;padding:10px 12px;background:linear-gradient(135deg,#fff8e1,#ffe0b2);border:1px dashed #f57c00;border-radius:8px;font-size:14px;color:#8d4e00;line-height:1.6"></div>
+      </div>
+      <div class="field">
+        <label>设置密码（6-32位）</label>
+        <div class="pwd-wrap">
+          <input type="password" id="regPassword" placeholder="请输入密码" autocomplete="new-password">
+          <button type="button" class="eye-btn" onclick="togglePwd('regPassword',this)">👁</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>昵称（选填）</label>
+        <input type="text" id="regNickname" placeholder="例如：爱主的小羊">
+      </div>
+      <button type="submit" class="submit-btn" id="regBtn">注 册</button>
+      <div class="form-tip">已有账号？<a href="#" onclick="switchMode('login');return false;">直接登录</a></div>
+    </form>
+
+    <div class="auth-footer">
+      登录即代表同意 <a href="#">用户协议</a> 与 <a href="#">隐私政策</a> · 愿神祝福你 🙏
+    </div>
+  </div>
+</div>
+
+<!-- 成功动画遮罩 -->
+<div class="success-mask" id="successMask">
+  <div class="success-box">
+    <div class="success-icon">✝</div>
+    <div class="success-title" id="successTitle">登录成功！</div>
+    <div class="success-sub" id="successSub">欢迎回家</div>
+    <button class="success-btn" onclick="goHome()">进入网站</button>
+  </div>
+</div>
+
+<script src="js/three.min.js"></script>
+<script src="js/GLTFLoader-r128.js"></script>
+<script src="auth_api_config.js?v=11"></script>
+<script src="auth_app_v8.js?v=230"></script>
+<script src="avatar_ai.js?v=230"></script>
+<script>
+/* ===== 圣经AI聊天交互 ===== */
+function escH(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'"',"'":'&#39;'}[c];});}
+function aiSend(){
+  var inp=document.getElementById('aiChatInput');if(!inp)return;
+  var q=inp.value.trim();if(!q)return;
+  var log=document.getElementById('aiChatLog');if(!log)return;
+  var d=document.createElement('div');d.className='ai-msg user';d.textContent=q;
+  log.appendChild(d);log.scrollTop=log.scrollHeight;inp.value='';
+  if(window.AvatarAI)AvatarAI.ask(q);
+}
+window.onAISay=function(text){
+  var log=document.getElementById('aiChatLog');if(!log)return;
+  var d=document.createElement('div');d.className='ai-msg ai';d.textContent=text;
+  log.appendChild(d);log.scrollTop=log.scrollHeight;
+};
+window.addEventListener('load',function(){ if(window.AvatarAI)AvatarAI.init(); });
+/* ===== 音频解锁：点击/触摸页面任意处，立即解锁语音（解决安卓自动播放限制导致的无声） ===== */
+(function(){
+  function unlockAudio(){
+    try{ if(window.AvatarAI && AvatarAI.unlock) AvatarAI.unlock(); }catch(e){}
+    try{ var a=new (window.AudioContext||window.webkitAudioContext)(); if(a.state==='suspended') a.resume(); }catch(e){}
+    try{ if(window.speechSynthesis){ window.speechSynthesis.resume(); var vs=window.speechSynthesis.getVoices(); } }catch(e){}
+    document.removeEventListener('touchstart',unlockAudio);
+    document.removeEventListener('click',unlockAudio);
+  }
+  document.addEventListener('touchstart',unlockAudio,{passive:true});
+  document.addEventListener('click',unlockAudio);
+})();
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"a69169ae778848939d3ece0ba67d2718","r":1}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"a69169ae778848939d3ece0ba67d2718","r":1}' crossorigin="anonymous"></script>
+</body>
+</html>

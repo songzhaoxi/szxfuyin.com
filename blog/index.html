@@ -1,79 +1,441 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>兆西福音博客 | 福音传递爱</title>
-<meta name="description" content="兆西福音博客——分享圣经真理、信仰见证、灵修心得与福音信息">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,'Noto Sans SC','Microsoft YaHei',sans-serif;background:#f7f3ec;color:#2c1a08;min-height:100vh}
-a{text-decoration:none;color:inherit}
-.top{background:linear-gradient(135deg,#3d1f05,#7a4a1e);color:#fdf3e0;padding:32px 20px;text-align:center}
-.top h1{font-size:26px;letter-spacing:2px;margin-bottom:8px}
-.top p{font-size:14px;opacity:.85}
-.top a.home{display:inline-block;margin-top:14px;padding:8px 22px;border:1px solid #e8b96a;border-radius:20px;color:#e8b96a;font-size:13px}
-.top a.home:hover{background:#e8b96a;color:#3d1f05}
-.wrap{max-width:960px;margin:0 auto;padding:24px 16px 60px}
-.cat{font-size:15px;color:#7a4a1e;font-weight:700;margin:28px 0 12px;padding-left:10px;border-left:4px solid #c8973a}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
-.card{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 10px rgba(90,50,10,.08);transition:transform .2s;cursor:pointer}
-.card:hover{transform:translateY(-3px);box-shadow:0 6px 18px rgba(90,50,10,.15)}
-.card img{width:100%;height:120px;object-fit:cover;background:#eee}
-.card .info{padding:12px}
-.card .info h3{font-size:15px;margin-bottom:4px;color:#3d1f05}
-.card .info span{font-size:12px;color:#8a7a6a}
-.footer{text-align:center;padding:20px;color:#a89880;font-size:12px;border-top:1px solid #e6ddcd}
-@media(max-width:520px){.grid{grid-template-columns:repeat(2,1fr)}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>兆西福音博客 - 传递福音，启发生命</title>
+    <meta name="description" content="兆西福音博客，分享信仰心得，传递福音信息，建立属灵共同体">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 </head>
 <body>
-<div class="top">
-  <h1>📖 兆西福音博客</h1>
-  <p>分享圣经真理 · 信仰见证 · 灵修心得 · 福音信息</p>
-  <a class="home" href="/">← 返回福音传递爱首页</a>
-</div>
-<div class="wrap">
-  <div class="cat">📚 圣经学苑研读课程</div>
-  <div class="grid" id="blogGrid"></div>
-  <div class="cat">✝️ 最新福音信息</div>
-  <div class="grid" id="gospelGrid"></div>
-</div>
-<div class="footer">© 福音传递爱 szxfuyin.com · 兆西福音博客</div>
-<script>
-var COURSES = [
-  {id:1,img:'https://xue2.52fuyin.com/static/images/book/Mosessimply0803.png',title:'摩西五经',teacher:'赖建国博士'},
-  {id:2,img:'https://xue2.52fuyin.com/static/images/book/Old-Testamentsimply0803.png',title:'旧约历史',teacher:'吴献章博士'},
-  {id:3,img:'https://xue2.52fuyin.com/static/images/book/DanielInLionsDen-simply0803.png',title:'大先知书',teacher:'吴献章博士'},
-  {id:4,img:'https://xue2.52fuyin.com/static/images/book/Jonah-simply0803.png',title:'小先知书',teacher:'蔡筱枫师母'},
-  {id:5,img:'https://xue2.52fuyin.com/static/images/book/jobsimply0803.png',title:'约伯记',teacher:'刘幸枝博士'},
-  {id:6,img:'https://xue2.52fuyin.com/static/images/book/gospel-simply0803.png',title:'福音书',teacher:'孙宝玲博士'},
-  {id:7,img:'https://xue2.52fuyin.com/static/images/book/Paul-simply0803.png',title:'保罗书信',teacher:'黄子嘉博士'},
-  {id:8,img:'https://xue2.52fuyin.com/static/images/book/Peter-simply0803.png',title:'彼得书信',teacher:'张圣佳博士'},
-  {id:9,img:'https://xue2.52fuyin.com/static/images/book/Jeremiah-simply0502.png',title:'耶利米书',teacher:'蔡筱枫师母'},
-  {id:11,img:'https://xue2.52fuyin.com/static/images/book/psalmssimply0803.png',title:'诗篇',teacher:'吴献章博士'},
-  {id:12,img:'https://xue2.52fuyin.com/static/images/book/Proverbs-simply0502.png',title:'箴言',teacher:'刘幸枝博士'},
-  {id:13,img:'https://xue2.52fuyin.com/static/images/book/luke-simply0803.png',title:'路加福音',teacher:'孙宝玲博士'},
-  {id:14,img:'https://xue2.52fuyin.com/static/images/book/john-simply-0729.png',title:'约翰福音',teacher:'黄子嘉博士'},
-  {id:16,img:'https://xue2.52fuyin.com/static/images/book/romans-simply20160708.png',title:'罗马书',teacher:'陆大龄博士'},
-  {id:21,img:'https://xue2.52fuyin.com/static/images/book/bible-simply0803.png',title:'圣经概论',teacher:'吴献章博士'},
-  {id:23,img:'https://xue2.52fuyin.com/static/images/book/u65B0u589E-1-simply.png',title:'系统神学',teacher:'曾劭恺博士'}
-];
-var GOSPEL = [
-  {title:'什么是福音？——好消息的源头',cat:'福音信息'},
-  {title:'圣经都是神所默示的（提后3:16-17）',cat:'经文灵修'},
-  {title:'耶稣基督——唯一的道路、真理、生命',cat:'信仰见证'},
-  {title:'祷告的力量：与神建立亲密关系',cat:'灵修心得'},
-  {title:'从罗马书看因信称义的真理',cat:'圣经研读'},
-  {title:'爱的真谛——哥林多前书13章',cat:'经文灵修'}
-];
-function cardHtml(it, isCourse){
-  return '<div class="card" onclick="' + (isCourse ? 'location.href=\'/fuyin_course.html?id=' + it.id + '\'' : 'alert(\'' + it.title + '——即将发布全文，敬请期待！\')') + '">' +
-    (it.img ? '<img src="' + it.img + '" loading="lazy">' : '<img src="data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'120\'><rect width=\'100%25\' height=\'100%25\' fill=\'%23f0e8d8\'/><text x=\'50%25\' y=\'55%25\' font-size=\'30\' text-anchor=\'middle\'>✝️</text></svg>">') +
-    '<div class="info"><h3>' + it.title + '</h3><span>' + (isCourse ? it.teacher : it.cat) + '</span></div></div>';
-}
-document.getElementById('blogGrid').innerHTML = COURSES.map(function(c){return cardHtml(c,true)}).join('');
-document.getElementById('gospelGrid').innerHTML = GOSPEL.map(function(g){return cardHtml(g,false)}).join('');
-</script>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1 class="brand-title">兆西福音</h1>
+                <p class="brand-subtitle">传递福音，启发生命</p>
+            </div>
+            
+            <div class="nav-menu" id="nav-menu">
+                <a href="#home" class="nav-link active">首页</a>
+                <a href="#articles" class="nav-link">文章</a>
+                <a href="#multimedia" class="nav-link">多媒体</a>
+                <a href="#templates" class="nav-link">模版</a>
+                <a href="#uploads" class="nav-link">文件</a>
+                <a href="#links" class="nav-link">链接</a>
+                <a href="#about" class="nav-link">关于</a>
+                <a href="#contact" class="nav-link">联系</a>
+            </div>
+            
+            <div class="nav-actions">
+                <button class="search-toggle" id="search-toggle" aria-label="搜索">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </button>
+                
+                <div class="user-menu" id="user-menu">
+                    <button class="auth-btn" id="login-btn">登录</button>
+                    <button class="auth-btn primary" id="register-btn">注册</button>
+                </div>
+                
+                <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 搜索栏 -->
+        <div class="search-container" id="search-container">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="搜索福音内容..." />
+                <button class="search-btn" id="search-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="search-results" id="search-results"></div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero" id="home">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="first-letter">传</span>递福音，启发生命
+                </h1>
+                <p class="hero-subtitle">
+                    在这里，我们分享信仰心得，传递上帝的话语，建立属灵共同体
+                </p>
+                <div class="hero-actions">
+                    <button class="btn btn-primary" id="start-reading-btn">开始阅读</button>
+                    <button class="btn btn-secondary" id="subscribe-btn">订阅更新</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 搜索结果区域 -->
+        <section class="search-results-section" id="search-results-section" style="display: none;">
+            <div class="container">
+                <h2>搜索结果</h2>
+                <div class="results-grid" id="results-grid"></div>
+                <div class="pagination" id="search-pagination"></div>
+            </div>
+        </section>
+
+        <!-- 文章列表 -->
+        <section class="articles-section" id="articles">
+            <div class="container">
+                <div class="section-header">
+                    <h2>最新文章</h2>
+                    <p class="section-subtitle">分享我们的信仰路程</p>
+                </div>
+                
+                <div class="filter-bar">
+                    <button class="filter-btn active" data-category="all">全部</button>
+                    <button class="filter-btn" data-category="devotional">灵修</button>
+                    <button class="filter-btn" data-category="sermon">讲道</button>
+                    <button class="filter-btn" data-category="testimony">见证</button>
+                    <button class="filter-btn" data-category="study">查经</button>
+                </div>
+                
+                <div class="articles-grid" id="articles-grid">
+                    <!-- 文章卡片将通过JavaScript动态加载 -->
+                </div>
+                
+                <div class="pagination" id="articles-pagination">
+                    <!-- 分页控件 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 多媒体区域 -->
+        <section class="multimedia-section" id="multimedia">
+            <div class="container">
+                <div class="section-header">
+                    <h2>多媒体资源</h2>
+                    <p class="section-subtitle">视频、音频与图片分享</p>
+                </div>
+                
+                <div class="media-tabs">
+                    <button class="media-tab active" data-type="videos">视频</button>
+                    <button class="media-tab" data-type="audios">音频</button>
+                    <button class="media-tab" data-type="images">图片</button>
+                </div>
+                
+                <div class="media-content">
+                    <!-- 视频内容 -->
+                    <div class="media-grid videos-grid active" id="videos-grid">
+                        <!-- 视频卡片 -->
+                    </div>
+                    
+                    <!-- 音频内容 -->
+                    <div class="media-grid audios-grid" id="audios-grid">
+                        <!-- 音频播放器 -->
+                    </div>
+                    
+                    <!-- 图片内容 -->
+                    <div class="media-grid images-grid" id="images-grid">
+                        <!-- 图片画廊 -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 文章详情模态框 -->
+        <div class="modal" id="article-modal">
+            <div class="modal-content">
+                <button class="modal-close" id="modal-close">&times;</button>
+                <div class="modal-body" id="modal-body">
+                    <!-- 文章内容 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 登录/注册模态框 -->
+        <div class="modal auth-modal" id="auth-modal">
+            <div class="modal-content">
+                <button class="modal-close" id="auth-modal-close">&times;</button>
+                <div class="auth-container">
+                    <!-- 登录表单 -->
+                    <div class="auth-form" id="login-form">
+                        <h3>登录</h3>
+                        <form id="login-form-element">
+                            <div class="form-group">
+                                <label for="login-email">邮箱</label>
+                                <input type="email" id="login-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="login-password">密码</label>
+                                <input type="password" id="login-password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">登录</button>
+                        </form>
+                        <p class="auth-switch">还没有账号？ <a href="#" id="switch-to-register">立即注册</a></p>
+                    </div>
+                    
+                    <!-- 注册表单 -->
+                    <div class="auth-form" id="register-form" style="display: none;">
+                        <h3>注册</h3>
+                        <form id="register-form-element">
+                            <div class="form-group">
+                                <label for="register-name">姓名</label>
+                                <input type="text" id="register-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="register-email">邮箱</label>
+                                <input type="email" id="register-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="register-password">密码</label>
+                                <input type="password" id="register-password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="register-confirm">确认密码</label>
+                                <input type="password" id="register-confirm" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">注册</button>
+                        </form>
+                        <p class="auth-switch">已有账号？ <a href="#" id="switch-to-login">立即登录</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>兆西福音博客</h4>
+                    <p>传递上帝的话语，建立属灵共同体，启发每个人的生命旅程。</p>
+                </div>
+                <div class="footer-section">
+                    <h4>快速链接</h4>
+                    <ul>
+                        <li><a href="#articles">文章</a></li>
+                        <li><a href="#multimedia">多媒体</a></li>
+                        <li><a href="#about">关于我们</a></li>
+                        <li><a href="#contact">联系我们</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>联系方式</h4>
+                    <p>邮箱: contact@zhaoxifuyin.com</p>
+                    <p>电话: +86 123-4567-8900</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 兆西福音博客. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 管理员功能模态框 -->
+    
+    <!-- 模版管理模态框 -->
+    <div id="template-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>创建文章模版</h3>
+                <button class="close" id="template-close">&times;</button>
+            </div>
+            <form id="template-form">
+                <div class="form-group">
+                    <label for="template-name">模版名称</label>
+                    <input type="text" id="template-name" class="form-control" placeholder="请输入模版名称">
+                </div>
+                <div class="form-group">
+                    <label for="template-category">分类</label>
+                    <select id="template-category" class="form-control">
+                        <option value="devotional">灵修</option>
+                        <option value="sermon">讲道</option>
+                        <option value="testimony">见证</option>
+                        <option value="bible-study">查经</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="template-description">描述</label>
+                    <textarea id="template-description" class="form-control" rows="2" placeholder="模版用途描述"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="template-content">模版内容</label>
+                    <textarea id="template-content" class="form-control" rows="10" placeholder="输入模版内容..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="template-cancel">取消</button>
+                    <button type="submit" class="btn btn-primary">创建模版</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 文件上传模态框 -->
+    <div id="upload-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>上传文件</h3>
+                <button class="close" id="upload-close">&times;</button>
+            </div>
+            <form id="upload-form">
+                <div class="form-group">
+                    <label for="upload-file">选择文件</label>
+                    <input type="file" id="upload-file" class="form-control" accept="image/*,video/*,audio/*,.pdf,.doc,.docx">
+                </div>
+                <div class="form-group">
+                    <label for="upload-name">文件名称</label>
+                    <input type="text" id="upload-name" class="form-control" placeholder="文件显示名称">
+                </div>
+                <div class="form-group">
+                    <label for="upload-type">文件类型</label>
+                    <select id="upload-type" class="form-control">
+                        <option value="image">图片</option>
+                        <option value="video">视频</option>
+                        <option value="audio">音频</option>
+                        <option value="document">文档</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="upload-category">分类</label>
+                    <select id="upload-category" class="form-control">
+                        <option value="general">一般</option>
+                        <option value="worship">赞美</option>
+                        <option value="prayer">祷告</option>
+                        <option value="event">活动</option>
+                        <option value="bible">圣经</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="upload-description">描述</label>
+                    <textarea id="upload-description" class="form-control" rows="2" placeholder="文件描述"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="upload-cancel">取消</button>
+                    <button type="submit" class="btn btn-primary">上传文件</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 链接管理模态框 -->
+    <div id="link-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加链接</h3>
+                <button class="close" id="link-close">&times;</button>
+            </div>
+            <form id="link-form">
+                <div class="form-group">
+                    <label for="link-title">链接标题</label>
+                    <input type="text" id="link-title" class="form-control" placeholder="链接显示标题">
+                </div>
+                <div class="form-group">
+                    <label for="link-url">链接地址</label>
+                    <input type="url" id="link-url" class="form-control" placeholder="https://example.com">
+                </div>
+                <div class="form-group">
+                    <label for="link-category">分类</label>
+                    <select id="link-category" class="form-control">
+                        <option value="resources">资源</option>
+                        <option value="bible">圣经</option>
+                        <option value="worship">赞美</option>
+                        <option value="event">活动</option>
+                        <option value="prayer">祷告</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="link-description">描述</label>
+                    <textarea id="link-description" class="form-control" rows="2" placeholder="链接描述"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="link-tags">标签（用逗号分隔）</label>
+                    <input type="text" id="link-tags" class="form-control" placeholder="标签1, 标签2, 标签3">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="link-cancel">取消</button>
+                    <button type="submit" class="btn btn-primary">添加链接</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 管理员功能区域 -->
+    <div id="admin-section" class="admin-section" style="display: none;">
+        <div class="container">
+            <!-- 模版管理 -->
+            <div class="admin-panel">
+                <div class="panel-header">
+                    <h2>文章模版</h2>
+                    <button class="btn btn-primary" id="add-template-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        新建模版
+                    </button>
+                </div>
+                <div id="template-list" class="template-grid"></div>
+            </div>
+
+            <!-- 文件管理 -->
+            <div class="admin-panel">
+                <div class="panel-header">
+                    <h2>文件管理</h2>
+                    <button class="btn btn-primary" id="add-upload-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7,10 12,15 17,10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        上传文件
+                    </button>
+                </div>
+                <div id="upload-list" class="upload-grid"></div>
+            </div>
+
+            <!-- 链接管理 -->
+            <div class="admin-panel">
+                <div class="panel-header">
+                    <h2>链接管理</h2>
+                    <button class="btn btn-primary" id="add-link-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                        </svg>
+                        添加链接
+                    </button>
+                </div>
+                <div id="link-list" class="link-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/articles.js"></script>
+    <script src="js/multimedia.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
