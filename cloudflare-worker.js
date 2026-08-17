@@ -10,6 +10,8 @@
 
 // ===== 配置 =====
 const CONFIG = {
+  // Manus 动态应用正式源站；仅用于 /blog 与 /potv 同域转发
+  APP_ORIGIN: 'https://pulseblog-pv5p7urq.manus.space',
   // 福音TV API 基础地址
   FUYIN_API_BASE: 'https://www.fuyin.tv/api/api/tv.movie',
   // 允许跨域的域名列表（你的网站域名）
@@ -224,6 +226,70 @@ async function handleFuyinStream(request, urlParams) {
   }
 }
 
+// ===== 博客 / PoTV 同域反向代理 =====
+function appRoutePrefix(path) {
+  if (path === '/blog' || path.startsWith('/blog/')) return '/blog';
+  if (path === '/potv' || path.startsWith('/potv/')) return '/potv';
+  return '';
+}
+
+function appTargetPath(path, prefix) {
+  if (prefix === '/blog') return path === prefix ? '/' : path.slice(prefix.length) || '/';
+  if (prefix === '/potv') {
+    const suffix = path.slice(prefix.length);
+    if (!suffix) return '/potv';
+    // 静态资源与 API 在 Manus 源站根路径；PoTV 页面路由保留 /potv 前缀。
+    if (/^\/(api|assets|src|manifest\.json|sw\.js|favicon)/.test(suffix)) return suffix;
+    return path;
+  }
+  return path;
+}
+
+function rewriteAppHtml(html, prefix) {
+  return html.replace(/(\b(?:href|src|action)=["'])\/(?!\/)/g, `$1${prefix}/`);
+}
+
+async function handleAppProxy(request, url, prefix) {
+  if (!CONFIG.APP_ORIGIN) {
+    return new Response(JSON.stringify({ success: false, message: '动态应用源站尚未配置' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  const target = new URL(appTargetPath(url.pathname, prefix) + url.search, CONFIG.APP_ORIGIN);
+  const headers = new Headers(request.headers);
+  headers.set('X-Forwarded-Host', url.host);
+  headers.set('X-Forwarded-Prefix', prefix);
+  const init = { method: request.method, headers, redirect: 'manual' };
+  if (request.method !== 'GET' && request.method !== 'HEAD') init.body = request.body;
+  const upstream = await fetch(new Request(target, init));
+  const responseHeaders = new Headers(upstream.headers);
+  const location = responseHeaders.get('Location');
+  if (location) {
+    const rewritten = location.startsWith(CONFIG.APP_ORIGIN)
+      ? location.slice(CONFIG.APP_ORIGIN.length) || '/'
+      : location;
+    if (rewritten.startsWith('/') && !rewritten.startsWith(prefix)) {
+      responseHeaders.set('Location', `${prefix}${rewritten}`);
+    }
+  }
+  const contentType = responseHeaders.get('Content-Type') || '';
+  if (contentType.includes('text/html')) {
+    const html = await upstream.text();
+    responseHeaders.delete('Content-Length');
+    return new Response(rewriteAppHtml(html, prefix), {
+      status: upstream.status,
+      statusText: upstream.statusText,
+      headers: responseHeaders,
+    });
+  }
+  return new Response(upstream.body, {
+    status: upstream.status,
+    statusText: upstream.statusText,
+    headers: responseHeaders,
+  });
+}
+
 // ===== 主路由 =====
 async function handleRequest(request) {
   const url = new URL(request.url);
@@ -236,6 +302,18 @@ async function handleRequest(request) {
 
   // 路由分发
   const path = url.pathname;
+  const appPrefix = appRoutePrefix(path);
+  if (appPrefix) {
+    try {
+      return await handleAppProxy(request, url, appPrefix);
+    } catch (error) {
+      console.error('动态应用代理失败:', error);
+      return new Response(JSON.stringify({ success: false, message: '动态应用源站暂时不可用' }), {
+        status: 502,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+  }
 
   // 健康检查（支持 /api/health 和 /proxy/health 和 /proxy/）
   if (path === '/api/health' || path === '/proxy/health' || path === '/proxy/') {
@@ -318,6 +396,8 @@ async function handleRequest(request) {
     success: false,
     message: '未知路由: ' + path,
     availableRoutes: [
+      'GET /blog and /blog/* → Manus blog app',
+      'GET /potv and /potv/* → Manus PoTV app',
       'GET /proxy/health',
       'GET /proxy/fuyin/url?movid=xxx&urlid=xxx',
       'GET /proxy/fuyin/stream?url=xxx',
