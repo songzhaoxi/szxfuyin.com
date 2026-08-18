@@ -246,7 +246,11 @@ function appTargetPath(path, prefix) {
 }
 
 function rewriteAppHtml(html, prefix) {
-  return html.replace(/(\b(?:href|src|action)=["'])\/(?!\/)/g, `$1${prefix}/`);
+  const prefixedRoot = `$1${prefix}/`;
+  return html
+    .replace(/(\b(?:href|src|action)=["'])\/(?!\/)/g, prefixedRoot)
+    .replace(/(\bsrcset=["'][^"']*)\/(?!\/)/g, `$1${prefix}/`)
+    .replace(/(url\(["']?)\/(?!\/)/g, `$1${prefix}/`);
 }
 
 async function handleAppProxy(request, url, prefix) {
@@ -264,6 +268,8 @@ async function handleAppProxy(request, url, prefix) {
   if (request.method !== 'GET' && request.method !== 'HEAD') init.body = request.body;
   const upstream = await fetch(new Request(target, init));
   const responseHeaders = new Headers(upstream.headers);
+  responseHeaders.set('X-SZXF-App-Proxy-Version', '2026-08-18.2');
+  responseHeaders.set('X-SZXF-App-Prefix', prefix);
   const location = responseHeaders.get('Location');
   if (location) {
     const rewritten = location.startsWith(CONFIG.APP_ORIGIN)
