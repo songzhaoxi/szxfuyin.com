@@ -2,12 +2,11 @@
  * 福音传递爱 · 独立应用入口配置
  *
  * 兆西福音博客与潼视 PoTV 使用独立的完整动态应用。
- * 在 Cloudflare 同域路由正式生效前，先指向已核验的 Manus 生产源站；
- * 同域路由完成后，可将下面两个地址切换为 /blog 与 /potv。
+ * Cloudflare 同域路由已经生效，入口保持在 szxfuyin.com 主域名下。
  */
 window.SZXF_APP_LINKS = Object.freeze({
-  blog: 'https://pulseblog-pv5p7urq.manus.space/',
-  potv: 'https://pulseblog-pv5p7urq.manus.space/potv'
+  blog: '/blog/',
+  potv: '/potv/'
 });
 
 window.SZXF_OPEN_APP = function (key) {
