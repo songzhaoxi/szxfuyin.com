@@ -745,9 +745,21 @@ ul{list-style:none;}
 }
 .back-top.show{opacity:1;pointer-events:auto;}
 .back-top:hover{background:var(--brown);transform:translateY(-2px);}
+
+/* ===== 福音传递爱 · 原主页沉浸舞台（仅叠加视觉层，不改动导航、内容、视频、阅读或认证逻辑） ===== */
+body.fuyin-immersive-mode{isolation:isolate;background:radial-gradient(circle at 72% 0%,rgba(232,185,106,.17),transparent 28%),radial-gradient(circle at 18% 88%,rgba(200,151,58,.12),transparent 31%),var(--cream);}
+.fuyin-immersive-stage{--fuyin-parallax:0px 0px;position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;transform:translate(var(--fuyin-parallax));transition:transform .25s cubic-bezier(.23,1,.32,1);}
+.fuyin-orbit{position:absolute;border:1px solid rgba(232,185,106,.24);border-radius:50%;box-shadow:0 0 0 28px rgba(232,185,106,.025),0 0 0 64px rgba(232,185,106,.018);}
+.fuyin-orbit-one{width:min(58vw,720px);aspect-ratio:1;right:-13vw;top:7vh;}.fuyin-orbit-two{width:min(30vw,360px);aspect-ratio:1;left:17vw;bottom:-14vh;border-color:rgba(122,74,30,.22);}
+.fuyin-light-track{position:absolute;width:54vw;height:2px;background:linear-gradient(90deg,transparent,rgba(253,243,224,.9),rgba(232,185,106,.65),transparent);filter:drop-shadow(0 0 9px rgba(232,185,106,.58));opacity:.45;transform:rotate(-18deg);}.fuyin-track-one{top:23%;right:-8%;}.fuyin-track-two{bottom:17%;left:-13%;transform:rotate(18deg);opacity:.25;}
+.fuyin-immersive-mode .topbar{background:linear-gradient(92deg,rgba(61,31,5,.96),rgba(86,46,12,.89),rgba(61,31,5,.96));border-bottom:1px solid rgba(232,185,106,.22);box-shadow:0 8px 28px rgba(36,16,0,.32);}.fuyin-immersive-mode .sidebar{background:linear-gradient(180deg,rgba(61,31,5,.98),rgba(37,18,3,.97));border-right:1px solid rgba(232,185,106,.12);}.fuyin-immersive-mode .main-content{position:relative;}.fuyin-immersive-mode .banner-wrap{height:270px;border:1px solid rgba(232,185,106,.34);box-shadow:0 20px 50px rgba(61,31,5,.26),inset 0 0 0 1px rgba(255,255,255,.09);}.fuyin-immersive-mode .banner-wrap::before{content:'';position:absolute;inset:0;z-index:2;background:radial-gradient(circle at 72% 32%,rgba(232,185,106,.28),transparent 21%),linear-gradient(110deg,rgba(40,15,0,.42),transparent 55%);pointer-events:none;}.fuyin-immersive-mode .banner-info{padding:26px 30px;background:linear-gradient(0deg,rgba(24,8,0,.9),rgba(24,8,0,.2) 75%,transparent);}.fuyin-immersive-mode .banner-info h2,.fuyin-immersive-mode .topbar-logo .site-name{background:linear-gradient(96deg,#fff4d5,#e8b96a,#fff8e8,#c8973a);background-size:260% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;}.fuyin-immersive-mode .banner-info h2{font-size:clamp(24px,3vw,36px);letter-spacing:.045em;}.fuyin-immersive-mode .topbar-logo .site-name{font-size:18px;letter-spacing:.12em;}.fuyin-immersive-mode .notice-bar{border:1px solid rgba(232,185,106,.25);border-left:4px solid var(--gold);background:linear-gradient(100deg,rgba(255,255,255,.98),rgba(253,243,224,.92));}.fuyin-immersive-mode .section-header h3{font-size:18px;letter-spacing:.08em;}.fuyin-immersive-mode .section-header .s-icon{box-shadow:0 0 0 5px rgba(200,151,58,.11),0 7px 18px rgba(122,74,30,.18);}.fuyin-immersive-mode .album-card,.fuyin-immersive-mode .list-item,.fuyin-immersive-mode .hot-item{border:1px solid rgba(200,151,58,.12);}.fuyin-immersive-mode .album-card:hover,.fuyin-immersive-mode .list-item:hover,.fuyin-immersive-mode .hot-item:hover{border-color:rgba(200,151,58,.46);}
+@media (prefers-reduced-motion:no-preference){.fuyin-immersive-mode .banner-info h2,.fuyin-immersive-mode .topbar-logo .site-name{animation:fuyin-title-glow 5.2s linear infinite;}.fuyin-orbit-one{animation:fuyin-drift-a 14s ease-in-out infinite alternate;}.fuyin-orbit-two{animation:fuyin-drift-b 17s ease-in-out infinite alternate;}.fuyin-light-track{animation:fuyin-track-sweep 9s ease-in-out infinite alternate;}}@keyframes fuyin-title-glow{0%,100%{background-position:0% 50%;filter:drop-shadow(0 0 0 rgba(232,185,106,0));}50%{background-position:100% 50%;filter:drop-shadow(0 0 7px rgba(232,185,106,.58));}}@keyframes fuyin-drift-a{from{transform:translate3d(0,0,0) rotate(0deg)}to{transform:translate3d(-2vw,2vh,0) rotate(8deg)}}@keyframes fuyin-drift-b{from{transform:translate3d(0,0,0) rotate(0deg)}to{transform:translate3d(3vw,-2vh,0) rotate(-11deg)}}@keyframes fuyin-track-sweep{from{opacity:.14;transform:translate3d(-2vw,0,0) rotate(-18deg)}to{opacity:.55;transform:translate3d(3vw,-2vh,0) rotate(-18deg)}}
+@media(max-width:900px){.fuyin-immersive-stage{display:none;}.fuyin-immersive-mode .banner-wrap{height:205px;}.fuyin-immersive-mode .banner-info{padding:18px;}.fuyin-immersive-mode .banner-info h2{font-size:22px;}.fuyin-immersive-mode .section-header h3{font-size:16px;}}@media(prefers-reduced-motion:reduce){.fuyin-immersive-mode .banner-info h2,.fuyin-immersive-mode .topbar-logo .site-name{background:none;color:var(--gold-light);filter:none;}.fuyin-orbit,.fuyin-light-track{animation:none;}}
 </style>
 </head>
 <body>
+
+<!-- 原主页沉浸舞台：只承载视觉背景，原导航、视频、阅读与认证结构保持不变 -->
 
 <!-- 侧栏遮罩 -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
@@ -3682,5 +3694,6 @@ const catLabels = {mudao:1,zhengdao:2,hunyin:3,zanmei:4,jianzheng:5,shipin:6,she
 <script src="fuyin-api-patch.js"></script>
 <script src="site-data.js"></script>
 <script src="site-social.js"></script>
+<script src="fuyin-immersive-stage.js"></script>
 </body>
 </html>
